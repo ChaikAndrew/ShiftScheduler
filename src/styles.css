@@ -1,0 +1,202 @@
+/* Загальні стилі для контейнера */
+.container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+/* Стилі для заголовку */
+h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+/* Стилі для таблиці */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+th,
+td {
+  padding: 5px;
+  text-align: center;
+}
+
+th {
+  background-color: #f4f4f4;
+  color: #333;
+  font-weight: bold;
+  border-bottom: 2px solid #ddd;
+}
+
+td {
+  border-bottom: 1px solid #ddd;
+}
+
+/* Чередування кольорів для рядків таблиці */
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Стилі для кнопок */
+button {
+  padding: 6px 12px;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+  background-color: #4caf50;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button:focus {
+  outline: none;
+}
+
+button.edit {
+  background-color: #4caf50; /* Зелений для редагування */
+}
+
+button.delete {
+  background-color: #f44336; /* Червоний для видалення */
+}
+
+/* Стиль для селекту та інпутів */
+input[type="date"],
+input[type="time"],
+select {
+  padding: 6px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+select {
+  background-color: #fff;
+}
+
+/* Загальний стиль для header меню вибору змін та інпутів*/
+.header-main-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Загальний стиль для всіх кнопок змін */
+.shiftBtn {
+  padding: 10px 20px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  background-color: #e0e0e0; /* Базовий колір кнопок */
+  color: #333;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Стиль для активної кнопки зміни */
+.shiftBtn.active {
+  background-color: #4caf50; /* Зелений колір для активної кнопки */
+  color: white;
+  font-weight: bold;
+}
+
+.summary {
+  margin: 20px 0;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.all-totals-for-shift {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px; /* Відстань між блоками */
+  padding: 20px; /* Відступи від країв контейнера */
+}
+
+.all-totals-for-shift > div {
+  background-color: #f0f0f0; /* Колір фону для блоків */
+  padding: 15px; /* Внутрішні відступи для контенту блоків */
+  border-radius: 8px; /* Закруглення країв */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тінь для блоків */
+  text-align: center; /* Центрування тексту в блоках */
+}
+
+.task-summary,
+.product-summary,
+.operators-summary,
+.operator-summary,
+.total-quantity-summary,
+.total-quantity-shift {
+  flex: 1; /* Блоки займуть рівну частину доступного простору */
+  margin: 10px; /* Відступи між блоками */
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  min-height: 100px; /* Мінімальна висота блоків для однакового вигляду */
+}
+
+.task-summary h4,
+.product-summary h4,
+.operators-summary h4,
+.all-summary-statistics h4 {
+  text-align: left;
+  color: #333;
+}
+
+.task-summary h5,
+.operators-summary h5 {
+  text-align: left; /* Вирівнюємо підзаголовки по лівому краю */
+  color: #555;
+}
+
+.task-summary p,
+.product-summary p,
+.operators-summary p {
+  text-align: left; /* Вирівнюємо текст абзаців по лівому краю */
+  color: #666;
+  margin: 5px 0; /* Відступи для абзаців */
+}
+
+.input-quantity,
+.zlecenie-input {
+  width: 50px;
+  height: 20px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.input-quantity::-webkit-inner-spin-button,
+.input-quantity::-webkit-outer-spin-button {
+  -webkit-appearance: none; /* Для Chrome, Safari, Edge */
+  margin: 0; /* Убираємо відступи */
+}
+
+.zlecenie-input {
+  width: 80px;
+}
+
+.summary-all-machines {
+  text-align: left;
+}
