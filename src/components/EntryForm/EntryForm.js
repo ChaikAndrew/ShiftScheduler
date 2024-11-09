@@ -21,7 +21,7 @@ const EntryForm = ({
   editingIndex,
 }) => {
   return (
-    <div style={{ marginBottom: "20px" }}>
+    <div>
       {/* Поле введення для часу початку роботи */}
       <input
         type="time"

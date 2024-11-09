@@ -1,0 +1,75 @@
+.productSummaryTitle {
+  font-size: 1.5em;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.productList {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* Відступ між елементами */
+  padding: 0;
+  list-style-type: none; /* Забирає стандартні буліти у списку */
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px); /* Елементи випливають знизу */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.description {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  opacity: 0; /* Початково елементи невидимі */
+  animation: fadeInUp 0.8s forwards; /* Анімація для кожного елемента */
+}
+
+/* Стилі з індивідуальними затримками для анімації */
+.description:nth-child(1) {
+  animation-delay: 1s;
+  border-bottom: 5px solid #8884d8;
+  border-radius: 3px;
+  padding: 10px;
+}
+
+.description:nth-child(2) {
+  animation-delay: 1.3s;
+  border-bottom: 5px solid #82ca9d;
+  border-radius: 3px;
+  padding: 10px;
+}
+
+.description:nth-child(3) {
+  animation-delay: 1.5s;
+  border-bottom: 5px solid #ffc658;
+  border-radius: 3px;
+  padding: 10px;
+}
+
+.description:nth-child(4) {
+  animation-delay: 1.7s;
+  border-bottom: 5px solid #d0ed57;
+  border-radius: 3px;
+  padding: 10px;
+}
+
+.description:nth-child(5) {
+  animation-delay: 1.9s;
+  border-bottom: 5px solid #a4de6c;
+  border-radius: 3px;
+  padding: 10px;
+}
+
+.description:nth-child(6) {
+  animation-delay: 2.1s;
+  border-bottom: 5px solid #b3429d;
+  border-radius: 3px;
+  padding: 10px;
+}

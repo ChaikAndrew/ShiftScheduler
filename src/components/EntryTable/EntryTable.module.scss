@@ -1,0 +1,41 @@
+.reasonDescription {
+  position: relative;
+  cursor: pointer;
+}
+
+.reasonDescription .tooltip {
+  visibility: hidden;
+  width: 350px; /* Задай ширину підказки за потреби */
+  background-color: #8884d8;
+  color: #fff;
+  text-align: center;
+  padding: 5px;
+  border-radius: 5px;
+
+  /* Позиціонування підказки */
+  position: absolute;
+  z-index: 1;
+  bottom: 125%; /* Відступ від комірки */
+  left: 50%;
+  transform: translateX(-50%);
+
+  /* Анімація */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.reasonDescription .tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%; /* Трикутник під тултіпом */
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+.reasonDescription:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}

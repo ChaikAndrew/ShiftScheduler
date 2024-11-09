@@ -10,7 +10,7 @@ import React from "react";
  */
 const ShiftButtons = ({ currentShift, selectedDate, handleShiftChange }) => {
   return (
-    <div style={{ marginBottom: "20px" }}>
+    <div>
       {/* Кнопка для вибору першої зміни */}
       <button
         onClick={() => handleShiftChange("first")}

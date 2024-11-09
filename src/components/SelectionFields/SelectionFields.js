@@ -26,7 +26,7 @@ const SelectionFields = ({
   operators,
 }) => {
   return (
-    <div style={{ marginBottom: "20px" }}>
+    <div>
       {/* Вибір лідера */}
       <select
         value={selectedLeader}

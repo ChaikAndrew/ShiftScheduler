@@ -1,0 +1,52 @@
+.operatorsSummary {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(200px, 1fr)
+  ); /* Автоматичне підлаштування кількості колонок */
+  gap: 20px; /* Відступ між блоками */
+  padding: 20px;
+  border-radius: 10px;
+  justify-content: center; /* Центрує блоки по горизонталі */
+}
+
+.operatorSummary {
+  padding: 15px;
+  border: 1px solid #8884d8; /* Рамка з основним кольором */
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тінь для кращого вигляду */
+  text-align: center; /* Центрує текст всередині блоку */
+  background-color: #8884d818;
+}
+
+.operatorName {
+  font-size: 1.3em;
+  font-weight: bold;
+
+  margin-bottom: 10px;
+}
+
+.summarySection {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.sectionTitle {
+  font-size: 1.1em;
+  color: #8884d8;
+  margin-bottom: 5px;
+}
+
+.total {
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.summaryList {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
