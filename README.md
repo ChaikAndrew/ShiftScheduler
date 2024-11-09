@@ -18,21 +18,8 @@ Shift Scheduler is a React application that manages shifts, task entries, and op
 - **Search Interface**: Find entries by `Zlecenie` name for quick access to specific records.
 - **Data Storage**: Automatically saves entries in the browser's local storage (LocalStorage).
 
-## Getting Started
 
-1. **Clone the Repository**:
-   ```bash
-   git clone <your-repo-URL>
-   cd shift-scheduler
-   ```
-2. **Install Dependencies**:
- ```bash
-   npm install
-   ```
-4. **Run the Application**:
-```bash
-   npm start
-  ```
-6. **Author**:
+
+## **Author**:
 
 This project was created for internal use by manufacturing companies to simplify shift management and monitor operator productivity.
