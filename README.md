@@ -26,11 +26,13 @@ Shift Scheduler is a React application that manages shifts, task entries, and op
    cd shift-scheduler
    ```
 2. **Install Dependencies**:
+ ```bash
    npm install
-
-3. **Run the Application**:
+   ```
+4. **Run the Application**:
+```bash
    npm start
-
-4. **Author**:
+  ```
+6. **Author**:
 
 This project was created for internal use by manufacturing companies to simplify shift management and monitor operator productivity.
