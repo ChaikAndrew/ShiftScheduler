@@ -1,0 +1,20 @@
+.footer {
+  background-color: #333;
+  color: #ffffffb2;
+  text-align: center;
+
+  position: fixed; /* Фіксує футер внизу вікна */
+  bottom: 0;
+  left: 0;
+  width: 100%; /* На всю ширину вікна */
+  z-index: 1; /* Забезпечує поверх інших елементів */
+}
+
+.footer p {
+  font-size: 12px;
+}
+
+.footer p span {
+  color: #82ca9d;
+  font-size: 12px;
+}

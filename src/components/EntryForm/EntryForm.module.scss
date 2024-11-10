@@ -1,0 +1,35 @@
+.addEntry {
+  position: relative; /* Додаємо відносне позиціонування */
+  color: #333;
+  border: none;
+  background-color: #a2a2a2;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 20px;
+  transition: background-color 0.3s, color 0.3s;
+  outline: none;
+  overflow: visible; /* Дозволяє показувати анімацію поза межами кнопки */
+}
+
+.addEntry:hover,
+.addEntry:focus {
+  background-color: #333;
+  color: #82ca9d;
+}
+
+.addEntry::after {
+  content: "";
+  position: absolute;
+  bottom: -4px; /* Лінія під кнопкою */
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background-color: #ffaa00;
+  transition: width 0.3s ease, left 0.3s ease;
+  transform-origin: center;
+}
+
+.addEntry:hover::after {
+  width: 100%; /* Підкреслення по всій ширині при наведенні */
+  left: 0;
+}

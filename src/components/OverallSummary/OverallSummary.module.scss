@@ -1,9 +1,15 @@
 .summaryContainer {
   display: flex;
   justify-content: space-between; /* Розташування елементів з однаковим проміжком */
-  padding: 20px;
+  padding: 5px;
   background-color: #f5f5f5;
   border-radius: 8px;
+  max-width: 98%;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .summaryBlock {
@@ -95,6 +101,13 @@
 .description:nth-child(5) {
   animation-delay: 1.9s;
   border-bottom: 5px solid #a4de6c;
+  border-radius: 3px;
+  padding: 10px;
+}
+
+.description:nth-child(6) {
+  animation-delay: 2.1s;
+  border-bottom: 5px solid #b3429d;
   border-radius: 3px;
   padding: 10px;
 }

@@ -17,12 +17,24 @@ function TaskSummary({ taskSummary }) {
       value: taskSummary[task],
     }));
 
-  const colors = ["#8884d8", "#82ca9d", "#ffc658", "#d0ed57", "#a4de6c"]; // Кольори для кругової діаграми
+  const colors = [
+    "#8884d8",
+    "#82ca9d",
+    "#ffc658",
+    "#d0ed57",
+    "#a4de6c",
+    "#b3429d",
+  ]; // Кольори для кругової діаграми
 
   return (
     <div className={styles.taskSummary}>
       <p className={styles.taskSummaryTitle}>Task summary</p>
-      <CustomActiveShapePieChart data={taskData} colors={colors} />
+      <CustomActiveShapePieChart
+        data={taskData}
+        colors={colors}
+        width="100%"
+        height={250}
+      />
 
       <ul className={styles.productList}>
         {taskData.map((task) => (

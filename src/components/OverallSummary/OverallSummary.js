@@ -30,7 +30,14 @@ function OverallSummary({ overallSummary }) {
       value: overallSummary.overallProductSummary[product],
     }));
 
-  const colors = ["#8884d8", "#82ca9d", "#ffc658", "#d0ed57", "#a4de6c"];
+  const colors = [
+    "#8884d8",
+    "#82ca9d",
+    "#ffc658",
+    "#d0ed57",
+    "#a4de6c",
+    "#b3429d",
+  ];
 
   return (
     <div>
@@ -48,7 +55,12 @@ function OverallSummary({ overallSummary }) {
           {taskData.length > 0 && (
             <>
               <h4 className={styles.title}>Overall Task Summary</h4>
-              <CustomActiveShapePieChart data={taskData} colors={colors} />
+              <CustomActiveShapePieChart
+                data={taskData}
+                colors={colors}
+                width="100%"
+                height={350}
+              />
               <ul className={styles.taskList}>
                 {taskData.map((task) => (
                   <li key={task.name} className={styles.description}>
@@ -65,7 +77,12 @@ function OverallSummary({ overallSummary }) {
           {productData.length > 0 && (
             <>
               <h4 className={styles.title}>Overall Product Summary</h4>
-              <CustomActiveShapePieChart data={productData} colors={colors} />
+              <CustomActiveShapePieChart
+                data={productData}
+                colors={colors}
+                width="100%"
+                height={350}
+              />
               <ul className={styles.productList}>
                 {productData.map((product) => (
                   <li key={product.name} className={styles.description}>

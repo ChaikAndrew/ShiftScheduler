@@ -1,21 +1,16 @@
 import React from "react";
+import style from "./ShiftButtons.module.scss";
 
-/**
- * Компонент ShiftButtons рендерить кнопки для вибору зміни (Shift 1, Shift 2, Shift 3).
- *
- * Пропси:
- * - currentShift: поточна обрана зміна
- * - selectedDate: обрана дата (кнопки будуть активні лише при виборі дати)
- * - handleShiftChange: функція для зміни обраної зміни (викликається при натисканні на кнопку)
- */
 const ShiftButtons = ({ currentShift, selectedDate, handleShiftChange }) => {
   return (
     <div>
       {/* Кнопка для вибору першої зміни */}
       <button
         onClick={() => handleShiftChange("first")}
-        className={`shiftBtn ${currentShift === "first" ? "active" : ""}`}
-        disabled={!selectedDate} // Кнопка активна лише при виборі дати
+        className={`${style.shiftBtn} ${
+          currentShift === "first" ? style.active : ""
+        }`}
+        disabled={!selectedDate}
       >
         Shift 1
       </button>
@@ -23,8 +18,10 @@ const ShiftButtons = ({ currentShift, selectedDate, handleShiftChange }) => {
       {/* Кнопка для вибору другої зміни */}
       <button
         onClick={() => handleShiftChange("second")}
-        className={`shiftBtn ${currentShift === "second" ? "active" : ""}`}
-        disabled={!selectedDate} // Кнопка активна лише при виборі дати
+        className={`${style.shiftBtn} ${
+          currentShift === "second" ? style.active : ""
+        }`}
+        disabled={!selectedDate}
       >
         Shift 2
       </button>
@@ -32,8 +29,10 @@ const ShiftButtons = ({ currentShift, selectedDate, handleShiftChange }) => {
       {/* Кнопка для вибору третьої зміни */}
       <button
         onClick={() => handleShiftChange("third")}
-        className={`shiftBtn ${currentShift === "third" ? "active" : ""}`}
-        disabled={!selectedDate} // Кнопка активна лише при виборі дати
+        className={`${style.shiftBtn} ${
+          currentShift === "third" ? style.active : ""
+        }`}
+        disabled={!selectedDate}
       >
         Shift 3
       </button>

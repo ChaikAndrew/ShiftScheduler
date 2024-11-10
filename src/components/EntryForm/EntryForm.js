@@ -1,5 +1,5 @@
 import React from "react";
-
+import style from "./EntryForm.module.scss";
 /**
  * Компонент EntryForm рендерить форму для додавання або редагування запису.
  *
@@ -9,6 +9,8 @@ import React from "react";
  * - tasks, products, colors, reasons: масиви з варіантами вибору для полів select
  * - onSaveEntry: функція для збереження або оновлення запису
  * - editingIndex: індекс запису, що редагується (null, якщо додаємо новий запис)
+ * - selectedLeader, selectedMachine, selectedOperator: вибрані значення для лідера, машини та оператора
+ * - disabled: прапорець для блокування форми, якщо значення true
  */
 const EntryForm = ({
   form,
@@ -19,7 +21,35 @@ const EntryForm = ({
   reasons,
   onSaveEntry,
   editingIndex,
+  selectedLeader,
+  selectedMachine,
+  selectedOperator,
+  disabled, // Прапорець для блокування форми
 }) => {
+  const handleSave = () => {
+    // Перевірка на заповненість всіх обов'язкових полів
+    if (
+      !form.startTime ||
+      !form.endTime ||
+      !selectedLeader || // Перевірка на заповненість лідера
+      !selectedMachine || // Перевірка на заповненість машини
+      !selectedOperator // Перевірка на заповненість оператора
+    ) {
+      alert("Будь ласка, заповніть всі обов'язкові поля форми.");
+      return;
+    }
+
+    // Зберігаємо запис
+    onSaveEntry();
+
+    // Використання alert для повідомлення про успіх
+    alert(
+      editingIndex !== null
+        ? "Запис оновлено успішно!"
+        : "Запис додано успішно!"
+    );
+  };
+
   return (
     <div>
       {/* Поле введення для часу початку роботи */}
@@ -28,20 +58,14 @@ const EntryForm = ({
         value={form.startTime}
         onChange={(e) => setForm({ ...form, startTime: e.target.value })}
         placeholder="Start Time"
-      />
-
-      {/* Поле введення для часу закінчення роботи */}
-      <input
-        type="time"
-        value={form.endTime}
-        onChange={(e) => setForm({ ...form, endTime: e.target.value })}
-        placeholder="End Time"
+        disabled={disabled} // Блокування поля, якщо disabled = true
       />
 
       {/* Вибір задачі з можливістю вибору "Zlecenie" для введення кастомного значення */}
       <select
         value={form.task}
         onChange={(e) => setForm({ ...form, task: e.target.value })}
+        disabled={disabled}
       >
         <option value="">Select Task</option>
         {tasks.map((task) => (
@@ -59,6 +83,7 @@ const EntryForm = ({
           placeholder="Zlecenie №"
           value={form.customTaskName}
           onChange={(e) => setForm({ ...form, customTaskName: e.target.value })}
+          disabled={disabled}
         />
       )}
 
@@ -66,6 +91,7 @@ const EntryForm = ({
       <select
         value={form.product}
         onChange={(e) => setForm({ ...form, product: e.target.value })}
+        disabled={disabled}
       >
         <option value="">Select Product</option>
         {products.map((product) => (
@@ -79,6 +105,7 @@ const EntryForm = ({
       <select
         value={form.color}
         onChange={(e) => setForm({ ...form, color: e.target.value })}
+        disabled={disabled}
       >
         <option value="">Select Color</option>
         {colors.map((color) => (
@@ -88,10 +115,11 @@ const EntryForm = ({
         ))}
       </select>
 
-      {/* Вибір причини простою */}
+      {/* Вибір причини простою (необов'язкове поле) */}
       <select
         value={form.reason}
         onChange={(e) => setForm({ ...form, reason: e.target.value })}
+        disabled={disabled}
       >
         <option value="">Select Reason</option>
         {reasons.map((reason) => (
@@ -108,10 +136,24 @@ const EntryForm = ({
         value={form.quantity}
         onChange={(e) => setForm({ ...form, quantity: e.target.value })}
         placeholder="0"
+        disabled={disabled}
       />
 
-      {/* Кнопка для збереження запису: текст змінюється залежно від того, чи редагується існуючий запис */}
-      <button onClick={onSaveEntry}>
+      {/* Поле введення для часу закінчення роботи */}
+      <input
+        type="time"
+        value={form.endTime}
+        onChange={(e) => setForm({ ...form, endTime: e.target.value })}
+        placeholder="End Time"
+        disabled={disabled}
+      />
+
+      {/* Кнопка для збереження запису */}
+      <button
+        onClick={handleSave}
+        disabled={disabled}
+        className={style.addEntry}
+      >
         {editingIndex !== null ? "Update Entry" : "Add Entry"}
       </button>
     </div>

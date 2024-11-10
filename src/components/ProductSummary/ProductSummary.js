@@ -31,7 +31,12 @@ function ProductSummary({ productSummary }) {
   return (
     <div className={styles.productSummary}>
       <p className={styles.productSummaryTitle}>Product summary</p>
-      <CustomActiveShapePieChart data={productData} colors={colors} />
+      <CustomActiveShapePieChart
+        data={productData}
+        colors={colors}
+        width="100%"
+        height={250}
+      />
 
       <ul className={styles.productList}>
         {productData.map((product) => (

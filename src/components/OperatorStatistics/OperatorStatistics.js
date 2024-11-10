@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { calculateSummary } from "../../utils/calculateSummaries"; // Імпорт функції
+import { calculateSummary } from "../../utils/calculateSummaries"; // Import function
 import style from "./OperatorStatistics.module.scss";
 
 function OperatorStatistics({
@@ -11,27 +11,21 @@ function OperatorStatistics({
   const [viewType, setViewType] = useState("day");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("");
-  const [selectedOperators, setSelectedOperators] = useState([]);
+  const [selectedOperator, setSelectedOperator] = useState("");
 
   const handleViewTypeChange = (e) => setViewType(e.target.value);
   const handleDateChange = (e) => setSelectedDate(e.target.value);
   const handleMonthChange = (e) => setSelectedMonth(e.target.value);
 
   const handleOperatorSelection = (operator) => {
-    setSelectedOperators((prevSelected) =>
-      prevSelected.includes(operator)
-        ? prevSelected.filter((op) => op !== operator)
-        : [...prevSelected, operator]
-    );
+    setSelectedOperator(operator); // Оновлюємо вибір оператора
   };
 
   const filteredEntries = entries
     ? Object.entries(entries).flatMap(([shift, machines]) =>
         Object.values(machines || {}).flatMap((machineEntries) =>
           (machineEntries || []).filter((entry) => {
-            const isOperatorSelected = selectedOperators.includes(
-              entry.operator
-            );
+            const isOperatorSelected = entry.operator === selectedOperator;
             const isDateSelected =
               viewType === "day" && entry.date === selectedDate;
             const isMonthSelected =
@@ -48,7 +42,7 @@ function OperatorStatistics({
 
   const summary = calculateSummary(filteredEntries, operators, products);
 
-  // Підрахунок загальної суми для завдань та продуктів
+  // Calculate total sum for tasks and products
   const totalTaskQuantity = Object.values(summary.taskSummary).reduce(
     (sum, quantity) => sum + quantity,
     0
@@ -60,9 +54,9 @@ function OperatorStatistics({
 
   return (
     <div className={style.container}>
-      <h2 className={style.header}>Статистика по операторам</h2>
+      <h2 className={style.header}>Operator Statistics</h2>
 
-      {/* Вибір типу перегляду */}
+      {/* View Type Selection */}
       <div className={style.viewTypeSelection}>
         <div className={style.radioGroup}>
           <label>
@@ -73,7 +67,7 @@ function OperatorStatistics({
               checked={viewType === "day"}
               onChange={handleViewTypeChange}
             />
-            По даті
+            By Date
           </label>
           <label>
             <input
@@ -83,40 +77,43 @@ function OperatorStatistics({
               checked={viewType === "month"}
               onChange={handleViewTypeChange}
             />
-            За місяць
+            By Month
           </label>
         </div>
       </div>
 
-      {/* Вибір дати або місяця */}
-      <div className={style.dateSelection}>
-        {viewType === "day" && (
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={handleDateChange}
-            className={style.dateInput}
-          />
-        )}
-        {viewType === "month" && (
-          <input
-            type="month"
-            value={selectedMonth}
-            onChange={handleMonthChange}
-            className={style.monthInput}
-          />
-        )}
+      {/* Date or Month Selection */}
+      <div className={style.dateSelectionContainer}>
+        <div className={style.dateSelection}>
+          {viewType === "day" && (
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={handleDateChange}
+              className={style.dateInput}
+            />
+          )}
+          {viewType === "month" && (
+            <input
+              type="month"
+              value={selectedMonth}
+              onChange={handleMonthChange}
+              className={style.monthInput}
+            />
+          )}
+        </div>
       </div>
 
-      {/* Вибір операторів */}
+      {/* Operator Selection */}
       <div className={style.operatorSelection}>
-        <h3>Оператори</h3>
-        <div className={style.operatorCheckboxGroup}>
+        <h3>Operators</h3>
+        <div className={style.operatorRadioGroup}>
           {operators.map((operator) => (
             <label key={operator} className={style.operatorLabel}>
               <input
-                type="checkbox"
-                checked={selectedOperators.includes(operator)}
+                type="radio"
+                name="operator"
+                checked={selectedOperator === operator}
                 onChange={() => handleOperatorSelection(operator)}
               />
               {operator}
@@ -125,19 +122,19 @@ function OperatorStatistics({
         </div>
       </div>
 
-      {/* Відображення результатів */}
+      {/* Display Results */}
       <div className={style.resultTables}>
-        <h3>Результати</h3>
-        {selectedOperators.length > 0 ? (
+        <h3>Results</h3>
+        {selectedOperator ? (
           <>
-            {/* Таблиця завдань */}
+            {/* Task Summary Table */}
             <div className={style.tableContainer}>
-              <h4>Підсумок по завданнях</h4>
+              <h4>Task Summary</h4>
               <table className={style.table}>
                 <thead>
                   <tr>
-                    <th>Завдання</th>
-                    <th>Кількість</th>
+                    <th>Task</th>
+                    <th>Quantity</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -149,10 +146,10 @@ function OperatorStatistics({
                         <td>{quantity}</td>
                       </tr>
                     ))}
-                  {/* Рядок для загальної кількості */}
+                  {/* Row for Total Quantity */}
                   <tr>
                     <td>
-                      <strong>Загалом</strong>
+                      <strong>Total</strong>
                     </td>
                     <td>
                       <strong>{totalTaskQuantity}</strong>
@@ -162,14 +159,14 @@ function OperatorStatistics({
               </table>
             </div>
 
-            {/* Таблиця продуктів */}
+            {/* Product Summary Table */}
             <div className={style.tableContainer}>
-              <h4>Підсумок по продуктах</h4>
+              <h4>Product Summary</h4>
               <table className={style.table}>
                 <thead>
                   <tr>
-                    <th>Продукт</th>
-                    <th>Кількість</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -181,10 +178,10 @@ function OperatorStatistics({
                         <td>{quantity}</td>
                       </tr>
                     ))}
-                  {/* Рядок для загальної кількості */}
+                  {/* Row for Total Quantity */}
                   <tr>
                     <td>
-                      <strong>Загалом</strong>
+                      <strong>Total</strong>
                     </td>
                     <td>
                       <strong>{totalProductQuantity}</strong>
@@ -196,7 +193,7 @@ function OperatorStatistics({
           </>
         ) : (
           <p className={style.emptyMessage}>
-            Виберіть оператора для перегляду статистики
+            Select an operator to view statistics
           </p>
         )}
       </div>

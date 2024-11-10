@@ -9,6 +9,10 @@ export const operators = [
   "Angelina",
   "Marina",
   "Vitalii",
+  "Viktoria",
+  "Daria",
+  "Lilia",
+  "Anastasiia",
 ];
 
 //tasks

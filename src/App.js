@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Routes, Route, Link } from "react-router-dom"; // Додаємо імпорти для маршрутизації
+import { Routes, Route } from "react-router-dom"; // Додаємо імпорти для маршрутизації
 import "./styles.css";
 
 import {
@@ -43,6 +43,10 @@ import EntryTable from "./components/EntryTable/EntryTable";
 
 import SearchByZlecenieName from "./components/SearchByZlecenieName/SearchByZlecenieName";
 import OperatorStatistics from "./components/OperatorStatistics/OperatorStatistics";
+import MonthlyOperatorStatistics from "./components/MonthlyOperatorStatistics/MonthlyOperatorStatistics";
+
+import NavBar from "./components/NavBar/NavBar";
+import Footer from "./components/Footer/Footer";
 
 function App() {
   const [entries, setEntries] = useState(() => {
@@ -235,14 +239,13 @@ function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  //перевіряємо, чи всі необхідні поля в <SelectionFields /> заповнені.
+  const isSelectionComplete =
+    selectedLeader && selectedMachine && selectedOperator;
+
   return (
     <div className="container">
-      <nav>
-        {/* Посилання на сторінки */}
-        <Link to="/">Shift Scheduler</Link> |
-        <Link to="/operator-statistics">Статистика по операторам</Link>
-      </nav>
-
+      <NavBar />
       <Routes>
         <Route
           path="/"
@@ -295,6 +298,10 @@ function App() {
                   reasons={reasons}
                   onSaveEntry={onSaveEntry}
                   editingIndex={editingIndex}
+                  selectedLeader={selectedLeader}
+                  selectedMachine={selectedMachine}
+                  selectedOperator={selectedOperator}
+                  disabled={!isSelectionComplete} // Додаємо проп для блокування форми
                 />
               </div>
 
@@ -335,7 +342,7 @@ function App() {
                   )}
 
                   {/* Контент, який відображається, якщо є хоча б один показник > 0
-          головна статистика по змніні  Overall Total Summary*/}
+                   головна статистика по змніні  Overall Total Summary*/}
                   {isDataAvailable && (
                     <div className="main-summary">
                       {/* OverallSummary */}
@@ -370,7 +377,9 @@ function App() {
                     !Object.values(summary.productSummary).some(
                       (val) => val > 0
                     ) ? (
-                      <p style={{ color: "gray" }}>Ще нічого нема</p>
+                      <p style={{ color: "gray" }}>
+                        Data for this machine is not available in the database
+                      </p>
                     ) : (
                       <>
                         <TotalSummary
@@ -416,7 +425,21 @@ function App() {
             />
           }
         />
+        <Route
+          path="/monthly-statistics"
+          element={
+            <MonthlyOperatorStatistics
+              entries={entries}
+              operators={operators}
+              selectedMonth={{
+                month: new Date().getMonth(),
+                year: new Date().getFullYear(),
+              }}
+            />
+          }
+        />
       </Routes>
+      <Footer className="footer" />
     </div>
   );
 }

@@ -1,0 +1,46 @@
+a {
+  text-decoration: none;
+  color: inherit;
+}
+.navbar {
+  background-color: #333;
+  color: #ffffffb2;
+  text-align: center;
+
+  position: fixed; /* Фіксує футер внизу вікна */
+  top: 0;
+  left: 0;
+  width: 100%; /* На всю ширину вікна */
+  z-index: 1; /* Забезпечує поверх інших елементів */
+}
+
+.link {
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+}
+
+.link:not(:last-child) {
+  margin-right: 40px;
+}
+
+.link.active {
+  color: #82ca9d; /* Колір для активного посилання */
+}
+
+.link::after {
+  content: "";
+  position: absolute;
+  left: 50%; /* Починаємо з центру */
+  bottom: -3px; /* Місце під лінком */
+  width: 0;
+  height: 2px; /* Товщина підкреслення */
+  background-color: #ffc658; /* Колір підкреслення */
+  transition: width 0.3s ease, left 0.3s ease; /* Плавний перехід */
+  transform-origin: center; /* Початок трансформації з центру */
+}
+
+.link:hover::after {
+  width: 100%; /* Заповнення всієї ширини при наведенні */
+  left: 0; /* Розширення з центру до країв */
+}

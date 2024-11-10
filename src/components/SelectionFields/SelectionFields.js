@@ -1,5 +1,5 @@
 import React from "react";
-
+import style from "./SelectionFields.module.scss";
 /**
  * Компонент SelectionFields рендерить поля для вибору лідера, машини та оператора.
  *
@@ -26,7 +26,7 @@ const SelectionFields = ({
   operators,
 }) => {
   return (
-    <div>
+    <div className={style.SelectionFields}>
       {/* Вибір лідера */}
       <select
         value={selectedLeader}

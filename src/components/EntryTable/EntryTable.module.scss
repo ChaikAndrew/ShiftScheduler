@@ -1,30 +1,30 @@
-.reasonDescription {
+.reasonDescription,
+.operatorCell {
   position: relative;
   cursor: pointer;
 }
 
-.reasonDescription .tooltip {
+.tooltip,
+.commentTooltip {
   visibility: hidden;
-  width: 350px; /* Задай ширину підказки за потреби */
-  background-color: #8884d8;
+  width: 350px; /* Ширина тултіпу */
+  background-color: #8884d8; /* Колір фону */
   color: #fff;
   text-align: center;
   padding: 5px;
   border-radius: 5px;
-
-  /* Позиціонування підказки */
   position: absolute;
   z-index: 1;
-  bottom: 125%; /* Відступ від комірки */
+  bottom: 125%; /* Позиціювання тултіпу */
   left: 50%;
   transform: translateX(-50%);
-
-  /* Анімація */
   opacity: 0;
   transition: opacity 0.3s;
+  white-space: nowrap;
 }
 
-.reasonDescription .tooltip::after {
+.tooltip::after,
+.commentTooltip::after {
   content: "";
   position: absolute;
   top: 100%; /* Трикутник під тултіпом */
@@ -32,10 +32,88 @@
   transform: translateX(-50%);
   border-width: 5px;
   border-style: solid;
-  border-color: #333 transparent transparent transparent;
+  border-color: #8884d8 transparent transparent transparent; /* Колір трикутника */
 }
 
-.reasonDescription:hover .tooltip {
+/* Активація тултіпу при наведенні */
+.reasonDescription:hover .tooltip,
+.operatorName:hover .commentTooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  max-width: 600px; /* Збільшена ширина */
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.commentInput {
+  width: 100%;
+  height: auto;
+  min-height: 100px; /* Збільшена висота */
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+  resize: vertical; /* Дозволяє користувачам змінювати висоту */
+  margin-top: 15px;
+}
+
+.modalActions {
+  margin-top: 20px;
+}
+
+.modalActions button {
+  margin: 0 10px;
+  padding: 10px 15px;
+  font-size: 16px;
+}
+.operatorCell {
+  position: relative;
+}
+
+.operatorName {
+  cursor: pointer;
+  position: relative;
+}
+
+.commentTooltip {
+  visibility: hidden;
+  background-color: #8884d8;
+  color: #fff;
+  text-align: center;
+  border-radius: 5px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  white-space: normal;
+  width: 350px;
+}
+
+.operatorName:hover .commentTooltip {
   visibility: visible;
   opacity: 1;
 }

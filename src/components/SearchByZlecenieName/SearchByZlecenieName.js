@@ -16,6 +16,10 @@ function SearchByZlecenieName({ entries }) {
   };
 
   const handleSearch = () => {
+    if (!searchTerm.trim()) {
+      return; // Якщо поле порожнє, пошук не виконується
+    }
+
     setSearchPerformed(true);
     const normalizedSearchTerm = searchTerm
       .replace(/[_\s-]/g, "")
@@ -80,7 +84,9 @@ function SearchByZlecenieName({ entries }) {
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Enter Zlecenie Name"
             />
-            <button onClick={handleSearch}>Search</button>
+            <button onClick={handleSearch} className={style.modalSearchButton}>
+              Search
+            </button>
 
             {searchPerformed && (
               <>
@@ -93,7 +99,7 @@ function SearchByZlecenieName({ entries }) {
                         <th>Leader</th>
                         <th>Operator</th>
                         <th>Machine</th>
-                        <th>Zlecenie Number</th>
+                        <th>Zlecenie</th>
                         <th>Product</th>
                         <th>Color</th>
                         <th>Quantity</th>
