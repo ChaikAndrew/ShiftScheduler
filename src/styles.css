@@ -71,14 +71,6 @@ button {
   transition: background-color 0.3s;
 }
 
-button.edit {
-  background-color: #4d4d4e; /* Зелений для редагування */
-}
-
-button.delete {
-  background-color: #f44336; /* Червоний для видалення */
-}
-
 .btn-summary {
   z-index: 10;
   position: relative;
@@ -99,17 +91,11 @@ button.delete {
   color: #82ca9d;
 }
 
-/* Стиль для стану активної кнопки під час натискання */
-.btn-summary:active {
-  background-color: #555; /* Додатковий відтінок при натисканні */
-  color: #82ca9d;
-}
-
 /* Псевдоелемент для анімації підкреслення */
 .btn-summary::after {
   content: "";
   position: absolute;
-  bottom: -4px; /* Лінія під кнопкою */
+  bottom: -4px;
   left: 50%;
   width: 0;
   height: 3px;
@@ -187,11 +173,40 @@ select {
 .btn-up {
   z-index: 10;
   position: fixed;
-  bottom: 20px; /* Відступ від нижнього краю */
-  right: 20px; /* Відступ від правого краю */
-  transition: opacity 0.3s;
+  bottom: 22px; /* Відступ від нижнього краю */
+  right: 5px; /* Відступ від правого краю */
+  color: #333;
+  border: none;
+  background-color: #a2a2a2;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 20px;
+  transition: background-color 0.3s, color 0.3s;
+  outline: none;
+  overflow: visible; /* Дозволяє показувати анімацію поза межами кнопки */
 }
 
-.btn-up:hover {
-  opacity: 1; /* Збільшення видимості при наведенні */
+.btn-up::after,
+.btn-up::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background-color: #ffc658;
+  transition: width 0.3s ease, left 0.3s ease;
+  transform-origin: center;
+}
+
+.btn-up:hover::after,
+.btn-up:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+.btn-up:hover,
+.btn-up:focus {
+  background-color: #333;
+  color: #82ca9d;
 }

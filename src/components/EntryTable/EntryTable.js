@@ -137,11 +137,11 @@ function EntryTable({ entries, onEdit, onDelete }) {
                 <td>{formatTime(entry.workingTime)}</td>
                 <td>{formatTime(entry.downtime)}</td>
                 <td>
-                  <button className="edit" onClick={() => onEdit(index)}>
+                  <button className={style.edit} onClick={() => onEdit(index)}>
                     Edit
                   </button>
                   <button
-                    className="delete"
+                    className={style.delete}
                     onClick={() =>
                       handleDelete(
                         index,

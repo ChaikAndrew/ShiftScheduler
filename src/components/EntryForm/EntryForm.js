@@ -34,12 +34,10 @@ const EntryForm = ({
   currentShift,
 }) => {
   const handleSave = () => {
-    console.log("handleSave triggered");
-
     // Перевірка на заповненість всіх обов'язкових полів
     if (
-      !form.startTime ||
-      !form.endTime ||
+      !form.startTime.trim() || // Перевірка на порожній рядок
+      !form.endTime.trim() ||
       !selectedLeader ||
       !selectedMachine ||
       !selectedOperator
@@ -189,11 +187,7 @@ const EntryForm = ({
       />
 
       {/* Кнопка для збереження запису */}
-      <button
-        onClick={handleSave}
-        disabled={disabled}
-        className={style.addEntry}
-      >
+      <button onClick={handleSave} className={style.addEntry}>
         {editingIndex !== null ? "Update Entry" : "Add Entry"}
       </button>
     </div>
