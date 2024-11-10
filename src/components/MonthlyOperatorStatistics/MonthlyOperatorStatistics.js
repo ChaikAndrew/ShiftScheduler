@@ -197,8 +197,7 @@ const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
             {Array.from({ length: daysInMonth }, (_, i) => (
               <th key={i}>{i + 1}</th>
             ))}
-            <th>Average per Day</th>{" "}
-            {/* Додаємо заголовок для колонки середнього значення */}
+            <th>Average per Day</th>
           </tr>
         </thead>
         <tbody>
@@ -220,7 +219,7 @@ const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
                 {monthlyStatistics[total.operator].map((data, index) => (
                   <td key={index}>{data.total || ""}</td>
                 ))}
-                <td>{averagePerDay}</td>{" "}
+                <td>{averagePerDay}</td>
                 {/* Відображення середнього значення */}
               </tr>
             );

@@ -301,7 +301,8 @@ function App() {
                   selectedLeader={selectedLeader}
                   selectedMachine={selectedMachine}
                   selectedOperator={selectedOperator}
-                  disabled={!isSelectionComplete} // Додаємо проп для блокування форми
+                  disabled={!isSelectionComplete}
+                  currentShift={currentShift} /// Додаємо проп для блокування форми
                 />
               </div>
 

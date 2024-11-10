@@ -12,6 +12,12 @@ import style from "./EntryForm.module.scss";
  * - selectedLeader, selectedMachine, selectedOperator: вибрані значення для лідера, машини та оператора
  * - disabled: прапорець для блокування форми, якщо значення true
  */
+
+import {
+  isValidFirstShiftTime,
+  isValidSecondShiftTime,
+  isValidThirdShiftTime,
+} from "../../utils/validateShiftTime";
 const EntryForm = ({
   form,
   setForm,
@@ -24,23 +30,57 @@ const EntryForm = ({
   selectedLeader,
   selectedMachine,
   selectedOperator,
-  disabled, // Прапорець для блокування форми
+  disabled,
+  currentShift,
 }) => {
   const handleSave = () => {
+    console.log("handleSave triggered");
+
     // Перевірка на заповненість всіх обов'язкових полів
     if (
       !form.startTime ||
       !form.endTime ||
-      !selectedLeader || // Перевірка на заповненість лідера
-      !selectedMachine || // Перевірка на заповненість машини
-      !selectedOperator // Перевірка на заповненість оператора
+      !selectedLeader ||
+      !selectedMachine ||
+      !selectedOperator
     ) {
       alert("Будь ласка, заповніть всі обов'язкові поля форми.");
+      console.log("Required fields missing:", {
+        startTime: form.startTime,
+        endTime: form.endTime,
+        selectedLeader,
+        selectedMachine,
+        selectedOperator,
+      });
+      return;
+    }
+
+    // Перевірка валідності часу в зміні
+    if (
+      currentShift === "first" &&
+      !isValidFirstShiftTime(form.startTime, form.endTime)
+    ) {
+      console.log("Time validation failed for first shift");
+      return;
+    }
+    if (
+      currentShift === "second" &&
+      !isValidSecondShiftTime(form.startTime, form.endTime)
+    ) {
+      console.log("Time validation failed for second shift");
+      return;
+    }
+    if (
+      currentShift === "third" &&
+      !isValidThirdShiftTime(form.startTime, form.endTime)
+    ) {
+      console.log("Time validation failed for third shift");
       return;
     }
 
     // Зберігаємо запис
     onSaveEntry();
+    console.log("Entry saved:", form);
 
     // Використання alert для повідомлення про успіх
     alert(
