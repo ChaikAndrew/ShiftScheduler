@@ -4,20 +4,25 @@ import { formatTime } from "../../utils/formatTime";
 import { reasons } from "../../utils/constants";
 import style from "./EntryTable.module.scss";
 
-// Завантаження коментарів із localStorage
+// Завантаження коментарів із localStorage з урахуванням дати, зміни та оператора
 const loadComments = () => {
   const savedComments = localStorage.getItem("comments");
   return savedComments ? JSON.parse(savedComments) : {};
 };
 
-// Збереження коментарів у localStorage
+// Збереження коментарів у localStorage з урахуванням дати, зміни та оператора
 const saveComments = (comments) => {
   localStorage.setItem("comments", JSON.stringify(comments));
 };
 
+// Функція для створення унікального ключа на основі дати, зміни, оператора та індексу запису
+const getCommentKey = (entry, index) => {
+  return `${entry.displayDate}-${entry.shift}-${entry.operator}-${index}`;
+};
+
 function EntryTable({ entries, onEdit, onDelete }) {
   const [comments, setComments] = useState(loadComments());
-  const [commentIndex, setCommentIndex] = useState(null);
+  const [commentKey, setCommentKey] = useState(null);
   const [newComment, setNewComment] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -34,18 +39,19 @@ function EntryTable({ entries, onEdit, onDelete }) {
     }
   };
 
-  const handleAddComment = (index) => {
-    setCommentIndex(index);
-    setNewComment(comments[index] || ""); // Показуємо коментар з localStorage
+  const handleAddComment = (entry, index) => {
+    const key = getCommentKey(entry, index);
+    setCommentKey(key);
+    setNewComment(comments[key] || ""); // Показуємо коментар для конкретного запису з localStorage
     setIsModalOpen(true); // Відкриваємо модальне вікно
   };
 
   const handleSaveComment = () => {
-    if (commentIndex !== null) {
-      const updatedComments = { ...comments, [commentIndex]: newComment };
+    if (commentKey) {
+      const updatedComments = { ...comments, [commentKey]: newComment };
       setComments(updatedComments); // Оновлюємо стан коментарів
       saveComments(updatedComments); // Зберігаємо у localStorage
-      setCommentIndex(null);
+      setCommentKey(null);
       setNewComment("");
       setIsModalOpen(false); // Закриваємо модальне вікно
     }
@@ -53,7 +59,7 @@ function EntryTable({ entries, onEdit, onDelete }) {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setCommentIndex(null);
+    setCommentKey(null);
     setNewComment("");
   };
 
@@ -80,74 +86,77 @@ function EntryTable({ entries, onEdit, onDelete }) {
           </tr>
         </thead>
         <tbody>
-          {entries.map((entry, index) => (
-            <tr key={index}>
-              <td>{entry.shift}</td>
-              <td>{entry.displayDate}</td>
-              <td>{DateTime.fromISO(entry.startTime).toFormat("HH:mm")}</td>
-              <td>{DateTime.fromISO(entry.endTime).toFormat("HH:mm")}</td>
-              <td>{entry.leader}</td>
-              <td>{entry.machine}</td>
-              <td className={style.operatorCell}>
-                <span
-                  className={style.operatorName}
-                  onClick={() => handleAddComment(index)}
-                >
-                  {entry.operator}
-                  {comments[index] && (
-                    <>
-                      {" "}
-                      <span role="img" aria-label="comment">
-                        📝
+          {entries.map((entry, index) => {
+            const key = getCommentKey(entry, index); // Створюємо унікальний ключ для кожного запису
+            return (
+              <tr key={index}>
+                <td>{entry.shift}</td>
+                <td>{entry.displayDate}</td>
+                <td>{DateTime.fromISO(entry.startTime).toFormat("HH:mm")}</td>
+                <td>{DateTime.fromISO(entry.endTime).toFormat("HH:mm")}</td>
+                <td>{entry.leader}</td>
+                <td>{entry.machine}</td>
+                <td className={style.operatorCell}>
+                  <span
+                    className={style.operatorName}
+                    onClick={() => handleAddComment(entry, index)}
+                  >
+                    {entry.operator}
+                    {comments[key] && (
+                      <>
+                        {" "}
+                        <span role="img" aria-label="comment">
+                          📝
+                        </span>
+                      </>
+                    )}
+                    {comments[key] && (
+                      <span className={style.commentTooltip}>
+                        {comments[key]}
                       </span>
-                    </>
-                  )}
-                  {comments[index] && (
-                    <span className={style.commentTooltip}>
-                      {comments[index]}
+                    )}
+                  </span>
+                </td>
+                <td>{entry.task}</td>
+                <td>{entry.product}</td>
+                <td>{entry.color}</td>
+                <td className={style.reasonDescription}>
+                  {reasons.find((reason) => reason.description === entry.reason)
+                    ?.id || ""}
+                  {entry.reason && (
+                    <span className={style.tooltip}>
+                      {
+                        reasons.find(
+                          (reason) => reason.description === entry.reason
+                        )?.description
+                      }
                     </span>
                   )}
-                </span>
-              </td>
-              <td>{entry.task}</td>
-              <td>{entry.product}</td>
-              <td>{entry.color}</td>
-              <td className={style.reasonDescription}>
-                {reasons.find((reason) => reason.description === entry.reason)
-                  ?.id || ""}
-                {entry.reason && (
-                  <span className={style.tooltip}>
-                    {
-                      reasons.find(
-                        (reason) => reason.description === entry.reason
-                      )?.description
+                </td>
+                <td>{entry.quantity}</td>
+                <td>{formatTime(entry.workingTime)}</td>
+                <td>{formatTime(entry.downtime)}</td>
+                <td>
+                  <button className="edit" onClick={() => onEdit(index)}>
+                    Edit
+                  </button>
+                  <button
+                    className="delete"
+                    onClick={() =>
+                      handleDelete(
+                        index,
+                        entry.operator,
+                        entry.task,
+                        entry.quantity
+                      )
                     }
-                  </span>
-                )}
-              </td>
-              <td>{entry.quantity}</td>
-              <td>{formatTime(entry.workingTime)}</td>
-              <td>{formatTime(entry.downtime)}</td>
-              <td>
-                <button className="edit" onClick={() => onEdit(index)}>
-                  Edit
-                </button>
-                <button
-                  className="delete"
-                  onClick={() =>
-                    handleDelete(
-                      index,
-                      entry.operator,
-                      entry.task,
-                      entry.quantity
-                    )
-                  }
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 

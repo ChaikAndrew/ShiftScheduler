@@ -8,8 +8,8 @@
 .commentTooltip {
   visibility: hidden;
   width: 350px; /* Ширина тултіпу */
-  background-color: #8884d8; /* Колір фону */
-  color: #fff;
+  background-color: #333; /* Колір фону */
+  color: #82ca9d;
   text-align: center;
   padding: 5px;
   border-radius: 5px;
@@ -20,7 +20,7 @@
   transform: translateX(-50%);
   opacity: 0;
   transition: opacity 0.3s;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .tooltip::after,
@@ -32,7 +32,7 @@
   transform: translateX(-50%);
   border-width: 5px;
   border-style: solid;
-  border-color: #8884d8 transparent transparent transparent; /* Колір трикутника */
+  border-color: #333 transparent transparent transparent; /* Колір трикутника */
 }
 
 /* Активація тултіпу при наведенні */
@@ -93,24 +93,6 @@
 .operatorName {
   cursor: pointer;
   position: relative;
-}
-
-.commentTooltip {
-  visibility: hidden;
-  background-color: #8884d8;
-  color: #fff;
-  text-align: center;
-  border-radius: 5px;
-  padding: 5px;
-  position: absolute;
-  z-index: 1;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 0.3s;
-  white-space: normal;
-  width: 350px;
 }
 
 .operatorName:hover .commentTooltip {
