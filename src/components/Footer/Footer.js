@@ -5,8 +5,8 @@ function Footer() {
   return (
     <footer className={style.footer}>
       <p>
-        Chaika Andrii / <span> HFT71 </span> / Wroclaw / 2025 &copy; All rights
-        reserved
+        ShiftPrint Manager / <span> HFT71 </span> / Wroclaw / Chaika Andrii /
+        2025 &copy;
       </p>
     </footer>
   );

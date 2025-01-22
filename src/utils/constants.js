@@ -61,6 +61,8 @@ export const reasons = [
   { id: 23, description: "23.Zalewanie się palety sprayem" },
   { id: 24, description: "24.Przezbrojenie (zmiana temperatury pieca)" },
   { id: 25, description: "25.Brak poprzedniej zmiany" },
+  { id: 26, description: "26.Zbiorniki na odpady płynne są pełne(wymiana)" },
+  { id: 27, description: "27.Restart aplikacji" },
 ];
 
 // leaders
