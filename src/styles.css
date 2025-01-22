@@ -210,3 +210,9 @@ select {
   background-color: #333;
   color: #82ca9d;
 }
+
+.editing-form {
+  border: 2px solid #ffcc00; /* Жовта рамка для привернення уваги */
+  background-color: #fffbe6; /* Світло-жовтий фон */
+  transition: all 0.3s ease-in-out; /* Гладка анімація */
+}

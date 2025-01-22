@@ -44,6 +44,8 @@ import EntryTable from "./components/EntryTable/EntryTable";
 import SearchByZlecenieName from "./components/SearchByZlecenieName/SearchByZlecenieName";
 import OperatorStatistics from "./components/OperatorStatistics/OperatorStatistics";
 import MonthlyOperatorStatistics from "./components/MonthlyOperatorStatistics/MonthlyOperatorStatistics";
+import MonthlyLeaderStatistics from "./components/MonthlyLeaderStatistics/MonthlyLeaderStatistics";
+import MachineStatistics from "./components/MachineStatistics/MachineStatistics";
 
 import NavBar from "./components/NavBar/NavBar";
 import Footer from "./components/Footer/Footer";
@@ -303,6 +305,7 @@ function App() {
                   selectedOperator={selectedOperator}
                   disabled={!isSelectionComplete}
                   currentShift={currentShift} /// Додаємо проп для блокування форми
+                  className={editingIndex !== null ? "editing-form" : ""} // Додаємо клас
                 />
               </div>
 
@@ -439,7 +442,25 @@ function App() {
             />
           }
         />
+
+        <Route
+          path="/leader-statistics"
+          element={
+            <MonthlyLeaderStatistics
+              entries={entries}
+              leaders={leaders}
+              tasks={tasks}
+              products={products}
+            />
+          }
+        />
+
+        <Route
+          path="/machine-statistics"
+          element={<MachineStatistics entries={entries} machines={machines} />}
+        />
       </Routes>
+
       <Footer className="footer" />
     </div>
   );

@@ -31,6 +31,24 @@ function NavBar() {
       >
         Monthly Statistics
       </NavLink>
+
+      <NavLink
+        to="/leader-statistics"
+        className={({ isActive }) =>
+          isActive ? `${styles.link} ${styles.active}` : styles.link
+        }
+      >
+        Leader Statistics
+      </NavLink>
+
+      <NavLink
+        to="/machine-statistics"
+        className={({ isActive }) =>
+          isActive ? `${styles.link} ${styles.active}` : styles.link
+        }
+      >
+        Machine Statistics
+      </NavLink>
     </nav>
   );
 }
