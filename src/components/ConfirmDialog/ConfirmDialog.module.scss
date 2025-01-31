@@ -1,0 +1,89 @@
+$background-dark: #ffffff; // Білий фон модального вікна
+$color-black: #333333; // Чорний текст
+$confirm-color: #4caf50;
+$confirm-hover: #45a049;
+$cancel-color: #f44336;
+$cancel-hover: #d32f2f;
+
+.confirmDialog {
+  background: $background-dark;
+  color: $color-black;
+  padding: 20px;
+  border-radius: 8px;
+  width: 350px;
+  text-align: center;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.2s ease-in-out;
+
+  h2 {
+    margin-top: 0;
+    font-size: 20px;
+    font-weight: bold;
+    color: $cancel-color;
+  }
+
+  p {
+    font-size: 16px;
+    margin: 15px 0;
+  }
+}
+
+.dialogButtons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.confirmBtn,
+.cancelBtn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.confirmBtn {
+  background: $confirm-color;
+  color: white;
+
+  &:hover {
+    background: $confirm-hover;
+  }
+}
+
+.cancelBtn {
+  background: $cancel-color;
+  color: white;
+
+  &:hover {
+    background: $cancel-hover;
+  }
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8); // Чорний напівпрозорий фон
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

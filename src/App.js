@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { Routes, Route } from "react-router-dom"; // Додаємо імпорти для маршрутизації
 import "./styles.css";
 
+import { ToastContainer } from "react-toastify";
+
 import {
   machines,
   operators,
@@ -79,7 +81,10 @@ function App() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    localStorage.setItem("entries", JSON.stringify(entries));
+    const prevEntries = JSON.parse(localStorage.getItem("entries"));
+    if (JSON.stringify(prevEntries) !== JSON.stringify(entries)) {
+      localStorage.setItem("entries", JSON.stringify(entries));
+    }
   }, [entries]);
 
   const onSaveEntry = () => {
@@ -247,6 +252,7 @@ function App() {
 
   return (
     <div className="container">
+      <ToastContainer />
       <NavBar />
       <Routes>
         <Route
@@ -465,5 +471,4 @@ function App() {
     </div>
   );
 }
-
 export default App;

@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { showToast } from "../../src/components/ToastNotification/ToastNotification";
 
 export const exportMonthlySummaryToPDF = (data, filename, selectedMonth) => {
   if (!data || !data.length) return;
@@ -38,7 +39,7 @@ export const exportMonthlySummaryToPDF = (data, filename, selectedMonth) => {
   const filteredData = data.filter((row) => row.Total > 0);
 
   if (!filteredData.length) {
-    alert("No data available to export for the selected month.");
+    showToast("No data available to export for the selected month.", "warning");
     return;
   }
 

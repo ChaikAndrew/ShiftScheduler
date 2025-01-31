@@ -3,6 +3,8 @@ import { DateTime } from "luxon";
 import { formatTime } from "../../utils/formatTime";
 import { reasons } from "../../utils/constants";
 import style from "./EntryTable.module.scss";
+import { showConfirmDialog } from "../ConfirmDialog/ConfirmDialog";
+import { showToast } from "../ToastNotification/ToastNotification";
 
 // Завантаження коментарів із localStorage з урахуванням дати, зміни та оператора
 const loadComments = () => {
@@ -31,12 +33,17 @@ function EntryTable({ entries, onEdit, onDelete }) {
   }, []);
 
   const handleDelete = (index, operator, task, quantity) => {
-    const confirmation = window.confirm(
-      `${operator}, are you sure you want to delete ${task} with a quantity of ${quantity}?`
-    );
-    if (confirmation) {
-      onDelete(index);
-    }
+    showConfirmDialog({
+      title: "Delete Confirmation",
+      message: `${operator}, are you sure you want to delete ${task} with a quantity of ${quantity}?`,
+      onConfirm: () => {
+        onDelete(index);
+        showToast(
+          `Entry successfully deleted! ${task} with a quantity of ${quantity}`,
+          "success"
+        ); // ✅ Показуємо зелений тост
+      },
+    });
   };
 
   const handleAddComment = (entry, index) => {

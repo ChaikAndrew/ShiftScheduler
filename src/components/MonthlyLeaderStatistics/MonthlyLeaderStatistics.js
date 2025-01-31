@@ -4,6 +4,7 @@ import { renderDailyStatistics } from "./renderDailyStatistics";
 import { renderMonthlySummary } from "./renderMonthlySummary";
 import { exportDailyStatisticsToPDF } from "../../utils/exportDailyStatisticsToPDF";
 import { exportMonthlySummaryToPDF } from "../../utils/exportMonthlySummaryToPDF";
+import { showToast } from "../ToastNotification/ToastNotification";
 
 const MonthlyLeaderStatistics = ({ entries, leaders }) => {
   const [selectedMonth, setSelectedMonth] = useState({
@@ -68,7 +69,7 @@ const MonthlyLeaderStatistics = ({ entries, leaders }) => {
 
   const handleExportDaily = () => {
     if (!selectedDate) {
-      alert("Please select a date for the export.");
+      showToast("Please select a date for the export.", "warning");
       return;
     }
 

@@ -66,7 +66,7 @@ export const reasons = [
 ];
 
 // leaders
-export const leaders = ["Radek", "Karina", "Michal"];
+export const leaders = ["Karina", "Michal"];
 
 // Початкові часи для кожної зміни
 export const shiftStartTimes = {

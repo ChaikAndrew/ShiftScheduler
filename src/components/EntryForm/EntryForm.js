@@ -1,5 +1,7 @@
 import React from "react";
 import style from "./EntryForm.module.scss";
+
+import { showToast } from "../ToastNotification/ToastNotification";
 /**
  * Компонент EntryForm рендерить форму для додавання або редагування запису.
  *
@@ -42,7 +44,7 @@ const EntryForm = ({
       !selectedMachine ||
       !selectedOperator
     ) {
-      alert("Будь ласка, заповніть всі обов'язкові поля форми.");
+      showToast("Please fill in all required fields of the form.", "warning");
       console.log("Required fields missing:", {
         startTime: form.startTime,
         endTime: form.endTime,
@@ -80,11 +82,12 @@ const EntryForm = ({
     onSaveEntry();
     console.log("Entry saved:", form);
 
-    // Використання alert для повідомлення про успіх
-    alert(
+    // Використання showToast для повідомлення про успіх
+    showToast(
       editingIndex !== null
-        ? "Запис оновлено успішно!"
-        : "Запис додано успішно!"
+        ? "Record updated successfully!"
+        : "Record added successfully!",
+      "success"
     );
   };
 
@@ -172,7 +175,17 @@ const EntryForm = ({
         className="input-quantity"
         type="number"
         value={form.quantity}
-        onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+        onChange={(e) => {
+          let value = e.target.value;
+
+          // Видаляємо всі нечислові символи
+          value = value.replace(/\D/, "");
+
+          // Прибираємо лідуючі нулі, залишаючи хоча б один нуль якщо поле пусте
+          value = value.replace(/^0+/, "") || "0";
+
+          setForm({ ...form, quantity: value });
+        }}
         placeholder="0"
         disabled={disabled}
       />

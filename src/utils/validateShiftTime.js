@@ -1,13 +1,14 @@
 // utils/validateShiftTime.js
 
 import { DateTime } from "luxon";
+import { showToast } from "../../src/components/ToastNotification/ToastNotification";
 
 /**
- * Перевіряє час для першої зміни (06:00-14:00).
+ * Validates the time for the first shift (06:00-14:00).
  *
- * @param {string} startTime - Час початку у форматі ISO.
- * @param {string} endTime - Час завершення у форматі ISO.
- * @returns {boolean} - Повертає true, якщо час у межах допустимого діапазону.
+ * @param {string} startTime - Start time in ISO format.
+ * @param {string} endTime - End time in ISO format.
+ * @returns {boolean} - Returns true if the time is within the allowed range.
  */
 export function isValidFirstShiftTime(startTime, endTime) {
   const start = DateTime.fromISO(startTime);
@@ -15,44 +16,61 @@ export function isValidFirstShiftTime(startTime, endTime) {
   console.log("isValidFirstShiftTime:", { startTime, endTime, start, end });
 
   if (start.hour < 6 || end.hour > 14 || (end.hour === 14 && end.minute > 0)) {
-    alert("Помилка: у першій зміні час повинен бути між 06:00 та 14:00");
+    showToast(
+      "Error: In the first shift, the time must be between 06:00 and 14:00.",
+      "error"
+    );
     return false;
   }
   return true;
 }
 
+/**
+ * Validates the time for the second shift (14:00-22:00).
+ */
 export function isValidSecondShiftTime(startTime, endTime) {
   const start = DateTime.fromISO(startTime);
   const end = DateTime.fromISO(endTime);
   console.log("isValidSecondShiftTime:", { startTime, endTime, start, end });
 
   if (start.hour < 14 || end.hour > 22 || (end.hour === 22 && end.minute > 0)) {
-    alert("Помилка: у другій зміні час повинен бути між 14:00 та 22:00");
+    showToast(
+      "Error: In the second shift, the time must be between 14:00 and 22:00.",
+      "error"
+    );
     return false;
   }
   return true;
 }
 
+/**
+ * Validates the time for the third shift (22:00-06:00).
+ */
 export function isValidThirdShiftTime(startTime, endTime) {
   const start = DateTime.fromISO(startTime);
   const end = DateTime.fromISO(endTime);
   console.log("isValidThirdShiftTime:", { startTime, endTime, start, end });
 
-  if (!(start.hour >= 22 || start.hour < 6)) {
-    alert(
-      "Помилка: у третій зміні час початку повинен бути між 22:00 та 06:00 наступного дня"
+  if (!(start.hour >= 22 || start.hour <= 6)) {
+    showToast(
+      "Error: In the third shift, the start time must be between 22:00 and 06:00 the next day.",
+      "error"
     );
     return false;
   }
 
-  if (start.hour < 22 && start.hour >= 6) {
-    alert("Помилка: час початку для третьої зміни не може бути пізніше 06:00");
+  if (start.hour < 22 && start.hour > 6) {
+    showToast(
+      "Error: The start time for the third shift cannot be later than 06:00.",
+      "error"
+    );
     return false;
   }
 
   if (end < start && end.hour >= 6) {
-    alert(
-      "Помилка: час закінчення для третьої зміни не може бути пізніше 06:00 наступного дня"
+    showToast(
+      "Error: The end time for the third shift cannot be later than 06:00 the next day.",
+      "error"
     );
     return false;
   }
