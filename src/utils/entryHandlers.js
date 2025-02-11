@@ -37,17 +37,25 @@ export function handleSaveEntry({
   setForm,
   editingIndex,
 }) {
+  console.group("⚙️ handleSaveEntry Process");
+  console.log("Form data:", form);
+  console.log("Current Shift:", currentShift);
+  console.log("Selected Date:", selectedDate);
+  console.log("Editing Index:", editingIndex);
+
   let startTime = DateTime.fromISO(`${selectedDate}T${form.startTime}`);
+  let endTime = DateTime.fromISO(`${selectedDate}T${form.endTime}`);
+
   if (currentShift === "third" && startTime.hour <= 6) {
     startTime = startTime.plus({ days: 1 });
   }
-
-  let endTime = DateTime.fromISO(`${selectedDate}T${form.endTime}`);
   if (endTime < startTime) {
     endTime = endTime.plus({ days: 1 });
   }
 
-  // Виконуємо перевірку залежно від поточної зміни
+  console.log("Start Time (ISO):", startTime.toISO());
+  console.log("End Time (ISO):", endTime.toISO());
+
   if (
     (currentShift === "first" &&
       !isValidFirstShiftTime(startTime.toISO(), endTime.toISO())) ||
@@ -56,6 +64,8 @@ export function handleSaveEntry({
     (currentShift === "third" &&
       !isValidThirdShiftTime(startTime.toISO(), endTime.toISO()))
   ) {
+    console.error("❌ Invalid shift time.");
+    console.groupEnd();
     return;
   }
 
@@ -64,44 +74,52 @@ export function handleSaveEntry({
   if (!updatedEntries[currentShift][selectedMachine])
     updatedEntries[currentShift][selectedMachine] = [];
 
-  const displayDate =
-    currentShift === "third" && startTime.hour < 6
-      ? DateTime.fromISO(selectedDate).toISODate()
-      : selectedDate;
+  const shiftMachineEntries = updatedEntries[currentShift][selectedMachine];
+  console.log("Current Shift Machine Entries:", shiftMachineEntries);
 
-  const newEntry = calculateWorkTime(startTime.toISO(), endTime.toISO());
-  newEntry.startTime = startTime.toISO();
-  newEntry.endTime = endTime.toISO();
-  newEntry.leader = selectedLeader;
-  newEntry.date = displayDate;
-  newEntry.displayDate = displayDate;
-  newEntry.machine = selectedMachine;
-  newEntry.operator = selectedOperator;
-  newEntry.task = form.task === "Zlecenie" ? form.customTaskName : form.task;
-  newEntry.product = form.product;
-  newEntry.color = form.color;
-  newEntry.reason = form.reason;
-  newEntry.quantity = parseInt(form.quantity, 10);
-  newEntry.shift = currentShift;
+  const displayDate = startTime.toISODate();
+  console.log("Display Date:", displayDate);
+
+  const newEntry = {
+    ...calculateWorkTime(startTime.toISO(), endTime.toISO()),
+    startTime: startTime.toISO(),
+    endTime: endTime.toISO(),
+    leader: selectedLeader,
+    date: displayDate,
+    displayDate: displayDate,
+    machine: selectedMachine,
+    operator: selectedOperator,
+    task: form.task === "Zlecenie" ? form.customTaskName : form.task,
+    product: form.product,
+    color: form.color,
+    reason: form.reason,
+    quantity: parseInt(form.quantity, 10),
+    shift: currentShift,
+  };
 
   if (editingIndex !== null) {
-    // Якщо редагуємо запис, оновлюємо його на відповідному індексі
-    updatedEntries[currentShift][selectedMachine][editingIndex] = newEntry;
+    console.log("📝 Updating entry at index:", editingIndex);
+    console.log("Old Entry:", shiftMachineEntries[editingIndex]);
+    shiftMachineEntries[editingIndex] = newEntry;
+    console.log("Updated Entry:", newEntry);
     setEditingIndex(null);
   } else {
-    // Додаємо новий запис
-    updatedEntries[currentShift][selectedMachine] = [
-      ...updatedEntries[currentShift][selectedMachine],
-      newEntry,
-    ];
+    console.log("➕ Adding new entry:", newEntry);
+    shiftMachineEntries.push(newEntry);
   }
 
-  // Перераховуємо час простою після збереження
-  setEntries(
-    recalculateDowntime(updatedEntries, currentShift, selectedMachine)
-  );
+  updatedEntries[currentShift][selectedMachine] = shiftMachineEntries;
+  console.log("Entries after update:", updatedEntries);
 
-  // Скидаємо форму після збереження
+  const recalculatedEntries = recalculateDowntime(
+    updatedEntries,
+    currentShift,
+    selectedMachine
+  );
+  console.log("Recalculated Entries with Downtime:", recalculatedEntries);
+
+  setEntries(recalculatedEntries);
+
   setForm({
     startTime: "",
     endTime: "",
@@ -112,4 +130,7 @@ export function handleSaveEntry({
     reason: "",
     quantity: 0,
   });
+
+  console.log("Form cleared after save.");
+  console.groupEnd();
 }

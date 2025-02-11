@@ -23,20 +23,23 @@ function OperatorStatistics({
 
   const filteredEntries = entries
     ? Object.entries(entries).flatMap(([shift, machines]) =>
-        Object.values(machines || {}).flatMap((machineEntries) =>
-          (machineEntries || []).filter((entry) => {
-            const isOperatorSelected = entry.operator === selectedOperator;
-            const isDateSelected =
-              viewType === "day" && entry.date === selectedDate;
-            const isMonthSelected =
-              viewType === "month" && entry.date.startsWith(selectedMonth);
-            return (
-              isOperatorSelected &&
-              ((viewType === "day" && isDateSelected) ||
-                (viewType === "month" && isMonthSelected))
-            );
-          })
-        )
+        Object.values(machines || {}).flatMap((machineEntries) => {
+          console.log("machineEntries:", machineEntries); // Додаємо лог тут
+          return Array.isArray(machineEntries)
+            ? machineEntries.filter((entry) => {
+                const isOperatorSelected = entry.operator === selectedOperator;
+                const isDateSelected =
+                  viewType === "day" && entry.date === selectedDate;
+                const isMonthSelected =
+                  viewType === "month" && entry.date.startsWith(selectedMonth);
+                return (
+                  isOperatorSelected &&
+                  ((viewType === "day" && isDateSelected) ||
+                    (viewType === "month" && isMonthSelected))
+                );
+              })
+            : [];
+        })
       )
     : [];
 

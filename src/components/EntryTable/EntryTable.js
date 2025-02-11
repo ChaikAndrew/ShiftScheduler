@@ -27,7 +27,7 @@ function EntryTable({ entries, onEdit, onDelete }) {
   const [commentKey, setCommentKey] = useState(null);
   const [newComment, setNewComment] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  console.log("Entries in EntryTable:", entries);
   useEffect(() => {
     setComments(loadComments()); // Завантаження коментарів під час першого рендеру
   }, []);
@@ -93,10 +93,10 @@ function EntryTable({ entries, onEdit, onDelete }) {
           </tr>
         </thead>
         <tbody>
-          {entries.map((entry, index) => {
-            const key = getCommentKey(entry, index); // Створюємо унікальний ключ для кожного запису
+          {entries.map((entry, filteredIndex) => {
+            const key = getCommentKey(entry, filteredIndex); // Створюємо унікальний ключ для кожного запису
             return (
-              <tr key={index}>
+              <tr key={filteredIndex}>
                 <td>{entry.shift}</td>
                 <td>{entry.displayDate}</td>
                 <td>{DateTime.fromISO(entry.startTime).toFormat("HH:mm")}</td>
@@ -106,21 +106,18 @@ function EntryTable({ entries, onEdit, onDelete }) {
                 <td className={style.operatorCell}>
                   <span
                     className={style.operatorName}
-                    onClick={() => handleAddComment(entry, index)}
+                    onClick={() => handleAddComment(entry, filteredIndex)}
                   >
                     {entry.operator}
                     {comments[key] && (
                       <>
-                        {" "}
                         <span role="img" aria-label="comment">
                           📝
                         </span>
+                        <span className={style.commentTooltip}>
+                          {comments[key]}
+                        </span>
                       </>
-                    )}
-                    {comments[key] && (
-                      <span className={style.commentTooltip}>
-                        {comments[key]}
-                      </span>
                     )}
                   </span>
                 </td>
@@ -144,14 +141,17 @@ function EntryTable({ entries, onEdit, onDelete }) {
                 <td>{formatTime(entry.workingTime)}</td>
                 <td>{formatTime(entry.downtime)}</td>
                 <td>
-                  <button className={style.edit} onClick={() => onEdit(index)}>
+                  <button
+                    className={style.edit}
+                    onClick={() => onEdit(filteredIndex, entry.originalIndex)}
+                  >
                     Edit
                   </button>
                   <button
                     className={style.delete}
                     onClick={() =>
                       handleDelete(
-                        index,
+                        filteredIndex,
                         entry.operator,
                         entry.task,
                         entry.quantity

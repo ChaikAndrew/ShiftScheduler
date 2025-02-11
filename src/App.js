@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Routes, Route } from "react-router-dom"; // Додаємо імпорти для маршрутизації
 import "./styles.css";
-
+import { DateTime } from "luxon";
 import { ToastContainer } from "react-toastify";
 
 import {
@@ -154,8 +154,10 @@ function App() {
 
   // Функція для обробки зміни дати
   const handleDateChangeLocal = (newDate) => {
+    const isoDate = DateTime.fromISO(newDate).toISODate();
+    console.log("New selected date:", isoDate);
     handleDateChange(
-      newDate,
+      isoDate,
       setSelectedDate,
       setCurrentShift,
       setSelectedLeader,
@@ -165,7 +167,19 @@ function App() {
   };
 
   // Функція для обробки редагування запису
+  // Оновлений виклик handleEdit у App.js
   const handleEdit = (index) => {
+    let dateToUse = selectedDate;
+
+    if (typeof dateToUse !== "string") {
+      console.warn("selectedDate is not a string. Converting to ISODate...");
+      dateToUse = new Date(dateToUse).toISOString().split("T")[0]; // Перетворення в ISO формат
+    }
+    console.log("Selected Date before edit:", selectedDate);
+    console.log("Selected Date in handleEdit:", dateToUse);
+    console.log("Current Shift:", currentShift);
+    console.log("Selected Machine:", selectedMachine);
+
     handleEditEntry(
       index,
       entries,
@@ -173,7 +187,8 @@ function App() {
       selectedMachine,
       setForm,
       setEditingIndex,
-      setError
+      setError,
+      dateToUse // Передаємо оброблену дату
     );
   };
 
@@ -184,7 +199,8 @@ function App() {
       entries,
       currentShift,
       selectedMachine,
-      setEntries
+      setEntries,
+      selectedDate
     );
   };
 
@@ -330,9 +346,16 @@ function App() {
               {/* Відображення записів */}
               {filteredEntries.length > 0 && (
                 <EntryTable
-                  entries={filteredEntries}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
+                  entries={filteredEntries.map((entry) => ({
+                    ...entry,
+                    originalIndex: entries[currentShift]?.[
+                      selectedMachine
+                    ]?.findIndex((e) => e === entry),
+                  }))}
+                  onEdit={(filteredIndex, originalIndex) =>
+                    handleEdit(filteredIndex, originalIndex)
+                  }
+                  onDelete={(index) => handleDelete(index)}
                 />
               )}
 

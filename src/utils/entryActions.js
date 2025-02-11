@@ -2,12 +2,19 @@ import { DateTime } from "luxon";
 import { recalculateDowntime } from "./recalculateDowntime";
 
 /**
+ * Перевіряє, чи дата запису відповідає вибраній даті.
+ * @param {string} entryDate - Дата запису.
+ * @param {string} selectedDate - Вибрана дата.
+ * @returns {boolean} - true, якщо дати збігаються.
+ */
+const isDateMatching = (entryDate, selectedDate) => {
+  const entry = DateTime.fromISO(entryDate).toISODate();
+  const selected = DateTime.fromISO(selectedDate).toISODate();
+  return entry === selected;
+};
+
+/**
  * Оновлює активну зміну, скидаючи вибраного лідера, машину та оператора.
- * @param {string} shift - Назва зміни.
- * @param {Function} setCurrentShift - Функція для оновлення поточної зміни.
- * @param {Function} setSelectedLeader - Функція для оновлення обраного лідера.
- * @param {Function} setSelectedMachine - Функція для оновлення обраної машини.
- * @param {Function} setSelectedOperator - Функція для оновлення обраного оператора.
  */
 export function handleShiftChange(
   shift,
@@ -24,12 +31,6 @@ export function handleShiftChange(
 
 /**
  * Оновлює вибрану дату, скидаючи активну зміну, лідера, машину та оператора.
- * @param {string} date - Вибрана дата.
- * @param {Function} setSelectedDate - Функція для оновлення вибраної дати.
- * @param {Function} setCurrentShift - Функція для оновлення поточної зміни.
- * @param {Function} setSelectedLeader - Функція для оновлення обраного лідера.
- * @param {Function} setSelectedMachine - Функція для оновлення обраної машини.
- * @param {Function} setSelectedOperator - Функція для оновлення обраного оператора.
  */
 export function handleDateChange(
   date,
@@ -47,26 +48,46 @@ export function handleDateChange(
 }
 
 /**
- * Ініціює редагування запису, заповнюючи форму даними вибраного запису.
- * @param {number} index - Індекс запису для редагування.
- * @param {Object} entries - Об'єкт записів.
- * @param {string} currentShift - Поточна зміна.
- * @param {string} selectedMachine - Обрана машина.
- * @param {Function} setForm - Функція для оновлення форми.
- * @param {Function} setEditingIndex - Функція для оновлення індексу редагування.
- * @param {Function} setError - Функція для встановлення помилок.
+ * Ініціює редагування запису.
  */
+
 export function handleEditEntry(
-  index,
+  filteredIndex,
   entries,
   currentShift,
   selectedMachine,
   setForm,
   setEditingIndex,
-  setError
+  setError,
+  selectedDate
 ) {
-  const shiftMachineEntries = entries[currentShift][selectedMachine] || [];
-  const entry = shiftMachineEntries[index];
+  console.group("✏️ handleEditEntry Process");
+  console.log("Filtered Index:", filteredIndex);
+  console.log("Current Shift:", currentShift);
+  console.log("Selected Machine:", selectedMachine);
+  console.log("Selected Date:", selectedDate);
+
+  const shiftMachineEntries = entries[currentShift]?.[selectedMachine] || [];
+  console.log("All Shift Machine Entries:", shiftMachineEntries);
+
+  const filteredEntries = shiftMachineEntries.filter((entry) =>
+    isDateMatching(entry.date, selectedDate)
+  );
+  console.log("Filtered Entries for Date:", filteredEntries);
+
+  const entry = filteredEntries[filteredIndex];
+
+  if (!entry) {
+    console.error("❌ Entry not found for the selected date.");
+    setError("Entry not found for the selected date.");
+    console.groupEnd();
+    return;
+  }
+
+  const originalIndex = shiftMachineEntries.findIndex((e) => e === entry);
+
+  console.log("Original Index:", originalIndex);
+
   setForm({
     startTime: DateTime.fromISO(entry.startTime).toFormat("HH:mm"),
     endTime: DateTime.fromISO(entry.endTime).toFormat("HH:mm"),
@@ -77,28 +98,62 @@ export function handleEditEntry(
     reason: entry.reason,
     quantity: entry.quantity,
   });
-  setEditingIndex(index);
-  setError("");
-}
 
+  setEditingIndex(originalIndex); // Використовуємо оригінальний індекс
+  setError("");
+  console.log("Editing entry:", entry);
+  console.groupEnd();
+}
 /**
- * Видаляє запис із обраної зміни та машини.
- * @param {number} index - Індекс запису для видалення.
- * @param {Object} entries - Поточні записи.
- * @param {string} currentShift - Поточна зміна.
- * @param {string} selectedMachine - Обрана машина.
- * @param {Function} setEntries - Функція для оновлення записів.
+ * Видаляє запис і перераховує простій.
  */
 export function handleDeleteEntry(
-  index,
+  filteredIndex,
   entries,
   currentShift,
   selectedMachine,
-  setEntries
+  setEntries,
+  selectedDate
 ) {
+  console.group("🗑️ handleDeleteEntry Process");
+  console.log("Filtered Index:", filteredIndex);
+  console.log("Current Shift:", currentShift);
+  console.log("Selected Machine:", selectedMachine);
+  console.log("Selected Date:", selectedDate);
+
   const updatedEntries = { ...entries };
-  updatedEntries[currentShift][selectedMachine].splice(index, 1);
-  setEntries(
-    recalculateDowntime(updatedEntries, currentShift, selectedMachine)
+  const machineEntries = updatedEntries[currentShift]?.[selectedMachine] || [];
+
+  const filteredEntries = machineEntries.filter((entry) =>
+    isDateMatching(entry.date, selectedDate)
   );
+  console.log("Filtered Entries for Date:", filteredEntries);
+
+  const entry = filteredEntries[filteredIndex];
+  const entryIndex = machineEntries.findIndex((e) => e === entry);
+
+  if (entryIndex !== -1) {
+    const entryToDelete = machineEntries[entryIndex];
+    console.log("Deleting Entry:", entryToDelete);
+
+    updatedEntries[currentShift][selectedMachine] = machineEntries.filter(
+      (e) => e !== entryToDelete
+    );
+
+    const recalculatedEntries = recalculateDowntime(
+      updatedEntries,
+      currentShift,
+      selectedMachine
+    );
+
+    console.log(
+      "Recalculated Entries with updated downtime:",
+      JSON.stringify(recalculatedEntries, null, 2)
+    );
+
+    setEntries(recalculatedEntries);
+  } else {
+    console.error("❌ Invalid index for deletion.");
+  }
+  console.groupEnd();
 }
