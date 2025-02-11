@@ -68,14 +68,14 @@ export function handleEditEntry(
   console.log("Selected Date:", selectedDate);
 
   const shiftMachineEntries = entries[currentShift]?.[selectedMachine] || [];
-  console.log("All Shift Machine Entries:", shiftMachineEntries);
-
   const filteredEntries = shiftMachineEntries.filter((entry) =>
     isDateMatching(entry.date, selectedDate)
   );
+
   console.log("Filtered Entries for Date:", filteredEntries);
 
   const entry = filteredEntries[filteredIndex];
+  const originalIndex = shiftMachineEntries.findIndex((e) => e === entry);
 
   if (!entry) {
     console.error("❌ Entry not found for the selected date.");
@@ -83,8 +83,6 @@ export function handleEditEntry(
     console.groupEnd();
     return;
   }
-
-  const originalIndex = shiftMachineEntries.findIndex((e) => e === entry);
 
   console.log("Original Index:", originalIndex);
 
@@ -99,7 +97,7 @@ export function handleEditEntry(
     quantity: entry.quantity,
   });
 
-  setEditingIndex(originalIndex); // Використовуємо оригінальний індекс
+  setEditingIndex(originalIndex);
   setError("");
   console.log("Editing entry:", entry);
   console.groupEnd();
