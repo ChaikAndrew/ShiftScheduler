@@ -14,7 +14,8 @@ export function isValidFirstShiftTime(startTime, endTime) {
   const start = DateTime.fromISO(startTime);
   const end = DateTime.fromISO(endTime);
   console.log("isValidFirstShiftTime:", { startTime, endTime, start, end });
-
+  console.log("Start is valid:", start.isValid);
+  console.log("End is valid:", end.isValid);
   if (start.hour < 6 || end.hour > 14 || (end.hour === 14 && end.minute > 0)) {
     showToast(
       "Error: In the first shift, the time must be between 06:00 and 14:00.",

@@ -380,7 +380,7 @@ const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
             return (
               <tr key={operator}>
                 <td>{operator}</td>
-                <td>{formatTime(data.totalWorkHours * 60)}</td>
+                <td>{formatTime(Math.round(data.totalWorkHours * 60))}</td>
                 <td>{data.totalProducts}</td>
                 <td>{avgSpeed}</td>
               </tr>
