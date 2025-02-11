@@ -216,3 +216,22 @@ select {
   background-color: #fffbe6; /* Світло-жовтий фон */
   transition: all 0.3s ease-in-out; /* Гладка анімація */
 }
+
+th,
+td {
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+}

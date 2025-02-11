@@ -12,7 +12,7 @@ const MonthlyLeaderStatistics = ({ entries, leaders }) => {
     month: new Date().getMonth(),
   });
 
-  const [selectedDate, setSelectedDate] = useState(""); // Стан для обраної дати
+  const [selectedDate, setSelectedDate] = useState("");
 
   const statistics = getLeaderStatisticsForMonth(
     entries,
