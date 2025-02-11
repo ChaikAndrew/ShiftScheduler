@@ -19,6 +19,11 @@ const MonthlyLeaderStatistics = ({ entries, leaders }) => {
     leaders,
     selectedMonth
   );
+  const daysInMonth = new Date(
+    selectedMonth.year,
+    selectedMonth.month + 1,
+    0
+  ).getDate();
 
   const dailyData = leaders.flatMap((leader) =>
     statistics[leader].map((day, index) => ({
@@ -139,7 +144,7 @@ const MonthlyLeaderStatistics = ({ entries, leaders }) => {
       </div>
 
       {/* Відображення таблиць */}
-      {renderDailyStatistics(statistics, leaders, 31)}
+      {renderDailyStatistics(statistics, leaders, daysInMonth)}
 
       {/* Поле для вибору дати */}
       <div>
