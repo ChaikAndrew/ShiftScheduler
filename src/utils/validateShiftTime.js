@@ -52,25 +52,19 @@ export function isValidThirdShiftTime(startTime, endTime) {
   const end = DateTime.fromISO(endTime);
   console.log("isValidThirdShiftTime:", { startTime, endTime, start, end });
 
-  if (!(start.hour >= 22 || start.hour <= 6)) {
+  // Перевірка початку зміни (повинна бути між 22:00 і 06:00)
+  if (!(start.hour >= 22 || start.hour < 6)) {
     showToast(
-      "Error: In the third shift, the start time must be between 22:00 and 06:00 the next day.",
+      "Error: In the third shift, the start time must be between 22:00 and 06:00.",
       "error"
     );
     return false;
   }
 
-  if (start.hour < 22 && start.hour > 6) {
+  // Перевірка кінця зміни (дозволено рівно до 06:00)
+  if (end < start && (end.hour > 6 || (end.hour === 6 && end.minute > 0))) {
     showToast(
-      "Error: The start time for the third shift cannot be later than 06:00.",
-      "error"
-    );
-    return false;
-  }
-
-  if (end < start && end.hour >= 6) {
-    showToast(
-      "Error: The end time for the third shift cannot be later than 06:00 the next day.",
+      "Error: The end time for the third shift cannot be later than 06:00.",
       "error"
     );
     return false;
