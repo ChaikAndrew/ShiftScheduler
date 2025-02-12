@@ -46,18 +46,21 @@ export function handleSaveEntry({
   let startTime = DateTime.fromISO(`${selectedDate}T${form.startTime}`);
   let endTime = DateTime.fromISO(`${selectedDate}T${form.endTime}`);
 
-  // Корекція для третьої зміни
-  if (currentShift === "third" && startTime.hour <= 6) {
-    startTime = startTime.plus({ days: 1 });
-  }
-  if (endTime < startTime) {
-    endTime = endTime.plus({ days: 1 });
+  // ✅ Коригуємо дату для третьої зміни, якщо час початку або кінця між 00:00 і 06:00
+  if (currentShift === "third") {
+    // Якщо годину <= 6 і дата запису вже відповідає вибраній, не коригуємо дату назад
+    if (
+      startTime.hour <= 6 &&
+      DateTime.fromISO(selectedDate).toISODate() !== startTime.toISODate()
+    ) {
+      startTime = startTime.minus({ days: 1 });
+    }
   }
 
   console.log("Start Time (ISO):", startTime.toISO());
   console.log("End Time (ISO):", endTime.toISO());
+  console.log("Display Date (Adjusted for Third Shift):", selectedDate);
 
-  // Перевірка на відповідність часу зміни
   if (
     (currentShift === "first" &&
       !isValidFirstShiftTime(startTime.toISO(), endTime.toISO())) ||
@@ -80,9 +83,8 @@ export function handleSaveEntry({
   console.log("Current Shift Machine Entries:", shiftMachineEntries);
 
   const displayDate = startTime.toISODate();
-  console.log("Display Date:", displayDate);
+  console.log("Final Display Date:", displayDate);
 
-  // Новий запис, який буде додано або відредаговано
   const newEntry = {
     ...calculateWorkTime(startTime.toISO(), endTime.toISO()),
     startTime: startTime.toISO(),
@@ -100,15 +102,11 @@ export function handleSaveEntry({
     shift: currentShift,
   };
 
-  if (
-    editingIndex !== null &&
-    editingIndex >= 0 &&
-    editingIndex < shiftMachineEntries.length
-  ) {
+  if (editingIndex !== null) {
     console.log("📝 Updating entry at index:", editingIndex);
     console.log("Old Entry:", shiftMachineEntries[editingIndex]);
     shiftMachineEntries[editingIndex] = newEntry;
-    console.log("Updated Entry:", shiftMachineEntries[editingIndex]);
+    console.log("Updated Entry:", newEntry);
     setEditingIndex(null);
   } else {
     console.log("➕ Adding new entry:", newEntry);
@@ -116,7 +114,7 @@ export function handleSaveEntry({
   }
 
   updatedEntries[currentShift][selectedMachine] = shiftMachineEntries;
-  console.log("Entries after update:", JSON.stringify(updatedEntries, null, 2));
+  console.log("Entries after update:", updatedEntries);
 
   const recalculatedEntries = recalculateDowntime(
     updatedEntries,
@@ -127,7 +125,6 @@ export function handleSaveEntry({
 
   setEntries(recalculatedEntries);
 
-  // Скидання форми після збереження
   setForm({
     startTime: "",
     endTime: "",

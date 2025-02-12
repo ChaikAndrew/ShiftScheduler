@@ -84,6 +84,15 @@ export function handleEditEntry(
     return;
   }
 
+  // 🟢 Корекція дати для третьої зміни
+  let displayDate = entry.date;
+  if (currentShift === "third" && DateTime.fromISO(entry.startTime).hour <= 6) {
+    displayDate = DateTime.fromISO(entry.startTime)
+      .minus({ days: 1 })
+      .toISODate();
+    console.log("Corrected Date for Third Shift:", displayDate);
+  }
+
   console.log("Original Index:", originalIndex);
 
   setForm({

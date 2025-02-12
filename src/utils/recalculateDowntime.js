@@ -35,6 +35,7 @@ export function recalculateDowntime(
   Object.keys(entriesByDate).forEach((date) => {
     console.log(`\n--- Processing Date: ${date} ---`);
     const entriesForDate = entriesByDate[date];
+
     entriesByDate[date] = entriesForDate.map((entry, index) => {
       const scheduledStart = DateTime.fromISO(
         `${date}T${shiftStartTimes[currentShift]}`
@@ -43,25 +44,63 @@ export function recalculateDowntime(
 
       if (index === 0) {
         console.log("Processing first entry...");
-        entry.downtime = DateTime.fromISO(entry.startTime).equals(
-          scheduledStart
-        )
-          ? 0
-          : Math.max(
+
+        if (currentShift === "third") {
+          const thirdShiftStart = DateTime.fromISO(`${date}T22:00`);
+          const entryStartTime = DateTime.fromISO(entry.startTime);
+
+          if (entryStartTime.hour <= 6) {
+            console.log("Handling third shift after midnight...");
+            const previousDay = thirdShiftStart.minus({ days: 1 });
+            entry.downtime = Math.max(
               0,
-              DateTime.fromISO(entry.startTime).diff(scheduledStart, "minutes")
-                .minutes
+              entryStartTime.diff(previousDay, "minutes").minutes
             );
-        console.log("Calculated Downtime for First Entry:", entry.downtime);
+            console.log(
+              "Downtime for third shift (after midnight):",
+              entry.downtime
+            );
+          } else {
+            entry.downtime = Math.max(
+              0,
+              entryStartTime.diff(thirdShiftStart, "minutes").minutes
+            );
+            console.log(
+              "Downtime for third shift (before midnight):",
+              entry.downtime
+            );
+          }
+        } else {
+          entry.downtime = DateTime.fromISO(entry.startTime).equals(
+            scheduledStart
+          )
+            ? 0
+            : Math.max(
+                0,
+                DateTime.fromISO(entry.startTime).diff(
+                  scheduledStart,
+                  "minutes"
+                ).minutes
+              );
+          console.log(
+            "Calculated Downtime for First Entry (Old Logic):",
+            entry.downtime
+          );
+        }
       } else {
         console.log("Processing subsequent entry...");
         const lastEntry = entriesForDate[index - 1];
-        const lastEndTime = lastEntry.endTime
+        let lastEndTime = lastEntry.endTime
           ? DateTime.fromISO(lastEntry.endTime)
           : scheduledStart;
-        const currentStartTime = DateTime.fromISO(entry.startTime);
+        let currentStartTime = DateTime.fromISO(entry.startTime);
+
         console.log("Last End Time:", lastEndTime.toISO());
         console.log("Current Start Time:", currentStartTime.toISO());
+
+        if (currentShift === "third" && currentStartTime < lastEndTime) {
+          currentStartTime = currentStartTime.plus({ days: 1 });
+        }
 
         entry.downtime = Math.max(
           0,
