@@ -33,15 +33,22 @@ function EntryTable({ entries, onEdit, onDelete }) {
   }, []);
 
   const handleDelete = (index, operator, task, quantity) => {
+    const message =
+      task && quantity > 0
+        ? `${operator}, are you sure you want to delete ${task} with a quantity of ${quantity}?`
+        : `${operator}, are you sure you want to delete this entry?`;
+
     showConfirmDialog({
       title: "Delete Confirmation",
-      message: `${operator}, are you sure you want to delete ${task} with a quantity of ${quantity}?`,
+      message: message,
       onConfirm: () => {
         onDelete(index);
         showToast(
-          `Entry successfully deleted! ${task} with a quantity of ${quantity}`,
+          task && quantity > 0
+            ? `Entry successfully deleted! ${task} with a quantity of ${quantity}`
+            : "Entry successfully deleted!",
           "success"
-        ); // ✅ Показуємо зелений тост
+        );
       },
     });
   };
@@ -137,7 +144,7 @@ function EntryTable({ entries, onEdit, onDelete }) {
                     </span>
                   )}
                 </td>
-                <td>{entry.quantity}</td>
+                <td>{entry.quantity > 0 ? entry.quantity : ""}</td>
                 <td>{formatTime(entry.workingTime)}</td>
                 <td>{formatTime(entry.downtime)}</td>
                 <td>
