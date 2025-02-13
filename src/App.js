@@ -1,8 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Routes, Route } from "react-router-dom"; // Додаємо імпорти для маршрутизації
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom"; // Додаємо імпорти для маршрутизації
 import "./styles.css";
 import { DateTime } from "luxon";
 import { ToastContainer } from "react-toastify";
+import LoginPage from "../src/pages/LoginPage/LoginPage";
+import AdminDashboard from "../src/pages/AdminDashboard/AdminDashboard";
+import OperatorDashboard from "../src/pages/OperatorDashboard/OperatorDashboard";
+import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
 
 import {
   machines,
@@ -51,6 +60,8 @@ import MachineStatistics from "./components/MachineStatistics/MachineStatistics"
 
 import NavBar from "./components/NavBar/NavBar";
 import Footer from "./components/Footer/Footer";
+
+// Додамо AdminDashboard і OperatorDashboard пізніше
 
 function App() {
   const [entries, setEntries] = useState(() => {
@@ -272,222 +283,256 @@ function App() {
       <NavBar />
       <Routes>
         <Route
-          path="/"
+          path="/shift-scheduler"
           element={
-            <div>
-              {/* Заголовок та кнопки вибору зміни */}
-              <div className="header-main-input">
-                <h2>Shift Scheduler</h2>
-                {/* DateSelector */}
-                {/* Компонент вибору дати */}
-                <DateSelector
-                  selectedDate={selectedDate}
-                  onDateChange={handleDateChangeLocal}
-                />
+            <PrivateRoute allowedRoles={["operator", "admin"]}>
+              <div>
+                {/* Заголовок та кнопки вибору зміни */}
 
-                {/*Компонент ShiftButtons відповідає за відображення кнопок вибору зміни (Shift 1, Shift 2, Shift 3)*/}
-                <ShiftButtons
+                <div className="header-main-input">
+                  <h2>Shift Scheduler</h2>
+                  {/* DateSelector */}
+                  {/* Компонент вибору дати */}
+                  <DateSelector
+                    selectedDate={selectedDate}
+                    onDateChange={handleDateChangeLocal}
+                  />
+
+                  {/*Компонент ShiftButtons відповідає за відображення кнопок вибору зміни (Shift 1, Shift 2, Shift 3)*/}
+                  <ShiftButtons
+                    currentShift={currentShift}
+                    selectedDate={selectedDate}
+                    handleShiftChange={(shift) =>
+                      handleShiftChange(
+                        shift,
+                        setCurrentShift,
+                        setSelectedLeader,
+                        setSelectedMachine,
+                        setSelectedOperator
+                      )
+                    }
+                  />
+                  {/*Компонент SelectionFields відповідає за відображення полів вибору для лідера, машини та оператора*/}
+                  <SelectionFields
+                    selectedLeader={selectedLeader}
+                    setSelectedLeader={setSelectedLeader}
+                    leaders={leaders}
+                    selectedMachine={selectedMachine}
+                    setSelectedMachine={setSelectedMachine}
+                    machines={machines}
+                    selectedOperator={selectedOperator}
+                    setSelectedOperator={setSelectedOperator}
+                    operators={operators}
+                  />
+
+                  {/*Компонент EntryForm рендерить форму для введення/редагування запису, що включає час, завдання, продукт, колір, причину та кількість*/}
+                  <EntryForm
+                    form={form}
+                    setForm={setForm}
+                    tasks={tasks}
+                    products={products}
+                    colors={colors}
+                    reasons={reasons}
+                    onSaveEntry={onSaveEntry}
+                    editingIndex={editingIndex}
+                    selectedLeader={selectedLeader}
+                    selectedMachine={selectedMachine}
+                    selectedOperator={selectedOperator}
+                    disabled={!isSelectionComplete}
+                    currentShift={currentShift} /// Додаємо проп для блокування форми
+                    className={editingIndex !== null ? "editing-form" : ""} // Додаємо клас
+                  />
+                </div>
+
+                {/* Відображення помилок */}
+                {error && <p style={{ color: "red" }}>{error}</p>}
+                {/* SummaryHeader */}
+                {/* Заголовок підсумків по конкретній машині*/}
+                <SummaryHeader
+                  totalQuantity={summary.totalQuantity}
+                  totalWorkingTime={summary.totalWorkingTime}
+                  totalDowntime={summary.totalDowntime}
+                  selectedDate={selectedDate}
                   currentShift={currentShift}
-                  selectedDate={selectedDate}
-                  handleShiftChange={(shift) =>
-                    handleShiftChange(
-                      shift,
-                      setCurrentShift,
-                      setSelectedLeader,
-                      setSelectedMachine,
-                      setSelectedOperator
-                    )
-                  }
-                />
-                {/*Компонент SelectionFields відповідає за відображення полів вибору для лідера, машини та оператора*/}
-                <SelectionFields
-                  selectedLeader={selectedLeader}
-                  setSelectedLeader={setSelectedLeader}
-                  leaders={leaders}
                   selectedMachine={selectedMachine}
-                  setSelectedMachine={setSelectedMachine}
-                  machines={machines}
-                  selectedOperator={selectedOperator}
-                  setSelectedOperator={setSelectedOperator}
-                  operators={operators}
                 />
+                {/* Відображення записів */}
+                {filteredEntries.length > 0 && (
+                  <EntryTable
+                    entries={filteredEntries.map((entry) => ({
+                      ...entry,
+                      originalIndex: entries[currentShift]?.[
+                        selectedMachine
+                      ]?.findIndex((e) => e === entry),
+                    }))}
+                    onEdit={(filteredIndex, originalIndex) =>
+                      handleEdit(filteredIndex, originalIndex)
+                    }
+                    onDelete={(index) => handleDelete(index)}
+                  />
+                )}
 
-                {/*Компонент EntryForm рендерить форму для введення/редагування запису, що включає час, завдання, продукт, колір, причину та кількість*/}
-                <EntryForm
-                  form={form}
-                  setForm={setForm}
-                  tasks={tasks}
-                  products={products}
-                  colors={colors}
-                  reasons={reasons}
-                  onSaveEntry={onSaveEntry}
-                  editingIndex={editingIndex}
-                  selectedLeader={selectedLeader}
-                  selectedMachine={selectedMachine}
-                  selectedOperator={selectedOperator}
-                  disabled={!isSelectionComplete}
-                  currentShift={currentShift} /// Додаємо проп для блокування форми
-                  className={editingIndex !== null ? "editing-form" : ""} // Додаємо клас
-                />
-              </div>
+                {/* Додаємо компонент пошуку */}
+                <SearchByZlecenieName entries={entries} />
 
-              {/* Відображення помилок */}
-              {error && <p style={{ color: "red" }}>{error}</p>}
-              {/* SummaryHeader */}
-              {/* Заголовок підсумків по конкретній машині*/}
-              <SummaryHeader
-                totalQuantity={summary.totalQuantity}
-                totalWorkingTime={summary.totalWorkingTime}
-                totalDowntime={summary.totalDowntime}
-                selectedDate={selectedDate}
-                currentShift={currentShift}
-                selectedMachine={selectedMachine}
-              />
-              {/* Відображення записів */}
-              {filteredEntries.length > 0 && (
-                <EntryTable
-                  entries={filteredEntries.map((entry) => ({
-                    ...entry,
-                    originalIndex: entries[currentShift]?.[
-                      selectedMachine
-                    ]?.findIndex((e) => e === entry),
-                  }))}
-                  onEdit={(filteredIndex, originalIndex) =>
-                    handleEdit(filteredIndex, originalIndex)
-                  }
-                  onDelete={(index) => handleDelete(index)}
-                />
-              )}
+                {/* Підсумки */}
+                <div className="summary">
+                  <div className="all-summary-statistics">
+                    {/* NoDataMessage */}
+                    {/* Заголовок, який відображається, якщо всі показники 0 */}
+                    {!isDataAvailable && (
+                      <NoDataMessage
+                        selectedDate={selectedDate}
+                        currentShift={currentShift}
+                      />
+                    )}
 
-              {/* Додаємо компонент пошуку */}
-              <SearchByZlecenieName entries={entries} />
-
-              {/* Підсумки */}
-              <div className="summary">
-                <div className="all-summary-statistics">
-                  {/* NoDataMessage */}
-                  {/* Заголовок, який відображається, якщо всі показники 0 */}
-                  {!isDataAvailable && (
-                    <NoDataMessage
-                      selectedDate={selectedDate}
-                      currentShift={currentShift}
-                    />
+                    {/* Контент, який відображається, якщо є хоча б один показник > 0
+                   головна статистика по змніні  Overall Total Summary*/}
+                    {isDataAvailable && (
+                      <div className="main-summary">
+                        {/* OverallSummary */}
+                        {!selectedMachine && selectedDate && currentShift && (
+                          <OverallSummary overallSummary={overallSummary} />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {/* Кнопка для показу/приховування machine-summary */}
+                  {selectedMachine && (
+                    <button
+                      onClick={toggleMachineSummary}
+                      className="btn-summary"
+                    >
+                      {showMachineSummary ? "Hide Summary" : "Show Summary"}
+                    </button>
                   )}
 
-                  {/* Контент, який відображається, якщо є хоча б один показник > 0
-                   головна статистика по змніні  Overall Total Summary*/}
-                  {isDataAvailable && (
-                    <div className="main-summary">
-                      {/* OverallSummary */}
-                      {!selectedMachine && selectedDate && currentShift && (
-                        <OverallSummary overallSummary={overallSummary} />
+                  {/* Контент, який показується або приховується */}
+                  {showMachineSummary && selectedMachine && (
+                    <div className="machine-summary" ref={machineSummaryRef}>
+                      {summary.totalQuantity === 0 &&
+                      summary.totalWorkingTime === 0 &&
+                      summary.totalDowntime === 0 &&
+                      !Object.values(summary.operatorSummary).some(
+                        (val) => val.total > 0
+                      ) &&
+                      !Object.values(summary.taskSummary).some(
+                        (val) => val > 0
+                      ) &&
+                      !Object.values(summary.productSummary).some(
+                        (val) => val > 0
+                      ) ? (
+                        <p style={{ color: "gray" }}>
+                          Data for this machine is not available in the database
+                        </p>
+                      ) : (
+                        <>
+                          <TotalSummary
+                            totalQuantity={summary.totalQuantity}
+                            totalWorkingTime={summary.totalWorkingTime}
+                            totalDowntime={summary.totalDowntime}
+                            selectedMachine={selectedMachine}
+                            selectedDate={selectedDate}
+                            currentShift={currentShift}
+                          />
+
+                          <OperatorSummary
+                            operators={operators}
+                            operatorSummary={summary.operatorSummary}
+                          />
+                          <TaskSummary taskSummary={summary.taskSummary} />
+                          <ProductSummary
+                            productSummary={summary.productSummary}
+                          />
+                        </>
                       )}
                     </div>
                   )}
                 </div>
-                {/* Кнопка для показу/приховування machine-summary */}
-                {selectedMachine && (
-                  <button
-                    onClick={toggleMachineSummary}
-                    className="btn-summary"
-                  >
-                    {showMachineSummary ? "Hide Summary" : "Show Summary"}
+
+                {showUpButton && (
+                  <button className="btn-up" onClick={scrollToTop}>
+                    go up
                   </button>
                 )}
-
-                {/* Контент, який показується або приховується */}
-                {showMachineSummary && selectedMachine && (
-                  <div className="machine-summary" ref={machineSummaryRef}>
-                    {summary.totalQuantity === 0 &&
-                    summary.totalWorkingTime === 0 &&
-                    summary.totalDowntime === 0 &&
-                    !Object.values(summary.operatorSummary).some(
-                      (val) => val.total > 0
-                    ) &&
-                    !Object.values(summary.taskSummary).some(
-                      (val) => val > 0
-                    ) &&
-                    !Object.values(summary.productSummary).some(
-                      (val) => val > 0
-                    ) ? (
-                      <p style={{ color: "gray" }}>
-                        Data for this machine is not available in the database
-                      </p>
-                    ) : (
-                      <>
-                        <TotalSummary
-                          totalQuantity={summary.totalQuantity}
-                          totalWorkingTime={summary.totalWorkingTime}
-                          totalDowntime={summary.totalDowntime}
-                          selectedMachine={selectedMachine}
-                          selectedDate={selectedDate}
-                          currentShift={currentShift}
-                        />
-
-                        <OperatorSummary
-                          operators={operators}
-                          operatorSummary={summary.operatorSummary}
-                        />
-                        <TaskSummary taskSummary={summary.taskSummary} />
-                        <ProductSummary
-                          productSummary={summary.productSummary}
-                        />
-                      </>
-                    )}
-                  </div>
-                )}
               </div>
-
-              {showUpButton && (
-                <button className="btn-up" onClick={scrollToTop}>
-                  go up
-                </button>
-              )}
-            </div>
+            </PrivateRoute>
           }
         ></Route>
         {/* Сторінка Статистика по операторам */}
-        <Route
-          path="/operator-statistics"
-          element={
-            <OperatorStatistics
-              entries={entries}
-              operators={operators}
-              tasks={tasks}
-              products={products}
-            />
-          }
-        />
+
         <Route
           path="/monthly-statistics"
           element={
-            <MonthlyOperatorStatistics
-              entries={entries}
-              operators={operators}
-              selectedMonth={{
-                month: new Date().getMonth(),
-                year: new Date().getFullYear(),
-              }}
-            />
+            <PrivateRoute allowedRoles={["operator", "admin"]}>
+              <MonthlyOperatorStatistics
+                entries={entries}
+                operators={operators}
+                selectedMonth={{
+                  month: new Date().getMonth(),
+                  year: new Date().getFullYear(),
+                }}
+              />
+            </PrivateRoute>
           }
         />
 
         <Route
           path="/leader-statistics"
           element={
-            <MonthlyLeaderStatistics
-              entries={entries}
-              leaders={leaders}
-              tasks={tasks}
-              products={products}
-            />
+            <PrivateRoute allowedRoles={["operator", "admin"]}>
+              <MonthlyLeaderStatistics
+                entries={entries}
+                leaders={leaders}
+                tasks={tasks}
+                products={products}
+              />
+            </PrivateRoute>
           }
         />
 
         <Route
           path="/machine-statistics"
-          element={<MachineStatistics entries={entries} machines={machines} />}
+          element={
+            <PrivateRoute allowedRoles={["operator", "admin"]}>
+              <MachineStatistics entries={entries} machines={machines} />
+            </PrivateRoute>
+          }
         />
+        <Route
+          path="/operator-statistics"
+          element={
+            <PrivateRoute allowedRoles={["operator", "admin"]}>
+              <OperatorStatistics
+                entries={entries}
+                operators={operators}
+                tasks={tasks}
+                products={products}
+              />
+            </PrivateRoute>
+          }
+        />
+
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/admin-dashboard"
+          element={
+            <PrivateRoute allowedRoles={["admin"]}>
+              <AdminDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/operator-dashboard"
+          element={
+            <PrivateRoute allowedRoles={["operator", "admin"]}>
+              <OperatorDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route path="*" element={<h2>404 - Сторінка не знайдена</h2>} />
       </Routes>
 
       <Footer className="footer" />

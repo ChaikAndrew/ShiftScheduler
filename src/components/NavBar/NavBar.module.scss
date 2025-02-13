@@ -1,46 +1,58 @@
-a {
-  text-decoration: none;
-  color: inherit;
-}
 .navbar {
   background-color: #333;
   color: #ffffffb2;
-  text-align: center;
-
-  position: fixed; /* Фіксує футер внизу вікна */
+  display: flex;
+  justify-content: space-between; /* Розділяє навігацію і Logout */
+  align-items: center;
+  padding: 5px 30px;
+  height: 40px; /* Фіксована висота */
+  position: fixed;
   top: 0;
   left: 0;
-  width: 100%; /* На всю ширину вікна */
-  z-index: 10; /* Забезпечує поверх інших елементів */
+  width: 100%;
+  z-index: 10;
 }
 
-.link {
+.navLinks {
+  display: flex;
+  gap: 20px;
+}
+
+.singleLink {
+  margin-left: auto; /* Вирівнює Login праворуч, якщо він один */
+}
+
+.link,
+.logoutButton {
   position: relative;
   text-decoration: none;
   color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
 }
 
-.link:not(:last-child) {
-  margin-right: 40px;
+.link.active,
+.logoutButton:hover {
+  color: #82ca9d;
 }
 
-.link.active {
-  color: #82ca9d; /* Колір для активного посилання */
-}
-
-.link::after {
+.link::after,
+.logoutButton::after {
   content: "";
   position: absolute;
-  left: 50%; /* Починаємо з центру */
-  bottom: -3px; /* Місце під лінком */
+  left: 50%;
+  bottom: -3px;
   width: 0;
-  height: 2px; /* Товщина підкреслення */
-  background-color: #ffc658; /* Колір підкреслення */
-  transition: width 0.3s ease, left 0.3s ease; /* Плавний перехід */
-  transform-origin: center; /* Початок трансформації з центру */
+  height: 2px;
+  background-color: #ffc658;
+  transition: width 0.3s ease, left 0.3s ease;
+  transform-origin: center;
 }
 
-.link:hover::after {
-  width: 100%; /* Заповнення всієї ширини при наведенні */
-  left: 0; /* Розширення з центру до країв */
+.link:hover::after,
+.logoutButton:hover::after {
+  width: 100%;
+  left: 0;
 }

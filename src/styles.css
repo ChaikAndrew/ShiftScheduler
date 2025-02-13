@@ -6,6 +6,9 @@
 
   font-family: "Chakra Petch", sans-serif;
 }
+.container {
+  padding-top: 60px; /* Відступ зверху, рівний висоті navbar */
+}
 
 /* Додаткові скидання для елементів */
 body,
@@ -30,7 +33,7 @@ video {
 
 /* Загальні стилі для контейнера */
 .container {
-  padding: 20px 20px 0; /* Зверху і з боків 20px, знизу 0 */
+  padding: 70px 20px 0; /* Зверху і з боків 20px, знизу 0 */
 }
 /* Стилі для заголовку */
 
