@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "./OperatorDashboard.module.scss";
+import styles from "./LeaderDashboard.module.scss";
 
 const OperatorDashboard = () => {
   const navigate = useNavigate();
@@ -19,8 +19,8 @@ const OperatorDashboard = () => {
 
   return (
     <div className={styles.dashboardContainer}>
-      <h1>Operator Dashboard</h1>
-      <p>Welcome, Operator! Here you can view your statistics and tasks.</p>
+      <h1>Leader Dashboard</h1>
+      <p>Welcome, Leader! Here you can view your statistics and tasks.</p>
       <button onClick={handleLogout} className={styles.logoutButton}>
         Logout
       </button>

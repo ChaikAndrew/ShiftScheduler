@@ -8,9 +8,11 @@ import {
 import "./styles.css";
 import { DateTime } from "luxon";
 import { ToastContainer } from "react-toastify";
+
 import LoginPage from "../src/pages/LoginPage/LoginPage";
 import AdminDashboard from "../src/pages/AdminDashboard/AdminDashboard";
 import OperatorDashboard from "../src/pages/OperatorDashboard/OperatorDashboard";
+import LeaderDashboard from "../src/pages/LeaderDashboard/LeaderDashboard";
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
 
 import {
@@ -285,7 +287,7 @@ function App() {
         <Route
           path="/shift-scheduler"
           element={
-            <PrivateRoute allowedRoles={["operator", "admin"]}>
+            <PrivateRoute allowedRoles={["operator", "admin", "leader"]}>
               <div>
                 {/* Заголовок та кнопки вибору зміни */}
 
@@ -465,7 +467,7 @@ function App() {
         <Route
           path="/monthly-statistics"
           element={
-            <PrivateRoute allowedRoles={["operator", "admin"]}>
+            <PrivateRoute allowedRoles={["operator", "admin", "leader"]}>
               <MonthlyOperatorStatistics
                 entries={entries}
                 operators={operators}
@@ -481,7 +483,7 @@ function App() {
         <Route
           path="/leader-statistics"
           element={
-            <PrivateRoute allowedRoles={["operator", "admin"]}>
+            <PrivateRoute allowedRoles={["operator", "admin", "leader"]}>
               <MonthlyLeaderStatistics
                 entries={entries}
                 leaders={leaders}
@@ -495,7 +497,7 @@ function App() {
         <Route
           path="/machine-statistics"
           element={
-            <PrivateRoute allowedRoles={["operator", "admin"]}>
+            <PrivateRoute allowedRoles={["operator", "admin", "leader"]}>
               <MachineStatistics entries={entries} machines={machines} />
             </PrivateRoute>
           }
@@ -503,7 +505,7 @@ function App() {
         <Route
           path="/operator-statistics"
           element={
-            <PrivateRoute allowedRoles={["operator", "admin"]}>
+            <PrivateRoute allowedRoles={["operator", "leader", "admin"]}>
               <OperatorStatistics
                 entries={entries}
                 operators={operators}
@@ -525,9 +527,17 @@ function App() {
           }
         />
         <Route
+          path="/leader-dashboard"
+          element={
+            <PrivateRoute allowedRoles={["operator", "leader", "admin"]}>
+              <LeaderDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/operator-dashboard"
           element={
-            <PrivateRoute allowedRoles={["operator", "admin"]}>
+            <PrivateRoute allowedRoles={["operator", "leader", "admin"]}>
               <OperatorDashboard />
             </PrivateRoute>
           }
