@@ -6,9 +6,6 @@
 
   font-family: "Chakra Petch", sans-serif;
 }
-.container {
-  padding-top: 60px; /* Відступ зверху, рівний висоті navbar */
-}
 
 /* Додаткові скидання для елементів */
 body,
@@ -32,15 +29,17 @@ video {
 }
 
 /* Загальні стилі для контейнера */
-.container {
-  padding: 70px 20px 0; /* Зверху і з боків 20px, знизу 0 */
-}
-/* Стилі для заголовку */
 
 /* Стилі для таблиці */
 table {
   width: 100%;
   border-collapse: collapse;
+  th,
+  td {
+    border: 1px solid #ededed;
+    padding: 2px;
+    text-align: center;
+  }
 }
 
 th,
@@ -57,9 +56,6 @@ th {
 }
 
 /* Чередування кольорів для рядків таблиці */
-tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
 
 table tr:last-child {
   border-bottom: 1px solid #ddd;
@@ -118,7 +114,7 @@ input[type="date"],
 input[type="time"],
 select {
   padding: 2px;
-  margin-right: 10px;
+
   border: 1px solid #cccccc91;
   border-radius: 4px;
   font-size: 14px;
@@ -220,21 +216,18 @@ select {
   transition: all 0.3s ease-in-out; /* Гладка анімація */
 }
 
-th,
-td {
-  padding: 8px;
-  text-align: center;
+.app-container {
+  display: flex;
+  transition: margin-left 0.3s ease-in-out;
 }
 
-th {
-  background-color: #f2f2f2;
-  font-weight: bold;
+.content {
+  flex-grow: 1;
+  padding: 20px;
+  margin-left: 250px; /* Коли NavBar розгорнутий */
+  transition: margin-left 0.5s ease-in-out;
 }
 
-tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-tr:hover {
-  background-color: #f1f1f1;
+.app-container.collapsed .content {
+  margin-left: 80px; /* Коли NavBar згорнутий */
 }

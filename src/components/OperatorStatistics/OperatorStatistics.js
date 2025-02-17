@@ -16,15 +16,11 @@ function OperatorStatistics({
   const handleViewTypeChange = (e) => setViewType(e.target.value);
   const handleDateChange = (e) => setSelectedDate(e.target.value);
   const handleMonthChange = (e) => setSelectedMonth(e.target.value);
-
-  const handleOperatorSelection = (operator) => {
-    setSelectedOperator(operator); // Оновлюємо вибір оператора
-  };
+  const handleOperatorChange = (e) => setSelectedOperator(e.target.value);
 
   const filteredEntries = entries
     ? Object.entries(entries).flatMap(([shift, machines]) =>
         Object.values(machines || {}).flatMap((machineEntries) => {
-          console.log("machineEntries:", machineEntries); // Додаємо лог тут
           return Array.isArray(machineEntries)
             ? machineEntries.filter((entry) => {
                 const isOperatorSelected = entry.operator === selectedOperator;
@@ -45,7 +41,6 @@ function OperatorStatistics({
 
   const summary = calculateSummary(filteredEntries, operators, products);
 
-  // Calculate total sum for tasks and products
   const totalTaskQuantity = Object.values(summary.taskSummary).reduce(
     (sum, quantity) => sum + quantity,
     0
@@ -61,68 +56,62 @@ function OperatorStatistics({
 
       {/* View Type Selection */}
       <div className={style.viewTypeSelection}>
-        <div className={style.radioGroup}>
-          <label>
-            <input
-              type="radio"
-              name="viewType"
-              value="day"
-              checked={viewType === "day"}
-              onChange={handleViewTypeChange}
-            />
-            By Date
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="viewType"
-              value="month"
-              checked={viewType === "month"}
-              onChange={handleViewTypeChange}
-            />
-            By Month
-          </label>
-        </div>
+        <label>
+          <input
+            type="radio"
+            name="viewType"
+            value="day"
+            checked={viewType === "day"}
+            onChange={handleViewTypeChange}
+          />
+          By Date
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="viewType"
+            value="month"
+            checked={viewType === "month"}
+            onChange={handleViewTypeChange}
+          />
+          By Month
+        </label>
       </div>
 
       {/* Date or Month Selection */}
-      <div className={style.dateSelectionContainer}>
-        <div className={style.dateSelection}>
-          {viewType === "day" && (
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={handleDateChange}
-              className={style.dateInput}
-            />
-          )}
-          {viewType === "month" && (
-            <input
-              type="month"
-              value={selectedMonth}
-              onChange={handleMonthChange}
-              className={style.monthInput}
-            />
-          )}
-        </div>
+      <div className={style.dateSelection}>
+        {viewType === "day" ? (
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={handleDateChange}
+            className={style.dateInput}
+          />
+        ) : (
+          <input
+            type="month"
+            value={selectedMonth}
+            onChange={handleMonthChange}
+            className={style.monthInput}
+          />
+        )}
       </div>
 
-      {/* Operator Selection */}
+      {/* Operator Selection Dropdown */}
       <div className={style.operatorSelection}>
-        <h3>Operators</h3>
-        <div className={style.operatorRadioGroup}>
+        <h3>Select Operator</h3>
+        <select
+          value={selectedOperator}
+          onChange={handleOperatorChange}
+          className={style.operatorDropdown}
+        >
+          <option value="">-- Select Operator --</option>
           {operators.map((operator) => (
-            <label key={operator} className={style.operatorLabel}>
-              <input
-                type="radio"
-                name="operator"
-                checked={selectedOperator === operator}
-                onChange={() => handleOperatorSelection(operator)}
-              />
+            <option key={operator} value={operator}>
               {operator}
-            </label>
+            </option>
           ))}
-        </div>
+        </select>
       </div>
 
       {/* Display Results */}
@@ -149,7 +138,6 @@ function OperatorStatistics({
                         <td>{quantity}</td>
                       </tr>
                     ))}
-                  {/* Row for Total Quantity */}
                   <tr>
                     <td>
                       <strong>Total</strong>
@@ -181,7 +169,6 @@ function OperatorStatistics({
                         <td>{quantity}</td>
                       </tr>
                     ))}
-                  {/* Row for Total Quantity */}
                   <tr>
                     <td>
                       <strong>Total</strong>

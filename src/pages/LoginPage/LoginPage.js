@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./LoginPage.module.scss"; // Підключаємо модулі стилів
-
+import { FiEye, FiEyeOff } from "react-icons/fi"; // Додаємо іконки
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -130,7 +130,7 @@ const LoginPage = () => {
               className={styles.togglePassword}
               onClick={toggleShowPassword}
             >
-              {showPassword ? "🙈" : "👁️"}
+              {showPassword ? <FiEyeOff /> : <FiEye />}
             </button>
           </div>
         </div>

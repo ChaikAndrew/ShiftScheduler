@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { getMachineStatistics } from "../../utils/machineStatisticsHelpers";
 
-const MachineStatistics = ({ entries, machines }) => {
-  const [selectedDate, setSelectedDate] = useState("");
+const MachineTimeStats = ({ entries, machines }) => {
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [selectedShift, setSelectedShift] = useState("");
 
   // Отримання статистики машин
@@ -38,11 +40,9 @@ const MachineStatistics = ({ entries, machines }) => {
     return `${hours}h ${remainingMinutes}m`;
   };
 
-  // Функція для експорту в PDF
-
   return (
     <div>
-      <h1>Machine Statistics</h1>
+      <h1>Machine Time Stats</h1>
 
       {/* Фільтри */}
       <div>
@@ -85,7 +85,6 @@ const MachineStatistics = ({ entries, machines }) => {
             <thead>
               <tr>
                 <th>Machine</th>
-                <th>Total Quantity</th>
                 <th>Working Time</th>
                 <th>Downtime</th>
                 <th>Downtime Reasons</th>
@@ -95,7 +94,6 @@ const MachineStatistics = ({ entries, machines }) => {
               {statistics.map((machineStat) => (
                 <tr key={machineStat.machine}>
                   <td>{machineStat.machine}</td>
-                  <td>{machineStat.totalQuantity}</td>
                   <td>{formatTime(machineStat.workingTime)}</td>
                   <td>{formatTime(machineStat.downtime)}</td>
                   <td>
@@ -119,4 +117,4 @@ const MachineStatistics = ({ entries, machines }) => {
   );
 };
 
-export default MachineStatistics;
+export default MachineTimeStats;

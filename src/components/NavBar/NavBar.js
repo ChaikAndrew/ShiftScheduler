@@ -1,8 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import {
+  FiLogOut,
+  FiHome,
+  FiCalendar,
+  FiBarChart,
+  FiUsers,
+  FiChevronLeft,
+  FiChevronRight,
+} from "react-icons/fi";
+import { VscPreview } from "react-icons/vsc";
+import { SlPrinter } from "react-icons/sl";
+import { GrGroup } from "react-icons/gr";
+
 import styles from "./NavBar.module.scss";
 
-function NavBar() {
+const NavBar = ({ isCollapsed, setIsCollapsed }) => {
   const navigate = useNavigate();
   const [role, setRole] = useState(localStorage.getItem("role"));
   const [username, setUsername] = useState(localStorage.getItem("username"));
@@ -14,119 +27,128 @@ function NavBar() {
     };
 
     window.addEventListener("storage", handleStorageChange);
-
     return () => {
       window.removeEventListener("storage", handleStorageChange);
     };
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("role");
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
+    localStorage.clear();
     setRole(null);
     setUsername(null);
     navigate("/login");
   };
 
   const getDashboardLink = () => {
-    switch (role) {
-      case "admin":
-        return { path: "/admin-dashboard", label: "Admin Dashboard" };
-      case "leader":
-        return { path: "/leader-dashboard", label: "Leader Dashboard" };
-      case "operator":
-        return { path: "/operator-dashboard", label: "Operator Dashboard" };
-      default:
-        return { path: "/login", label: "Dashboard" };
+    if (!role) {
+      return { path: "/login", label: "Dashboard", icon: <FiHome /> };
     }
+    return {
+      path: `/${role}-dashboard`,
+      label: `${role.charAt(0).toUpperCase() + role.slice(1)} Dashboard`,
+      icon: <FiHome />,
+    };
   };
 
   const dashboardLink = getDashboardLink();
 
+  if (!role || !username) {
+    return null;
+  }
+
   return (
-    <nav className={styles.navbar}>
-      {!role ? (
-        <div className={styles.singleLink}>
-          <NavLink
-            to="/login"
-            className={({ isActive }) =>
-              isActive ? `${styles.link} ${styles.active}` : styles.link
-            }
-          >
-            Login
-          </NavLink>
+    <div className={`${styles.navbar} ${isCollapsed ? styles.collapsed : ""}`}>
+      <div className={styles.logoContainer}>
+        <button
+          className={styles.collapseButton}
+          onClick={() => setIsCollapsed(!isCollapsed)}
+        >
+          {isCollapsed ? (
+            <FiChevronRight className={styles.icon} />
+          ) : (
+            <FiChevronLeft className={styles.icon} />
+          )}
+        </button>
+      </div>
+      <div className={styles.linksContainer}>
+        <NavLink
+          to="/shift-scheduler"
+          className={({ isActive }) =>
+            isActive ? `${styles.link} ${styles.active}` : styles.link
+          }
+        >
+          <FiCalendar className={styles.icon} />
+          <span className={styles.linkText}>Shift Scheduler</span>
+        </NavLink>
+        <NavLink
+          to="/monthly-statistics"
+          className={({ isActive }) =>
+            isActive ? `${styles.link} ${styles.active}` : styles.link
+          }
+        >
+          <FiBarChart className={styles.icon} />
+          <span className={styles.linkText}>Monthly Statistics</span>
+        </NavLink>
+        <NavLink
+          to="/leader-statistics"
+          className={({ isActive }) =>
+            isActive ? `${styles.link} ${styles.active}` : styles.link
+          }
+        >
+          <FiUsers className={styles.icon} />
+          <span className={styles.linkText}>Leader Statistics</span>
+        </NavLink>
+        <NavLink
+          to="/machine-time-stats"
+          className={({ isActive }) =>
+            isActive ? `${styles.link} ${styles.active}` : styles.link
+          }
+        >
+          <SlPrinter className={styles.icon} />
+          <span className={styles.linkText}>Machine Time Stats</span>
+        </NavLink>
+        <NavLink
+          to="/machines-quantity-stats"
+          className={({ isActive }) =>
+            isActive ? `${styles.link} ${styles.active}` : styles.link
+          }
+        >
+          <SlPrinter className={styles.icon} />
+          <span className={styles.linkText}>Machines Quantity Stats</span>
+        </NavLink>
+        <NavLink
+          to="/operator-statistics"
+          className={({ isActive }) =>
+            isActive ? `${styles.link} ${styles.active}` : styles.link
+          }
+        >
+          <GrGroup className={styles.icon} />
+          <span className={styles.linkText}>Operator Statistics</span>
+        </NavLink>
+
+        <NavLink
+          to={dashboardLink.path}
+          className={({ isActive }) =>
+            isActive ? `${styles.link} ${styles.active}` : styles.link
+          }
+        >
+          <VscPreview className={styles.icon} />
+          <span className={styles.linkText}>{dashboardLink.label}</span>
+        </NavLink>
+      </div>
+      <div className={styles.userSection}>
+        <div className={styles.userInfo}>
+          <div className={styles.username}>{username}</div>
+          <div className={styles.role}>({role})</div>
+          <div className={styles.onlineStatus}>Online</div>
         </div>
-      ) : (
-        <>
-          <div className={styles.navLinks}>
-            <NavLink
-              to="/shift-scheduler"
-              className={({ isActive }) =>
-                isActive ? `${styles.link} ${styles.active}` : styles.link
-              }
-            >
-              Shift Scheduler
-            </NavLink>
-            <NavLink
-              to="/monthly-statistics"
-              className={({ isActive }) =>
-                isActive ? `${styles.link} ${styles.active}` : styles.link
-              }
-            >
-              Monthly Statistics
-            </NavLink>
-            <NavLink
-              to="/leader-statistics"
-              className={({ isActive }) =>
-                isActive ? `${styles.link} ${styles.active}` : styles.link
-              }
-            >
-              Leader Statistics
-            </NavLink>
-            <NavLink
-              to="/machine-statistics"
-              className={({ isActive }) =>
-                isActive ? `${styles.link} ${styles.active}` : styles.link
-              }
-            >
-              Machine Statistics
-            </NavLink>
-            <NavLink
-              to="/operator-statistics"
-              className={({ isActive }) =>
-                isActive ? `${styles.link} ${styles.active}` : styles.link
-              }
-            >
-              Operator Statistics
-            </NavLink>
-            <NavLink
-              to={dashboardLink.path}
-              className={({ isActive }) =>
-                isActive ? `${styles.link} ${styles.active}` : styles.link
-              }
-            >
-              {dashboardLink.label}
-            </NavLink>
-          </div>
-          <div className={styles.userInfo}>
-            {username ? (
-              <span className={styles.username}>
-                You are <span className={styles.userInfoStatus}>online</span>{" "}
-                as: <span className={styles.userInfoName}> {username} </span> ({" "}
-                {role} )
-              </span>
-            ) : (
-              <span className={styles.username}>Checking connection...</span>
-            )}
-          </div>
-          <button onClick={handleLogout} className={styles.logoutButton}>
-            Logout
-          </button>
-        </>
-      )}
-    </nav>
+        <button onClick={handleLogout} className={styles.logoutButton}>
+          <FiLogOut className={styles.icon} />
+          <span className={styles.linkText}>Logout</span>
+        </button>
+      </div>
+    </div>
   );
-}
+};
 
 export default NavBar;

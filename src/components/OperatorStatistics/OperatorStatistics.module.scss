@@ -1,108 +1,84 @@
+/* OperatorStatistics.module.scss */
+
 .container {
   max-width: 800px;
-  margin: 0 auto;
-
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
 }
 
 .header {
   text-align: center;
-  color: #333;
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 15px;
 }
 
-.viewTypeSelection,
-.dateSelection,
-.operatorSelection,
-.resultTables {
-  margin-top: 20px;
-}
-
-.radioGroup {
+.viewTypeSelection {
   display: flex;
-  gap: 20px;
   justify-content: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.dateSelection {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
 }
 
 .dateInput,
 .monthInput {
-  display: block;
-  margin: 10px auto;
-  padding: 8px;
+  padding: 5px;
+  font-size: 14px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
 
-.operatorCheckboxGroup {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
+.operatorSelection {
+  all: unset;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
-.operatorLabel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
+.operatorDropdown {
+  padding: 5px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.resultTables {
+  margin-top: 20px;
 }
 
 .tableContainer {
-  margin-top: 20px;
-  overflow-x: auto;
+  margin-bottom: 20px;
 }
 
 .table {
   width: 100%;
-  table-layout: fixed;
+  border-collapse: collapse;
+  text-align: left;
+  table-layout: fixed; /* Фіксує ширину колонок */
 }
 
 .table th,
 .table td {
-  padding: 10px;
   border: 1px solid #ddd;
-
-  width: 50%;
+  padding: 8px;
   text-align: center;
+  white-space: nowrap; /* Запобігає переносу тексту */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Обрізає довгий текст */
 }
 
-.table th {
-  background-color: #f3f3f3;
-  font-weight: bold;
-  color: #555;
-}
-
-.table td {
-  color: #333;
-}
-
-.emptyMessage {
-  text-align: center;
-  color: #777;
-  font-style: italic;
-}
-
-.operatorRadioGroup {
-  display: flex;
-  flex-wrap: wrap; /* Дозволяє перенос на новий рядок */
-  gap: 1rem; /* Відстань між елементами */
-}
-
-.operatorLabel {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem; /* Відстань між текстом та радіокнопкою */
-}
-
-.dateSelectionContainer {
-  display: flex;
-  justify-content: center; /* Вирівнює вибір дати/місяця по центру */
-  margin-bottom: 1rem;
-}
-
-.dateSelection input {
-  width: 200px; /* Встановлює однакову ширину для полів */
-  padding: 0.5rem;
-  text-align: center;
-}
+/* Встановлення однакової ширини для кожного стовпця */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 20%;
+} /* Task */
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 20%;
+} /* Quantity */
