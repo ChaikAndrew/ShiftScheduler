@@ -64,6 +64,10 @@ import MonthlyMachineStatistics from "./components/MachinesQuantityStats/Machine
 import NavBar from "./components/NavBar/NavBar";
 import Footer from "./components/Footer/Footer";
 
+import { handleSaveEntryToDB } from "../src/utils/entryHandlers";
+import { getEntriesFromDB } from "../src/utils/api/shiftApi";
+import { recalculateDowntime } from "./utils/recalculateDowntime";
+
 // Додамо AdminDashboard і OperatorDashboard пізніше
 
 function App() {
@@ -73,6 +77,44 @@ function App() {
       ? JSON.parse(savedEntries)
       : { first: {}, second: {}, third: {} };
   });
+  // 🔽 ВСТАВ ОСЬ ТУТ ЦЕЙ useEffect
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = localStorage.getItem("token");
+
+      try {
+        const response = await getEntriesFromDB(token);
+        const dbEntries = response.data;
+
+        const grouped = { first: {}, second: {}, third: {} };
+        dbEntries.forEach((entry) => {
+          const { shift, machine } = entry;
+          if (!grouped[shift][machine]) {
+            grouped[shift][machine] = [];
+          }
+          grouped[shift][machine].push(entry);
+        });
+
+        // 🔁 Перераховуємо downtime для всіх змін і машин
+        let fullyRecalculated = { ...grouped };
+        for (const shift in grouped) {
+          for (const machine in grouped[shift]) {
+            fullyRecalculated = recalculateDowntime(
+              fullyRecalculated,
+              shift,
+              machine
+            );
+          }
+        }
+
+        setEntries(fullyRecalculated);
+      } catch (err) {
+        console.error("❌ Не вдалося завантажити записи з Mongo:", err.message);
+      }
+    };
+
+    fetchData();
+  }, []);
   const [editingIndex, setEditingIndex] = useState(null);
   const [currentShift, setCurrentShift] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
@@ -94,29 +136,56 @@ function App() {
   });
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const prevEntries = JSON.parse(localStorage.getItem("entries"));
-    if (JSON.stringify(prevEntries) !== JSON.stringify(entries)) {
-      localStorage.setItem("entries", JSON.stringify(entries));
-    }
-  }, [entries]);
+  // useEffect(() => {
+  //   const prevEntries = JSON.parse(localStorage.getItem("entries"));
+  //   if (JSON.stringify(prevEntries) !== JSON.stringify(entries)) {
+  //     localStorage.setItem("entries", JSON.stringify(entries));
+  //   }
+  // }, [entries]);
 
   const onSaveEntry = () => {
-    handleSaveEntry({
+    const token = localStorage.getItem("token");
+
+    handleSaveEntryToDB({
       form,
       currentShift,
       selectedDate,
       selectedLeader,
       selectedMachine,
       selectedOperator,
-      entries,
-      setEntries,
-      setEditingIndex,
       setForm,
       editingIndex,
+      editingEntryId: null,
+      token,
+      onSuccess: async () => {
+        try {
+          const response = await getEntriesFromDB(token);
+          const dbEntries = response.data;
+
+          // 🔁 Групування за shift та machine
+          const grouped = { first: {}, second: {}, third: {} };
+          dbEntries.forEach((entry) => {
+            const { shift, machine } = entry;
+            if (!grouped[shift]) grouped[shift] = {};
+            if (!grouped[shift][machine]) grouped[shift][machine] = [];
+            grouped[shift][machine].push(entry);
+          });
+
+          // 🔧 Перерахунок downtime
+          const recalculated = recalculateDowntime(
+            grouped,
+            currentShift,
+            selectedMachine
+          );
+
+          setEntries(recalculated);
+          console.log("✅ Дані оновлено з правильним downtime");
+        } catch (error) {
+          console.error("❌ Помилка при оновленні entries:", error.message);
+        }
+      },
     });
   };
-
   const filteredEntries = filterEntries(
     entries,
     currentShift,
