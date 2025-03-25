@@ -123,7 +123,7 @@ function App() {
   const [selectedOperator, setSelectedOperator] = useState("");
   const [showMachineSummary, setShowMachineSummary] = useState(false);
   const [showUpButton, setShowUpButton] = useState(false);
-
+  const [editingEntryId, setEditingEntryId] = useState(null);
   const [form, setForm] = useState({
     startTime: "",
     endTime: "",
@@ -155,7 +155,7 @@ function App() {
       selectedOperator,
       setForm,
       editingIndex,
-      editingEntryId: null,
+      editingEntryId,
       token,
       onSuccess: async () => {
         try {
@@ -270,6 +270,7 @@ function App() {
       selectedMachine,
       setForm,
       setEditingIndex,
+      setEditingEntryId,
       setError,
       dateToUse // Передаємо оброблену дату
     );

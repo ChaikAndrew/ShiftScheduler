@@ -46,6 +46,9 @@ export const getMachineStatistics = (
         downtimeReasons[reasonDescription] =
           (downtimeReasons[reasonDescription] || 0) + entryDowntime;
       }
+      console.log("📊 MACHINE ENTRIES:", machineEntries);
+      console.log("⏱️ TOTAL downtime:", downtime);
+      console.log("📋 REASONS:", downtimeReasons);
     });
 
     return {

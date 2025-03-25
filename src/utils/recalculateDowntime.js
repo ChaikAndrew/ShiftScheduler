@@ -151,7 +151,7 @@ export function recalculateDowntime(
 
   // Групуємо записи по даті
   const entriesByDate = shiftEntries.reduce((acc, entry) => {
-    const date = DateTime.fromISO(entry.startTime).toISODate();
+    const date = DateTime.fromISO(entry.startTime, { zone: "utc" }).toISODate();
     if (!acc[date]) acc[date] = [];
     acc[date].push(entry);
     return acc;
@@ -162,15 +162,16 @@ export function recalculateDowntime(
     const entriesForDate = entriesByDate[date];
 
     entriesByDate[date] = entriesForDate.map((entry, index) => {
-      const startTime = DateTime.fromISO(entry.startTime);
+      const startTime = DateTime.fromISO(entry.startTime, { zone: "utc" });
       const shiftStart = DateTime.fromISO(
-        `${date}T${shiftStartTimes[currentShift]}`
+        `${date}T${shiftStartTimes[currentShift]}`,
+        { zone: "utc" }
       );
 
       if (index === 0) {
         // Перший запис на дату
         if (currentShift === "third") {
-          const thirdStart = DateTime.fromISO(`${date}T22:00`);
+          const thirdStart = DateTime.fromISO(`${date}T22:00`, { zone: "utc" });
           const isAfterMidnight = startTime.hour < 6;
 
           const trueStart = isAfterMidnight
@@ -187,7 +188,9 @@ export function recalculateDowntime(
         }
       } else {
         // Наступні записи — рахуємо від попереднього endTime
-        const prevEnd = DateTime.fromISO(entriesForDate[index - 1].endTime);
+        const prevEnd = DateTime.fromISO(entriesForDate[index - 1].endTime, {
+          zone: "utc",
+        });
         let correctedStart = startTime;
 
         if (currentShift === "third" && correctedStart < prevEnd) {

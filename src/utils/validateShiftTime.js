@@ -11,8 +11,8 @@ import { showToast } from "../../src/components/ToastNotification/ToastNotificat
  * @returns {boolean} - Returns true if the time is within the allowed range.
  */
 export function isValidFirstShiftTime(startTime, endTime) {
-  const start = DateTime.fromISO(startTime);
-  const end = DateTime.fromISO(endTime);
+  const start = DateTime.fromISO(startTime, { zone: "utc" });
+  const end = DateTime.fromISO(endTime, { zone: "utc" });
   console.log("isValidFirstShiftTime:", { startTime, endTime, start, end });
   console.log("Start is valid:", start.isValid);
   console.log("End is valid:", end.isValid);

@@ -8,8 +8,8 @@ import { recalculateDowntime } from "./recalculateDowntime";
  * @returns {boolean} - true, якщо дати збігаються.
  */
 const isDateMatching = (entryDate, selectedDate) => {
-  const entry = DateTime.fromISO(entryDate).toISODate();
-  const selected = DateTime.fromISO(selectedDate).toISODate();
+  const entry = DateTime.fromISO(entryDate, { zone: "utc" }).toISODate();
+  const selected = DateTime.fromISO(selectedDate, { zone: "utc" }).toISODate();
   return entry === selected;
 };
 
@@ -58,6 +58,7 @@ export function handleEditEntry(
   selectedMachine,
   setForm,
   setEditingIndex,
+  setEditingEntryId,
   setError,
   selectedDate
 ) {
@@ -86,8 +87,11 @@ export function handleEditEntry(
 
   // 🟢 Корекція дати для третьої зміни
   let displayDate = entry.date;
-  if (currentShift === "third" && DateTime.fromISO(entry.startTime).hour <= 6) {
-    displayDate = DateTime.fromISO(entry.startTime)
+  if (
+    currentShift === "third" &&
+    DateTime.fromISO(entry.startTime, { zone: "utc" }).hour <= 6
+  ) {
+    displayDate = DateTime.fromISO(entry.startTime, { zone: "utc" })
       .minus({ days: 1 })
       .toISODate();
     console.log("Corrected Date for Third Shift:", displayDate);
@@ -96,8 +100,10 @@ export function handleEditEntry(
   console.log("Original Index:", originalIndex);
 
   setForm({
-    startTime: DateTime.fromISO(entry.startTime).toFormat("HH:mm"),
-    endTime: DateTime.fromISO(entry.endTime).toFormat("HH:mm"),
+    startTime: DateTime.fromISO(entry.startTime, { zone: "utc" }).toFormat(
+      "HH:mm"
+    ),
+    endTime: DateTime.fromISO(entry.endTime, { zone: "utc" }).toFormat("HH:mm"),
     task: entry.task === entry.customTaskName ? "Zlecenie" : entry.task,
     customTaskName: entry.task === entry.customTaskName ? entry.task : "",
     product: entry.product,
@@ -107,6 +113,7 @@ export function handleEditEntry(
   });
 
   setEditingIndex(originalIndex);
+  setEditingEntryId(entry._id); // ⬅️ ось головне!
   setError("");
   console.log("Editing entry:", entry);
   console.groupEnd();

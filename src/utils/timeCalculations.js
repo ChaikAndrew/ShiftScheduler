@@ -11,8 +11,8 @@ import { shiftStartTimes } from "./constants";
 import { getShiftByTime } from "./getShift";
 
 export function calculateWorkTime(startTime, endTime) {
-  const start = DateTime.fromISO(startTime);
-  let end = DateTime.fromISO(endTime);
+  const start = DateTime.fromISO(startTime, { zone: "utc" });
+  let end = DateTime.fromISO(endTime, { zone: "utc" });
 
   if (end < start) {
     end = end.plus({ days: 1 });
@@ -21,7 +21,8 @@ export function calculateWorkTime(startTime, endTime) {
   const shift = getShiftByTime(start);
 
   const scheduledStart = DateTime.fromISO(
-    `${start.toISODate()}T${shiftStartTimes[shift]}`
+    `${start.toISODate()}T${shiftStartTimes[shift]}`,
+    { zone: "utc" }
   );
   const initialDowntime = start.equals(scheduledStart)
     ? 0

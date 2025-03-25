@@ -106,8 +106,16 @@ function EntryTable({ entries, onEdit, onDelete }) {
               <tr key={filteredIndex}>
                 <td>{entry.shift}</td>
                 <td>{entry.displayDate}</td>
-                <td>{DateTime.fromISO(entry.startTime).toFormat("HH:mm")}</td>
-                <td>{DateTime.fromISO(entry.endTime).toFormat("HH:mm")}</td>
+                <td>
+                  {DateTime.fromISO(entry.startTime, { zone: "utc" }).toFormat(
+                    "HH:mm"
+                  )}
+                </td>
+                <td>
+                  {DateTime.fromISO(entry.endTime, { zone: "utc" }).toFormat(
+                    "HH:mm"
+                  )}
+                </td>
                 <td>{entry.leader}</td>
                 <td>{entry.machine}</td>
                 <td className={style.operatorCell}>
