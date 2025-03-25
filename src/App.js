@@ -179,6 +179,19 @@ function App() {
           );
 
           setEntries(recalculated);
+          setEditingIndex(null);
+          setEditingEntryId(null);
+          setForm({
+            startTime: "",
+            endTime: "",
+            task: "",
+            customTaskName: "",
+            product: "",
+            color: "",
+            reason: "",
+            quantity: 0,
+          });
+          console.log("✅ Дані оновлено з правильним downtime");
           console.log("✅ Дані оновлено з правильним downtime");
         } catch (error) {
           console.error("❌ Помилка при оновленні entries:", error.message);
