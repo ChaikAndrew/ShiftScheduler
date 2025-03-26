@@ -1,6 +1,17 @@
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
+/**
+ * Експортує щоденну статистику по лідерах у формат PDF з використанням jsPDF.
+ *
+ * @param {Array<Object>} data - Масив об'єктів зі щоденною статистикою. Кожен об'єкт містить Day і значення по задачах/продуктах.
+ * @param {string} filename - Назва PDF-файлу без розширення.
+ * @param {{ year: number, month: number }} selectedMonth - Об'єкт з вибраним місяцем і роком (місяць від 0 до 11).
+ *
+ * @returns {void} - Зберігає PDF-файл з таблицею статистики. Якщо немає валідних даних — нічого не експортує.
+ *
+ * Назви стовпців формуються динамічно на основі ключів у даних.
+ */
 export const exportDailyStatisticsToPDF = (data, filename, selectedMonth) => {
   if (!data || !data.length) return;
 

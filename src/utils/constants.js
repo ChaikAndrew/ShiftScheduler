@@ -1,7 +1,7 @@
-//machines
+//Список доступних машин для вибору
 export const machines = ["dtg1", "dtg2", "dtg3", "dtg4", "dtg5", "dtg6"];
 
-//operators
+//Список операторів, які можуть виконувати завдання
 export const operators = [
   "Andrii",
   "Karina",
@@ -15,10 +15,10 @@ export const operators = [
   "Anastasiia",
 ];
 
-//tasks
+//Типи задач, які оператор може виконувати
 export const tasks = ["POD", "POF", "Zlecenie", "Sample", "Test"];
 
-//products
+//Продукти, які можуть друкуватися
 export const products = [
   "T-shirts",
   "Hoodie",
@@ -28,10 +28,10 @@ export const products = [
   "Others",
 ];
 
-//colors
+//Можливі кольори продуктів
 export const colors = ["Color", "White"];
 
-//reasons
+//Причини простою, з ID та описом
 export const reasons = [
   { id: 1, description: "1.Przezbrojenie (zmiana palety)" },
   { id: 2, description: "2.Czyszczenie głowic (planowane 2/zm)" },
@@ -65,7 +65,7 @@ export const reasons = [
   { id: 27, description: "27.Restart aplikacji" },
 ];
 
-// leaders
+//Список лідерів змін
 export const leaders = ["Karina", "Michal"];
 
 // Початкові часи для кожної зміни

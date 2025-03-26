@@ -1,5 +1,3 @@
-// utils/validateShiftTime.js
-
 import { DateTime } from "luxon";
 import { showToast } from "../../src/components/ToastNotification/ToastNotification";
 
@@ -16,7 +14,12 @@ export function isValidFirstShiftTime(startTime, endTime) {
   console.log("isValidFirstShiftTime:", { startTime, endTime, start, end });
   console.log("Start is valid:", start.isValid);
   console.log("End is valid:", end.isValid);
-  if (start.hour < 6 || end.hour > 14 || (end.hour === 14 && end.minute > 0)) {
+  if (
+    start.hour < 6 ||
+    start.hour >= 14 ||
+    end.hour > 14 ||
+    (end.hour === 14 && end.minute > 0)
+  ) {
     showToast(
       "Error: In the first shift, the time must be between 06:00 and 14:00.",
       "error"
@@ -26,15 +29,18 @@ export function isValidFirstShiftTime(startTime, endTime) {
   return true;
 }
 
-/**
- * Validates the time for the second shift (14:00-22:00).
- */
+// Validates the time for the second shift (14:00-22:00).
 export function isValidSecondShiftTime(startTime, endTime) {
-  const start = DateTime.fromISO(startTime);
-  const end = DateTime.fromISO(endTime);
+  const start = DateTime.fromISO(startTime, { zone: "utc" });
+  const end = DateTime.fromISO(endTime, { zone: "utc" });
   console.log("isValidSecondShiftTime:", { startTime, endTime, start, end });
 
-  if (start.hour < 14 || end.hour > 22 || (end.hour === 22 && end.minute > 0)) {
+  if (
+    start.hour < 14 ||
+    start.hour >= 22 ||
+    end.hour > 22 ||
+    (end.hour === 22 && end.minute > 0)
+  ) {
     showToast(
       "Error: In the second shift, the time must be between 14:00 and 22:00.",
       "error"
@@ -44,12 +50,10 @@ export function isValidSecondShiftTime(startTime, endTime) {
   return true;
 }
 
-/**
- * Validates the time for the third shift (22:00-06:00).
- */
+// Validates the time for the third shift (22:00-06:00).
 export function isValidThirdShiftTime(startTime, endTime) {
-  const start = DateTime.fromISO(startTime);
-  const end = DateTime.fromISO(endTime);
+  const start = DateTime.fromISO(startTime, { zone: "utc" });
+  const end = DateTime.fromISO(endTime, { zone: "utc" });
   console.log("isValidThirdShiftTime:", { startTime, endTime, start, end });
 
   // Перевірка початку зміни (повинна бути між 22:00 і 06:00)

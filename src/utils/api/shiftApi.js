@@ -1,43 +1,8 @@
-// import axios from "axios";
-
-// const API_BASE = "http://localhost:4040/shifts"; // або твій прод-URL
-
-// export const saveEntryToDB = async (entryData, token) => {
-//   return axios.post(`${API_BASE}/add`, entryData, {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   });
-// };
-
-// export const updateEntryInDB = async (id, entryData, token) => {
-//   return axios.put(`${API_BASE}/update/${id}`, entryData, {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   });
-// };
-
-// export const deleteEntryFromDB = async (id, token) => {
-//   return axios.delete(`${API_BASE}/delete/${id}`, {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   });
-// };
-
-// export const getEntriesFromDB = async (token) => {
-//   return axios.get(`${API_BASE}`, {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   });
-// };
 import axios from "axios";
 
 let API_BASE = "https://shift-scheduler-server.vercel.app/shifts";
 
-// Автоматично перемикаємось на localhost, якщо він доступний
+//Перевірка на доступний локальний сервер, якщо так — перемикає API на localhost.
 const checkLocalhost = async () => {
   try {
     const controller = new AbortController();
@@ -57,9 +22,15 @@ const checkLocalhost = async () => {
   }
 };
 
-// Викликаємо одразу
+// Викликається автоматично при імпорті
 checkLocalhost();
 
+/**
+ * Зберігає новий запис у базу даних.
+ * @param {Object} entryData - Дані запису.
+ * @param {string} token - JWT токен користувача.
+ * @returns {Promise} - Результат запиту.
+ */
 export const saveEntryToDB = async (entryData, token) => {
   return axios.post(`${API_BASE}/add`, entryData, {
     headers: {
@@ -68,6 +39,13 @@ export const saveEntryToDB = async (entryData, token) => {
   });
 };
 
+/**
+ * Оновлює існуючий запис у базі даних за ID.
+ * @param {string} id - ID запису.
+ * @param {Object} entryData - Оновлені дані.
+ * @param {string} token - JWT токен користувача.
+ * @returns {Promise} - Результат запиту.
+ */
 export const updateEntryInDB = async (id, entryData, token) => {
   return axios.put(`${API_BASE}/update/${id}`, entryData, {
     headers: {
@@ -76,6 +54,12 @@ export const updateEntryInDB = async (id, entryData, token) => {
   });
 };
 
+/**
+ * Видаляє запис з бази даних за ID.
+ * @param {string} id - ID запису.
+ * @param {string} token - JWT токен користувача.
+ * @returns {Promise} - Результат запиту.
+ */
 export const deleteEntryFromDB = async (id, token) => {
   return axios.delete(`${API_BASE}/delete/${id}`, {
     headers: {
@@ -84,6 +68,11 @@ export const deleteEntryFromDB = async (id, token) => {
   });
 };
 
+/**
+ * Отримує всі записи з бази даних.
+ * @param {string} token - JWT токен користувача.
+ * @returns {Promise} - Масив записів.
+ */
 export const getEntriesFromDB = async (token) => {
   return axios.get(`${API_BASE}`, {
     headers: {

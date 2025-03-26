@@ -1,3 +1,20 @@
+/**
+ * Повертає статистику по кожній машині для обраної дати та зміни.
+ *
+ * @param {Object} entries - Об'єкт з усіма записами, структурований за змінами.
+ * @param {string[]} machines - Список доступних машин.
+ * @param {string} selectedDate - Обрана дата у форматі 'YYYY-MM-DD'.
+ * @param {string} selectedShift - Назва обраної зміни (first, second, third).
+ * @returns {Array<Object>} Масив статистики по кожній машині, де є дані.
+ *
+ * Кожен об'єкт у масиві містить:
+ * - machine: назва машини
+ * - totalQuantity: загальна кількість виконаних завдань
+ * - workingTime: загальний робочий час
+ * - downtime: загальний час простою
+ * - downtimeReasons: об'єкт з причинами простою та їх тривалістю
+ * - POD, POF, Zlecenie, Sample, Test: кількість кожного типу завдань
+ */
 export const getMachineStatistics = (
   entries,
   machines,

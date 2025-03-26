@@ -1,3 +1,16 @@
+/**
+ * Обчислює статистику для кожного лідера за кожен день обраного місяця.
+ *
+ * @param {Object} entries - Об'єкт із записами, згрупованими по змінах та машинах.
+ * @param {string[]} leaders - Масив імен лідерів.
+ * @param {{ year: number, month: number }} selectedMonth - Об'єкт з вибраним місяцем і роком (місяць від 0 до 11).
+ * @returns {Object} Об'єкт, де ключ — це ім'я лідера, а значення — масив з даними по кожному дню.
+ *
+ * Кожен день містить:
+ * - total: загальна кількість виконаних завдань
+ * - taskSummary: об'єкт з кількістю по кожному типу задач (POD, POF, Zlecenie, Sample, Test)
+ * - productSummary: об'єкт з кількістю по кожному продукту (T-shirts, Hoodie, Bags, Sleeves, Children, Others)
+ */
 export const getLeaderStatisticsForMonth = (
   entries,
   leaders,

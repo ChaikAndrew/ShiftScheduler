@@ -24,7 +24,7 @@ export function calculateSummary(entries, operators, products) {
     POD: 0,
     POF: 0,
     Zlecenie: 0,
-    Sample: 0, // Додано Sample
+    Sample: 0,
     Test: 0,
   };
 
@@ -50,7 +50,7 @@ export function calculateSummary(entries, operators, products) {
         POD: 0,
         POF: 0,
         Zlecenie: 0,
-        Sample: 0, // Додано Sample
+        Sample: 0,
         Test: 0,
       },
       productSummary: {},

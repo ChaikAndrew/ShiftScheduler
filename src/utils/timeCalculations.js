@@ -1,3 +1,7 @@
+import { DateTime, Interval } from "luxon";
+import { shiftStartTimes } from "./constants";
+import { getShiftByTime } from "./getShift";
+
 /**
  * Обчислює робочий час та початковий простій для запису зміни.
  *
@@ -5,11 +9,6 @@
  * @param {string} endTime - Час завершення роботи у форматі ISO.
  * @returns {Object} - Об'єкт з інформацією про зміну, робочий час та початковий простій.
  */
-
-import { DateTime, Interval } from "luxon";
-import { shiftStartTimes } from "./constants";
-import { getShiftByTime } from "./getShift";
-
 export function calculateWorkTime(startTime, endTime) {
   const start = DateTime.fromISO(startTime, { zone: "utc" });
   let end = DateTime.fromISO(endTime, { zone: "utc" });

@@ -1,111 +1,3 @@
-// import { DateTime } from "luxon";
-// import { calculateWorkTime } from "./timeCalculations";
-// import {
-//   isValidFirstShiftTime,
-//   isValidSecondShiftTime,
-//   isValidThirdShiftTime,
-// } from "./validateShiftTime";
-// // import { recalculateDowntime } from "./recalculateDowntime";
-
-// import {
-//   saveEntryToDB,
-//   updateEntryInDB,
-//   deleteEntryFromDB,
-//   getEntriesFromDB,
-// } from "../utils/api/shiftApi";
-
-// /**
-//  * Обробляє збереження запису для вибраної зміни.
-//  *
-//  * @param {Object} form - Об'єкт з інформацією про запис.
-//  * @param {string} currentShift - Поточна зміна (first, second, third).
-//  * @param {string} selectedDate - Обрана дата.
-//  * @param {string} selectedLeader - Обраний лідер.
-//  * @param {string} selectedMachine - Обрана машина.
-//  * @param {string} selectedOperator - Обраний оператор.
-//  * @param {Object} entries - Поточні записи.
-//  * @param {Function} setEntries - Функція для оновлення стану entries.
-//  * @param {Function} setEditingIndex - Функція для скидання індексу редагування.
-//  * @param {Function} setForm - Функція для скидання форми після збереження.
-//  * @param {number|null} editingIndex - Індекс редагованого запису.
-//  * @returns {void}
-//  */
-
-// export async function handleSaveEntryToDB({
-//   form,
-//   currentShift,
-//   selectedDate,
-//   selectedLeader,
-//   selectedMachine,
-//   selectedOperator,
-//   setForm,
-//   editingIndex,
-//   editingEntryId, // якщо редагування
-//   token,
-//   onSuccess,
-// }) {
-//   const startTime = `${selectedDate}T${form.startTime}`;
-//   const endTime = `${selectedDate}T${form.endTime}`;
-
-//   if (
-//     (currentShift === "first" && !isValidFirstShiftTime(startTime, endTime)) ||
-//     (currentShift === "second" &&
-//       !isValidSecondShiftTime(startTime, endTime)) ||
-//     (currentShift === "third" && !isValidThirdShiftTime(startTime, endTime))
-//   ) {
-//     console.error("⛔ Invalid time for shift!");
-//     return;
-//   }
-
-//   const { workingTime, initialDowntime, shift } = calculateWorkTime(
-//     startTime,
-//     endTime
-//   );
-
-//   const entryData = {
-//     shift,
-//     machine: selectedMachine,
-//     date: selectedDate,
-//     displayDate: selectedDate,
-//     startTime,
-//     endTime,
-//     workingTime,
-//     downtime: initialDowntime,
-//     initialDowntime,
-//     leader: selectedLeader,
-//     operator: selectedOperator,
-//     task: form.task === "Zlecenie" ? form.customTaskName : form.task,
-//     product: form.product,
-//     color: form.color,
-//     reason: form.reason,
-//     quantity: parseInt(form.quantity, 10),
-//   };
-
-//   try {
-//     if (editingIndex !== null && editingEntryId) {
-//       const response = await updateEntryInDB(editingEntryId, entryData, token);
-//       console.log("✅ Updated entry:", response.data);
-//     } else {
-//       const response = await saveEntryToDB(entryData, token);
-//       console.log("✅ Added entry:", response.data);
-//     }
-
-//     setForm({
-//       startTime: "",
-//       endTime: "",
-//       task: "",
-//       customTaskName: "",
-//       product: "",
-//       color: "",
-//       reason: "",
-//       quantity: 0,
-//     });
-
-//     if (onSuccess) onSuccess();
-//   } catch (err) {
-//     console.error("❌ Error saving entry:", err.response?.data || err.message);
-//   }
-// }
 import { DateTime } from "luxon";
 import { calculateWorkTime } from "./timeCalculations";
 import {
@@ -131,7 +23,6 @@ import { saveEntryToDB, updateEntryInDB } from "../utils/api/shiftApi";
  * @param {string} token - JWT токен користувача.
  * @param {Function} onSuccess - Колбек після успішного збереження.
  */
-
 export async function handleSaveEntryToDB({
   form,
   currentShift,
@@ -145,7 +36,7 @@ export async function handleSaveEntryToDB({
   token,
   onSuccess,
 }) {
-  // ⏱️ Створюємо об'єкти Luxon з UTC-зоною
+  //Створюємо об'єкти Luxon з UTC-зоною
   const start = DateTime.fromISO(`${selectedDate}T${form.startTime}`, {
     zone: "utc",
   });
@@ -153,7 +44,7 @@ export async function handleSaveEntryToDB({
     zone: "utc",
   });
 
-  // 🛡️ Перевірка часу для обраної зміни
+  //Перевірка часу для обраної зміни
   if (
     (currentShift === "first" &&
       !isValidFirstShiftTime(start.toISO(), end.toISO())) ||
@@ -166,10 +57,10 @@ export async function handleSaveEntryToDB({
     return;
   }
 
-  // 🧮 Обрахунок робочого часу та простою
+  //Обрахунок робочого часу та простою
   const { workingTime, initialDowntime, shift } = calculateWorkTime(start, end);
 
-  // 📝 Формуємо дані запису
+  //Формуємо дані запису
   const entryData = {
     shift,
     machine: selectedMachine,
@@ -198,7 +89,7 @@ export async function handleSaveEntryToDB({
       console.log("✅ Added entry:", response.data);
     }
 
-    // 🧼 Очищення форми після збереження
+    //Очищення форми після збереження
     setForm({
       startTime: "",
       endTime: "",

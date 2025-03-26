@@ -2,6 +2,17 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { showToast } from "../../src/components/ToastNotification/ToastNotification";
 
+/**
+ * Експортує місячну статистику у формат PDF з використанням jsPDF.
+ *
+ * @param {Array<Object>} data - Масив об'єктів зі статистикою. Кожен об'єкт — рядок таблиці.
+ * @param {string} filename - Базова назва для PDF-файлу.
+ * @param {{ year: number, month: number }} selectedMonth - Об'єкт з вибраним місяцем і роком (місяць від 0 до 11).
+ *
+ * @returns {void} - Зберігає PDF-файл на клієнтському пристрої. Якщо немає даних — показує попередження.
+ *
+ * Файл отримує назву у форматі: {filename}_{Month}_{Year}.pdf
+ */
 export const exportMonthlySummaryToPDF = (data, filename, selectedMonth) => {
   if (!data || !data.length) return;
 

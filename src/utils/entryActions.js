@@ -14,9 +14,7 @@ const isDateMatching = (entryDate, selectedDate) => {
   return entry === selected;
 };
 
-/**
- * Оновлює активну зміну, скидаючи вибраного лідера, машину та оператора.
- */
+//Оновлює активну зміну, скидаючи вибраного лідера, машину та оператора.
 export function handleShiftChange(
   shift,
   setCurrentShift,
@@ -30,9 +28,7 @@ export function handleShiftChange(
   setSelectedOperator("");
 }
 
-/**
- * Оновлює вибрану дату, скидаючи активну зміну, лідера, машину та оператора.
- */
+//Оновлює вибрану дату, скидаючи активну зміну, лідера, машину та оператора.
 export function handleDateChange(
   date,
   setSelectedDate,
@@ -48,10 +44,7 @@ export function handleDateChange(
   setSelectedOperator("");
 }
 
-/**
- * Ініціює редагування запису.
- */
-
+//Ініціює редагування запису.
 export function handleEditEntry(
   filteredIndex,
   entries,
@@ -86,7 +79,7 @@ export function handleEditEntry(
     return;
   }
 
-  // 🟢 Корекція дати для третьої зміни
+  //Корекція дати для третьої зміни
   let displayDate = entry.date;
   if (
     currentShift === "third" &&
@@ -114,14 +107,12 @@ export function handleEditEntry(
   });
 
   setEditingIndex(originalIndex);
-  setEditingEntryId(entry._id); // ⬅️ ось головне!
+  setEditingEntryId(entry._id);
   setError("");
   console.log("Editing entry:", entry);
   console.groupEnd();
 }
-/**
- * Видаляє запис і перераховує простій.
- */
+//Видаляє запис і перераховує простій.
 export async function handleDeleteEntry(
   filteredIndex,
   entries,
