@@ -1,39 +1,39 @@
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// Функція для показу сповіщень з кастомними кольорами
+// Функція для показу сповіщень у стилі navbar
 export const showToast = (message, type = "info") => {
   const toastConfig = {
     position: "bottom-right",
-    autoClose: 3000, // Автоматично закривається через 3 сек
+    autoClose: 4000,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
     draggable: true,
-    theme: "light", // Використовуємо світлу тему
+    theme: "dark", // Темна тема
   };
 
   const toastStyle = {
-    color: "black", // Білий текст
-    fontWeight: "",
-    backgroundColor: "",
+    color: "#ffffffb2", // як у .navbar
+    fontWeight: "normal",
+    backgroundColor: "", // додається нижче
   };
 
   switch (type) {
-    case "success": // Зелений (#82ca9d)
-      toastStyle.backgroundColor = "#82ca9d";
+    case "success":
+      toastStyle.backgroundColor = "#444"; // як при hover у navbar
       toast.success(message, { ...toastConfig, style: toastStyle });
       break;
-    case "warning": // Жовтий (#ffaa00)
-      toastStyle.backgroundColor = "#ffaa00";
+    case "warning":
+      toastStyle.backgroundColor = "#555"; // трохи яскравіший від базового
       toast.warning(message, { ...toastConfig, style: toastStyle });
       break;
-    case "error": // Червоний (#dd6f6f)
-      toastStyle.backgroundColor = "#dd6f6f";
+    case "error":
+      toastStyle.backgroundColor = "#5c2b2b"; // темний, спокійний червоний
       toast.error(message, { ...toastConfig, style: toastStyle });
       break;
-    default: // Інші (наприклад, жовтогарячий)
-      toastStyle.backgroundColor = "#ffaa00";
+    default:
+      toastStyle.backgroundColor = "#333"; // як background navbar
       toast.info(message, { ...toastConfig, style: toastStyle });
       break;
   }

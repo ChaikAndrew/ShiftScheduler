@@ -30,7 +30,6 @@ import {
   calculateOverallSummary,
 } from "./utils/calculateSummaries";
 
-import { handleSaveEntry } from "./utils/entryHandlers";
 import {
   handleShiftChange,
   handleDateChange,
@@ -289,18 +288,6 @@ function App() {
     );
   };
 
-  // Функція для обробки видалення запису
-  const handleDelete = (index) => {
-    handleDeleteEntry(
-      index,
-      entries,
-      currentShift,
-      selectedMachine,
-      setEntries,
-      selectedDate
-    );
-  };
-
   // Головна перевірка наявності будь-яких даних для відображення
   const isDataAvailable =
     isTotalDataAvailable ||
@@ -456,7 +443,17 @@ function App() {
                       onEdit={(filteredIndex, originalIndex) =>
                         handleEdit(filteredIndex, originalIndex)
                       }
-                      onDelete={(index) => handleDelete(index)}
+                      onDelete={(filteredIndex) =>
+                        handleDeleteEntry(
+                          filteredIndex,
+                          entries,
+                          currentShift,
+                          selectedMachine,
+                          setEntries,
+                          selectedDate,
+                          localStorage.getItem("token") // ⬅️ передаємо токен
+                        )
+                      }
                     />
                   )}
 

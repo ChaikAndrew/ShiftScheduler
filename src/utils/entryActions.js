@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
 import { recalculateDowntime } from "./recalculateDowntime";
+import { deleteEntryFromDB, getEntriesFromDB } from "../utils/api/shiftApi";
 
 /**
  * Перевіряє, чи дата запису відповідає вибраній даті.
@@ -121,53 +122,61 @@ export function handleEditEntry(
 /**
  * Видаляє запис і перераховує простій.
  */
-export function handleDeleteEntry(
+export async function handleDeleteEntry(
   filteredIndex,
   entries,
   currentShift,
   selectedMachine,
   setEntries,
-  selectedDate
+  selectedDate,
+  token
 ) {
-  console.group("🗑️ handleDeleteEntry Process");
+  console.group("🗑️ handleDeleteEntryFromDB");
   console.log("Filtered Index:", filteredIndex);
   console.log("Current Shift:", currentShift);
   console.log("Selected Machine:", selectedMachine);
   console.log("Selected Date:", selectedDate);
 
-  const updatedEntries = { ...entries };
-  const machineEntries = updatedEntries[currentShift]?.[selectedMachine] || [];
+  const machineEntries = entries[currentShift]?.[selectedMachine] || [];
 
   const filteredEntries = machineEntries.filter((entry) =>
     isDateMatching(entry.date, selectedDate)
   );
-  console.log("Filtered Entries for Date:", filteredEntries);
 
-  const entry = filteredEntries[filteredIndex];
-  const entryIndex = machineEntries.findIndex((e) => e === entry);
+  const entryToDelete = filteredEntries[filteredIndex];
+  const entryId = entryToDelete?._id;
 
-  if (entryIndex !== -1) {
-    const entryToDelete = machineEntries[entryIndex];
-    console.log("Deleting Entry:", entryToDelete);
+  if (!entryId) {
+    console.error("❌ Entry ID not found for deletion.");
+    return;
+  }
 
-    updatedEntries[currentShift][selectedMachine] = machineEntries.filter(
-      (e) => e !== entryToDelete
-    );
+  try {
+    await deleteEntryFromDB(entryId, token);
+    console.log("✅ Entry deleted from MongoDB");
 
-    const recalculatedEntries = recalculateDowntime(
-      updatedEntries,
+    const response = await getEntriesFromDB(token);
+    const dbEntries = response.data;
+
+    const grouped = { first: {}, second: {}, third: {} };
+    dbEntries.forEach((entry) => {
+      const { shift, machine } = entry;
+      if (!grouped[shift][machine]) {
+        grouped[shift][machine] = [];
+      }
+      grouped[shift][machine].push(entry);
+    });
+
+    const recalculated = recalculateDowntime(
+      grouped,
       currentShift,
       selectedMachine
     );
-
-    console.log(
-      "Recalculated Entries with updated downtime:",
-      JSON.stringify(recalculatedEntries, null, 2)
-    );
-
-    setEntries(recalculatedEntries);
-  } else {
-    console.error("❌ Invalid index for deletion.");
+    setEntries(recalculated);
+    console.log("📊 Entries after downtime recalculation:", recalculated);
+  } catch (err) {
+    console.error("❌ Error deleting entry:", err.message);
   }
+
   console.groupEnd();
 }
