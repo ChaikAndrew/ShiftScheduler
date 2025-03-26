@@ -1,10 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom"; // Додаємо імпорти для маршрутизації
+import { Routes, Route, Navigate } from "react-router-dom";
 import "./styles.css";
 import { DateTime } from "luxon";
 import { ToastContainer } from "react-toastify";
@@ -350,7 +345,7 @@ function App() {
   const isSelectionComplete =
     selectedLeader && selectedMachine && selectedOperator;
 
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   return (
     <div className={`app-container ${isCollapsed ? "collapsed" : ""}`}>
       <NavBar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
