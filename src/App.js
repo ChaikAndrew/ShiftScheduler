@@ -179,6 +179,12 @@ function App() {
           });
 
           // 🔧 Перерахунок downtime
+          // 🔧 Перерахунок downtime
+          // Спочатку сортуємо записи за часом
+          grouped[currentShift][selectedMachine].sort(
+            (a, b) => new Date(a.startTime) - new Date(b.startTime)
+          );
+
           const recalculated = recalculateDowntime(
             grouped,
             currentShift,
@@ -442,12 +448,17 @@ function App() {
                   {/* Відображення записів */}
                   {filteredEntries.length > 0 && (
                     <EntryTable
-                      entries={filteredEntries.map((entry) => ({
-                        ...entry,
-                        originalIndex: entries[currentShift]?.[
-                          selectedMachine
-                        ]?.findIndex((e) => e === entry),
-                      }))}
+                      entries={filteredEntries
+                        .sort(
+                          (a, b) =>
+                            new Date(a.startTime) - new Date(b.startTime)
+                        )
+                        .map((entry) => ({
+                          ...entry,
+                          originalIndex: entries[currentShift]?.[
+                            selectedMachine
+                          ]?.findIndex((e) => e === entry),
+                        }))}
                       onEdit={(filteredIndex, originalIndex) =>
                         handleEdit(filteredIndex, originalIndex)
                       }
