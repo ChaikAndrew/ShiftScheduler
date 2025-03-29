@@ -5,6 +5,7 @@ import { renderMonthlySummary } from "./renderMonthlySummary";
 import { exportDailyStatisticsToPDF } from "../../utils/exportDailyStatisticsToPDF";
 import { exportMonthlySummaryToPDF } from "../../utils/exportMonthlySummaryToPDF";
 import { showToast } from "../ToastNotification/ToastNotification";
+import styles from "./MonthlyLeaderStatistics.module.scss";
 
 const MonthlyLeaderStatistics = ({ entries, leaders }) => {
   const [selectedMonth, setSelectedMonth] = useState({
@@ -99,7 +100,7 @@ const MonthlyLeaderStatistics = ({ entries, leaders }) => {
   };
 
   return (
-    <div>
+    <div className={styles.container}>
       <h1>Monthly Leader Statistics</h1>
 
       {/* Вибір місяця і року */}

@@ -92,7 +92,7 @@ const EntryForm = ({
   };
 
   return (
-    <div>
+    <div className={style.formRow}>
       {/* Поле введення для часу початку роботи */}
       <input
         type="time"

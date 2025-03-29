@@ -6,18 +6,40 @@ function OperatorStatistics({
   entries = { first: {}, second: {}, third: {} },
   tasks = [],
   products = [],
-  baseUrl = "http://localhost:4040", // або твій прод url
 }) {
   const [viewType, setViewType] = useState("day");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("");
   const [operatorsFromDB, setOperatorsFromDB] = useState([]);
   const [selectedOperator, setSelectedOperator] = useState("");
+  const [baseUrl, setBaseUrl] = useState(
+    "https://shift-scheduler-server.vercel.app"
+  );
 
   const handleViewTypeChange = (e) => setViewType(e.target.value);
   const handleDateChange = (e) => setSelectedDate(e.target.value);
   const handleMonthChange = (e) => setSelectedMonth(e.target.value);
   const handleOperatorChange = (e) => setSelectedOperator(e.target.value);
+
+  useEffect(() => {
+    const checkLocalhost = async () => {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 1000);
+        const res = await fetch("http://localhost:4040", {
+          signal: controller.signal,
+        });
+        clearTimeout(timeout);
+        if (res.ok) {
+          setBaseUrl("http://localhost:4040");
+        }
+      } catch {
+        console.log("🌍 Використовується продакшн API");
+      }
+    };
+
+    checkLocalhost();
+  }, []);
 
   useEffect(() => {
     const fetchOperators = async () => {
@@ -28,14 +50,16 @@ function OperatorStatistics({
           },
         });
         const data = await res.json();
-        const operatorNames = data.map((op) => op.name);
+        const operatorNames = data.map((op) => op.name.trim());
         setOperatorsFromDB(operatorNames);
       } catch (err) {
         console.error("❌ Не вдалося отримати операторів:", err);
       }
     };
 
-    fetchOperators();
+    if (baseUrl) {
+      fetchOperators();
+    }
   }, [baseUrl]);
 
   const filteredEntries = entries
@@ -43,11 +67,12 @@ function OperatorStatistics({
         Object.values(machines || {}).flatMap((machineEntries) =>
           Array.isArray(machineEntries)
             ? machineEntries.filter((entry) => {
-                const isOperatorSelected = entry.operator === selectedOperator;
+                const isOperatorSelected =
+                  entry.operator?.trim() === selectedOperator?.trim();
                 const isDateSelected =
                   viewType === "day" && entry.date === selectedDate;
                 const isMonthSelected =
-                  viewType === "month" && entry.date.startsWith(selectedMonth);
+                  viewType === "month" && entry.date?.startsWith(selectedMonth);
                 return (
                   isOperatorSelected &&
                   ((viewType === "day" && isDateSelected) ||

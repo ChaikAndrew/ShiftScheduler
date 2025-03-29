@@ -32,34 +32,33 @@ video {
 
 /* Стилі для таблиці */
 table {
-  width: 100%;
+  width: 90%;
+
   border-collapse: collapse;
+  margin-top: 5px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: auto;
+
   th,
   td {
-    border: 1px solid #ededed;
+    border: 1px solid #ddd;
     padding: 2px;
     text-align: center;
   }
-}
 
-th,
-td {
-  padding: 5px;
-  text-align: center;
-}
+  th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
 
-th {
-  background-color: #f4f4f4;
-  color: #333;
-  font-weight: bold;
-  border-bottom: 1px solid #ddd;
+  tr:hover {
+    background-color: #f1f1f1;
+  }
 }
 
 /* Чередування кольорів для рядків таблиці */
 
-table tr:last-child {
-  border-bottom: 1px solid #ddd;
-}
 /* Стилі для кнопок */
 button {
   padding: 5px 12px;
@@ -78,6 +77,7 @@ button {
   background-color: #a2a2a2;
   cursor: pointer;
   font-size: 16px;
+  margin: 10px;
   padding: 2px 20px;
   transition: background-color 0.3s, color 0.3s;
   outline: none;
@@ -114,10 +114,10 @@ input[type="date"],
 input[type="time"],
 select {
   padding: 2px;
-
   border: 1px solid #cccccc91;
   border-radius: 4px;
   font-size: 14px;
+  text-align: center;
 }
 
 select {
@@ -126,13 +126,16 @@ select {
 
 /* Загальний стиль для header меню вибору змін та інпутів*/
 .header-main-input {
+  width: 90%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  margin: auto;
 }
 
 .machine-summary {
+  margin-bottom: 10px;
   display: grid;
   grid-template-columns: repeat(2, 1fr); /* Дві колонки по 1fr */
   grid-template-rows: repeat(
@@ -141,7 +144,7 @@ select {
   ); /* Два рядки, висота залежить від контенту */
   gap: 10px; /* Відстань між блоками */
   padding: 10px; /* Відступи від країв контейнера */
-
+  border-radius: 5px;
   background-color: #f4f4f4;
 }
 
@@ -152,7 +155,7 @@ select {
   padding: 2px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  margin-right: 10px;
+  text-align: center;
 }
 
 .input-quantity::-webkit-inner-spin-button,
@@ -167,6 +170,8 @@ select {
 
 .summary {
   text-align: center;
+  width: 90%;
+  margin: auto;
 }
 
 .btn-up {

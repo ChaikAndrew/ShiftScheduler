@@ -45,7 +45,12 @@ function OverallSummary({ overallSummary }) {
         {overallSummary.overallTotalQuantity > 0 && (
           <>
             <h4 className={styles.title}>Overall Total Summary</h4>
-            <p>Total Quantity: {overallSummary.overallTotalQuantity}</p>
+            <p className={styles.value}>
+              Total Quantity:{" "}
+              <span className={styles.highlight}>
+                {overallSummary.overallTotalQuantity}
+              </span>
+            </p>
           </>
         )}
       </div>

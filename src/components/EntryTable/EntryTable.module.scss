@@ -99,12 +99,14 @@
   visibility: visible;
   opacity: 1;
 }
+.edit {
+  margin-right: 5px;
+}
 
 .delete,
 .edit {
   position: relative;
   padding: 2px 20px;
-
   border: none;
   border-radius: 4px;
   cursor: pointer;
