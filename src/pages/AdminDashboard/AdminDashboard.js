@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom"; // Для перенаправлення, якщо токен недійсний
 import styles from "./AdminDashboard.module.scss";
 
+import OperatorManager from "../../components/OperatorManager/OperatorManager";
+
 const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [newUser, setNewUser] = useState({
@@ -163,10 +165,11 @@ const AdminDashboard = () => {
   return (
     <div className={styles.dashboardContainer}>
       <h1>Admin Dashboard</h1>
+      <OperatorManager baseUrl={baseUrl} />
       {error && <p className={styles.errorMessage}>{error}</p>}
 
       <button onClick={() => setIsAdding(true)} className={styles.addButton}>
-        Add New User
+        Add User to Login System
       </button>
 
       {["admin", "leader", "operator"].map((role) => (

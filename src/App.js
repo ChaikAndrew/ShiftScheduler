@@ -9,10 +9,8 @@ import AdminDashboard from "../src/pages/AdminDashboard/AdminDashboard";
 import OperatorDashboard from "../src/pages/OperatorDashboard/OperatorDashboard";
 import LeaderDashboard from "../src/pages/LeaderDashboard/LeaderDashboard";
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
-
 import {
   machines,
-  operators,
   tasks,
   products,
   colors,
@@ -71,7 +69,6 @@ function App() {
       ? JSON.parse(savedEntries)
       : { first: {}, second: {}, third: {} };
   });
-  // 🔽 ВСТАВ ОСЬ ТУТ ЦЕЙ useEffect
   useEffect(() => {
     const fetchData = async () => {
       const token = localStorage.getItem("token");
@@ -129,13 +126,29 @@ function App() {
     quantity: 0,
   });
   const [error, setError] = useState("");
+  const [operators, setOperators] = useState([]);
 
-  // useEffect(() => {
-  //   const prevEntries = JSON.parse(localStorage.getItem("entries"));
-  //   if (JSON.stringify(prevEntries) !== JSON.stringify(entries)) {
-  //     localStorage.setItem("entries", JSON.stringify(entries));
-  //   }
-  // }, [entries]);
+  useEffect(() => {
+    const fetchOperators = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(
+          "https://shift-scheduler-server.vercel.app/api/operators",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = await res.json();
+        setOperators(data.map((op) => op.name.trim()));
+      } catch (err) {
+        console.error("❌ Не вдалося завантажити операторів:", err.message);
+      }
+    };
+
+    fetchOperators();
+  }, []);
 
   const onSaveEntry = () => {
     const token = localStorage.getItem("token");

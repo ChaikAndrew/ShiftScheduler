@@ -23,7 +23,7 @@ const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
     const statistics = {};
 
     operators.forEach((operator) => {
-      statistics[operator] = Array(daysInMonth).fill({
+      statistics[operator] = Array.from({ length: daysInMonth }, () => ({
         total: 0,
         taskSummary: { POD: 0, POF: 0, Zlecenie: 0, Sample: 0, Test: 0 },
         productSummary: {
@@ -34,7 +34,7 @@ const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
           Children: 0,
           Others: 0,
         },
-      });
+      }));
     });
 
     const allEntries = Object.values(entries).flatMap((shiftEntries) =>
@@ -374,7 +374,7 @@ const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
           {Object.keys(operatorEfficiency).map((operator) => {
             const data = operatorEfficiency[operator];
             const avgSpeed = data.totalWorkHours
-              ? (data.totalProducts / data.totalWorkHours).toFixed(2)
+              ? Math.round(data.totalProducts / data.totalWorkHours)
               : 0;
 
             return (
@@ -415,7 +415,7 @@ const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
                   operatorEfficiency[operator].productDetails[product];
                 const productSpeed =
                   details.workHours > 0
-                    ? (details.total / details.workHours).toFixed(2)
+                    ? Math.round(details.total / details.workHours)
                     : "-";
                 return {
                   product,

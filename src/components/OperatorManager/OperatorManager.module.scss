@@ -1,0 +1,51 @@
+.dashboardContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  font-family: "Arial", sans-serif;
+  background-color: #f7f7f7;
+  width: 100%;
+}
+
+.roleSection {
+  margin: 20px 0;
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 1000px;
+}
+
+.roleTitle {
+  font-size: 1.4rem;
+
+  color: #333;
+  text-align: left;
+  margin-bottom: 15px;
+}
+
+.userTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.userTable th,
+.userTable td {
+  border: 1px solid #e0e0e0;
+  color: #333;
+  padding: 5px;
+  text-align: left;
+}
+
+.userTable th {
+  background-color: #bcbcbc;
+
+  text-transform: uppercase;
+}
+
+.userTable tr:hover {
+  background-color: #e6f7ffb5;
+  transition: background-color 0.3s ease;
+}

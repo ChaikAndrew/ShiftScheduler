@@ -1,16 +1,17 @@
-import React, { useState } from "react";
-import { calculateSummary } from "../../utils/calculateSummaries"; // Import function
+import React, { useState, useEffect } from "react";
+import { calculateSummary } from "../../utils/calculateSummaries";
 import style from "./OperatorStatistics.module.scss";
 
 function OperatorStatistics({
   entries = { first: {}, second: {}, third: {} },
-  operators = [],
   tasks = [],
   products = [],
+  baseUrl = "http://localhost:4040", // або твій прод url
 }) {
   const [viewType, setViewType] = useState("day");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("");
+  const [operatorsFromDB, setOperatorsFromDB] = useState([]);
   const [selectedOperator, setSelectedOperator] = useState("");
 
   const handleViewTypeChange = (e) => setViewType(e.target.value);
@@ -18,10 +19,29 @@ function OperatorStatistics({
   const handleMonthChange = (e) => setSelectedMonth(e.target.value);
   const handleOperatorChange = (e) => setSelectedOperator(e.target.value);
 
+  useEffect(() => {
+    const fetchOperators = async () => {
+      try {
+        const res = await fetch(`${baseUrl}/api/operators`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        const data = await res.json();
+        const operatorNames = data.map((op) => op.name);
+        setOperatorsFromDB(operatorNames);
+      } catch (err) {
+        console.error("❌ Не вдалося отримати операторів:", err);
+      }
+    };
+
+    fetchOperators();
+  }, [baseUrl]);
+
   const filteredEntries = entries
     ? Object.entries(entries).flatMap(([shift, machines]) =>
-        Object.values(machines || {}).flatMap((machineEntries) => {
-          return Array.isArray(machineEntries)
+        Object.values(machines || {}).flatMap((machineEntries) =>
+          Array.isArray(machineEntries)
             ? machineEntries.filter((entry) => {
                 const isOperatorSelected = entry.operator === selectedOperator;
                 const isDateSelected =
@@ -34,12 +54,12 @@ function OperatorStatistics({
                     (viewType === "month" && isMonthSelected))
                 );
               })
-            : [];
-        })
+            : []
+        )
       )
     : [];
 
-  const summary = calculateSummary(filteredEntries, operators, products);
+  const summary = calculateSummary(filteredEntries, operatorsFromDB, products);
 
   const totalTaskQuantity = Object.values(summary.taskSummary).reduce(
     (sum, quantity) => sum + quantity,
@@ -54,12 +74,11 @@ function OperatorStatistics({
     <div className={style.container}>
       <h2 className={style.header}>Operator Statistics</h2>
 
-      {/* View Type Selection */}
+      {/* View Type */}
       <div className={style.viewTypeSelection}>
         <label>
           <input
             type="radio"
-            name="viewType"
             value="day"
             checked={viewType === "day"}
             onChange={handleViewTypeChange}
@@ -69,7 +88,6 @@ function OperatorStatistics({
         <label>
           <input
             type="radio"
-            name="viewType"
             value="month"
             checked={viewType === "month"}
             onChange={handleViewTypeChange}
@@ -78,7 +96,7 @@ function OperatorStatistics({
         </label>
       </div>
 
-      {/* Date or Month Selection */}
+      {/* Date / Month Input */}
       <div className={style.dateSelection}>
         {viewType === "day" ? (
           <input
@@ -97,7 +115,7 @@ function OperatorStatistics({
         )}
       </div>
 
-      {/* Operator Selection Dropdown */}
+      {/* Operator Dropdown */}
       <div className={style.operatorSelection}>
         <h3>Select Operator</h3>
         <select
@@ -106,20 +124,22 @@ function OperatorStatistics({
           className={style.operatorDropdown}
         >
           <option value="">-- Select Operator --</option>
-          {operators.map((operator) => (
-            <option key={operator} value={operator}>
-              {operator}
-            </option>
-          ))}
+          {[...operatorsFromDB]
+            .sort((a, b) => a.localeCompare(b))
+            .map((op) => (
+              <option key={op} value={op}>
+                {op}
+              </option>
+            ))}
         </select>
       </div>
 
-      {/* Display Results */}
+      {/* Results */}
       <div className={style.resultTables}>
         <h3>Results</h3>
         {selectedOperator ? (
           <>
-            {/* Task Summary Table */}
+            {/* Tasks */}
             <div className={style.tableContainer}>
               <h4>Task Summary</h4>
               <table className={style.table}>
@@ -150,7 +170,7 @@ function OperatorStatistics({
               </table>
             </div>
 
-            {/* Product Summary Table */}
+            {/* Products */}
             <div className={style.tableContainer}>
               <h4>Product Summary</h4>
               <table className={style.table}>
