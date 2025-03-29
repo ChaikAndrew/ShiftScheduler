@@ -185,13 +185,16 @@ function App() {
             (a, b) => new Date(a.startTime) - new Date(b.startTime)
           );
 
-          const recalculated = recalculateDowntime(
-            grouped,
-            currentShift,
-            selectedMachine
-          );
+          let fullyRecalculated = { ...grouped };
+          for (const machine in grouped[currentShift]) {
+            fullyRecalculated = recalculateDowntime(
+              fullyRecalculated,
+              currentShift,
+              machine
+            );
+          }
 
-          setEntries(recalculated);
+          setEntries(fullyRecalculated);
           setEditingIndex(null);
           setEditingEntryId(null);
           setForm({
