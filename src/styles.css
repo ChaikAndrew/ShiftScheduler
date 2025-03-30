@@ -32,8 +32,9 @@ video {
 
 /* Стилі для таблиці */
 table {
-  width: 90%;
+  width: 100%;
 
+  font-size: 14px;
   border-collapse: collapse;
   margin-top: 5px;
   border-radius: 8px;
@@ -126,7 +127,7 @@ select {
 
 /* Загальний стиль для header меню вибору змін та інпутів*/
 .header-main-input {
-  width: 90%;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -170,7 +171,7 @@ select {
 
 .summary {
   text-align: center;
-  width: 90%;
+  width: 100%;
   margin: auto;
 }
 
@@ -234,5 +235,5 @@ select {
 }
 
 .app-container.collapsed .content {
-  margin-left: 80px; /* Коли NavBar згорнутий */
+  margin-left: 70px; /* Коли NavBar згорнутий */
 }

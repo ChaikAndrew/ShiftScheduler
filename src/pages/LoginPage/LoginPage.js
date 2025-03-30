@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./LoginPage.module.scss"; // Підключаємо модулі стилів
 import { FiEye, FiEyeOff } from "react-icons/fi"; // Додаємо іконки
+import loginImage from "../../images/login.png";
+
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -103,6 +105,11 @@ const LoginPage = () => {
 
   return (
     <div className={styles.loginContainer}>
+      <img
+        src={loginImage}
+        alt="Login illustration"
+        className={styles.loginImage}
+      />
       <h2 className={styles.header}>Login</h2>
       <form onSubmit={handleLogin}>
         <div className={styles.formGroup}>

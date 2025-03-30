@@ -1,9 +1,4 @@
 .container {
-  padding: 20px;
-  display: flex;
-  padding: 20px;
-  flex-direction: column;
-  align-items: center;
   margin-left: auto;
   margin-right: auto;
 }
@@ -19,31 +14,26 @@
     flex-direction: column;
     gap: 5px;
   }
-
-  select {
-    padding: 5px;
-    font-size: 1rem;
-  }
 }
 
 .title {
-  margin-top: 20px;
+  padding: 10px 0;
   font-size: 1.2rem;
-  font-weight: bold;
   text-align: center;
 }
 
 .table {
-  width: 90%;
+  width: 100%;
+  background-color: white;
   border-collapse: collapse;
-  margin-top: 10px;
+
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
   th,
   td {
     border: 1px solid #ddd;
-    padding: 8px;
+    padding: 5px;
     text-align: center;
   }
 
@@ -57,6 +47,53 @@
   }
 }
 
-.taskGroup {
-  border: 2px;
+.operatorCell {
+  background-color: #f2f2f2;
+}
+
+.averageCell {
+  background-color: #f2f2f2;
+}
+
+.section {
+  margin-bottom: 40px;
+  flex: 1;
+  min-width: 450px;
+}
+
+.rowSection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-between;
+  align-items: stretch;
+}
+
+.scrollTable {
+  max-height: 567px;
+  overflow-y: auto;
+}
+
+/* 🔥 Sticky шапка таблиці тільки для останньої */
+.stickyHeaderTable thead th {
+  position: sticky;
+  top: 40px; // 👈 висота заголовка h3
+  background-color: #f2f2f2;
+  z-index: 2;
+  height: 40px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* 🔥 Sticky заголовок h3 */
+.stickyHeaderWrapper {
+  position: relative;
+}
+
+.stickyTitle {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 3;
+  padding: 10px 0;
+  text-align: center;
 }

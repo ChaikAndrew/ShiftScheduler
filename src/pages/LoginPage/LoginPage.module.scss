@@ -2,15 +2,15 @@
   max-width: 400px;
   margin: 50px auto;
   padding: 20px;
-  border: 1px solid #ddd;
+
   border-radius: 8px;
-  background-color: #f9f9f9;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #eeeeee;
+  box-shadow: 2px 6px 8px 2px rgba(0, 0, 0, 0.31);
   text-align: center;
 }
 
 .header {
-  font-size: 1.8rem;
+  font-size: 1.4rem;
   font-weight: bold;
   color: #333;
   margin-bottom: 20px;
@@ -22,6 +22,7 @@
 }
 
 .label {
+  color: #333;
   font-weight: bold;
   margin-bottom: 5px;
   display: block;
@@ -29,10 +30,13 @@
 
 .input {
   width: 100%;
-  padding: 8px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 5px;
+  background-color: transparent;
+  outline: none;
+  flex: 1;
+  padding-right: 40px; /* Додаємо простір для іконки */
+  border: none;
+  border-bottom: 1px solid black;
 }
 
 .errorMessage {
@@ -44,7 +48,7 @@
 .button {
   width: 100%;
   padding: 10px;
-  background-color: #007bff;
+  background-color: #686458;
   color: white;
   border: none;
   border-radius: 4px;
@@ -54,18 +58,13 @@
 }
 
 .button:hover {
-  background-color: #0056b3;
+  background-color: #3d3b34;
 }
 
 .passwordContainer {
   display: flex;
   align-items: center;
   position: relative;
-}
-
-.input {
-  flex: 1;
-  padding-right: 40px; /* Додаємо простір для іконки */
 }
 
 .togglePassword {
@@ -87,4 +86,8 @@
 .icon {
   width: 24px;
   height: 24px;
+}
+
+.loginImage {
+  width: 85%;
 }
