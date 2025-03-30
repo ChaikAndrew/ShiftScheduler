@@ -5,6 +5,8 @@ import { reasons } from "../../utils/constants";
 import style from "./EntryTable.module.scss";
 import { showConfirmDialog } from "../ConfirmDialog/ConfirmDialog";
 import { showToast } from "../ToastNotification/ToastNotification";
+import { FaRegEdit } from "react-icons/fa";
+import { RiDeleteBin5Line } from "react-icons/ri";
 
 // Завантаження коментарів із localStorage з урахуванням дати, зміни та оператора
 const loadComments = () => {
@@ -160,7 +162,11 @@ function EntryTable({ entries, onEdit, onDelete }) {
                     className={style.edit}
                     onClick={() => onEdit(filteredIndex, entry.originalIndex)}
                   >
-                    Edit
+                    <FaRegEdit
+                      className={style.icon}
+                      onClick={() => onEdit(filteredIndex, entry.originalIndex)}
+                      title="Edit"
+                    />
                   </button>
                   <button
                     className={style.delete}
@@ -173,7 +179,18 @@ function EntryTable({ entries, onEdit, onDelete }) {
                       )
                     }
                   >
-                    Delete
+                    <RiDeleteBin5Line
+                      className={style.icon}
+                      onClick={() =>
+                        handleDelete(
+                          filteredIndex,
+                          entry.operator,
+                          entry.task,
+                          entry.quantity
+                        )
+                      }
+                      title="Delete"
+                    />
                   </button>
                 </td>
               </tr>

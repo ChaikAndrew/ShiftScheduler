@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "./LoginPage.module.scss"; // Підключаємо модулі стилів
 import { FiEye, FiEyeOff } from "react-icons/fi"; // Додаємо іконки
 import loginImage from "../../images/login.png";
+import infoImage from "../../images/info.png";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -104,48 +105,70 @@ const LoginPage = () => {
   };
 
   return (
-    <div className={styles.loginContainer}>
-      <img
-        src={loginImage}
-        alt="Login illustration"
-        className={styles.loginImage}
-      />
-      <h2 className={styles.header}>Login</h2>
-      <form onSubmit={handleLogin}>
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Username</label>
-          <input
-            type="text"
-            className={styles.input}
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter username"
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Password</label>
-          <div className={styles.passwordContainer}>
+    <div className={styles.loginWrapper}>
+      {" "}
+      <div className={styles.loginContainer}>
+        <div></div>
+        <img
+          src={loginImage}
+          alt="Login illustration"
+          className={styles.loginImage}
+        />
+        <h2 className={styles.header}>Login</h2>
+        <form onSubmit={handleLogin}>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Username</label>
             <input
-              type={showPassword ? "text" : "password"}
+              type="text"
               className={styles.input}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter password"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter username"
             />
-            <button
-              type="button"
-              className={styles.togglePassword}
-              onClick={toggleShowPassword}
-            >
-              {showPassword ? <FiEyeOff /> : <FiEye />}
-            </button>
           </div>
-        </div>
-        {error && <p className={styles.errorMessage}>{error}</p>}
-        <button type="submit" className={styles.button}>
-          Login
-        </button>
-      </form>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Password</label>
+            <div className={styles.passwordContainer}>
+              <input
+                type={showPassword ? "text" : "password"}
+                className={styles.input}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter password"
+              />
+              <button
+                type="button"
+                className={styles.togglePassword}
+                onClick={toggleShowPassword}
+              >
+                {showPassword ? <FiEyeOff /> : <FiEye />}
+              </button>
+            </div>
+          </div>
+          {error && <p className={styles.errorMessage}>{error}</p>}
+          <button type="submit" className={styles.button}>
+            Login
+          </button>
+        </form>
+      </div>
+      <div className={styles.descriptionBox}>
+        <h2>What is ShiftPrint Manager?</h2>
+        <p>
+          ShiftPrint Manager is a system for registering shifts, tasks, and
+          operator productivity. It allows managing work data, viewing detailed
+          statistics, and simplifies control over T-shirt production.
+        </p>
+        <ul>
+          <li>- Instant access to analytics</li>
+          <li>- Simple login system</li>
+          <li>- Flexible shift management</li>
+        </ul>
+        <img
+          src={infoImage}
+          alt="Login illustration"
+          className={styles.infoImage}
+        />
+      </div>
     </div>
   );
 };

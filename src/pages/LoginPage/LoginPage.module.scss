@@ -1,8 +1,7 @@
 .loginContainer {
   max-width: 400px;
-  margin: 50px auto;
-  padding: 20px;
 
+  padding: 20px;
   border-radius: 8px;
   background-color: #eeeeee;
   box-shadow: 2px 6px 8px 2px rgba(0, 0, 0, 0.31);
@@ -36,7 +35,7 @@
   flex: 1;
   padding-right: 40px; /* Додаємо простір для іконки */
   border: none;
-  border-bottom: 1px solid black;
+  border-bottom: 1px solid #bfbfbf;
 }
 
 .errorMessage {
@@ -90,4 +89,37 @@
 
 .loginImage {
   width: 85%;
+}
+
+.infoImage {
+  width: 85%;
+}
+
+.loginWrapper {
+  margin-top: 120px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 60px;
+}
+
+.descriptionBox {
+  max-height: 464px;
+  max-width: 386px;
+  padding: 20px;
+
+  border-radius: 8px;
+  background-color: #eeeeee;
+  box-shadow: 2px 6px 8px 2px rgba(0, 0, 0, 0.31);
+  text-align: center;
+
+  h2 {
+    margin-bottom: 10px;
+    font-size: 20px;
+  }
+
+  p {
+    margin-bottom: 12px;
+  }
 }

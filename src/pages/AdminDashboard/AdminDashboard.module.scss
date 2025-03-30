@@ -94,22 +94,22 @@ button {
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-button::after {
-  content: "";
-  position: absolute;
-  bottom: -3px;
-  left: 50%;
-  width: 0;
-  height: 2px;
-  background-color: #ffc658;
-  transition: width 0.4s ease, left 0.4s ease;
-  transform-origin: center;
-}
+// button::after {
+//   content: "";
+//   position: absolute;
+//   bottom: -3px;
+//   left: 50%;
+//   width: 0;
+//   height: 2px;
+//   background-color: #ffc658;
+//   transition: width 0.4s ease, left 0.4s ease;
+//   transform-origin: center;
+// }
 
-button:hover::after {
-  width: 100%;
-  left: 0;
-}
+// button:hover::after {
+//   width: 100%;
+//   left: 0;
+// }
 
 button:disabled {
   background-color: #ccc;

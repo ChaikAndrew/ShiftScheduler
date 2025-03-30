@@ -92,7 +92,7 @@ button {
 }
 
 /* Псевдоелемент для анімації підкреслення */
-.btn-summary::after {
+/* .btn-summary::after {
   content: "";
   position: absolute;
   bottom: -4px;
@@ -108,7 +108,7 @@ button {
 .btn-summary:active::after {
   width: 100%;
   left: 0;
-}
+} */
 
 /* Стиль для селекту та інпутів */
 input[type="date"],
@@ -191,7 +191,7 @@ select {
   overflow: visible; /* Дозволяє показувати анімацію поза межами кнопки */
 }
 
-.btn-up::after,
+/* .btn-up::after,
 .btn-up::after {
   content: "";
   position: absolute;
@@ -208,7 +208,7 @@ select {
 .btn-up:hover::after {
   width: 100%;
   left: 0;
-}
+} */
 
 .btn-up:hover,
 .btn-up:focus {

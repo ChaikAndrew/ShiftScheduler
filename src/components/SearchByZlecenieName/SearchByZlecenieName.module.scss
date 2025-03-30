@@ -46,22 +46,22 @@
 }
 
 /* Псевдоелемент для анімації підкреслення */
-.fixedButton::after {
-  content: "";
-  position: absolute;
-  bottom: -4px; /* Лінія під кнопкою */
-  left: 50%;
-  width: 0;
-  height: 3px;
-  background-color: #ffaa00;
-  transition: width 0.3s ease, left 0.3s ease;
-  transform-origin: center;
-}
+// .fixedButton::after {
+//   content: "";
+//   position: absolute;
+//   bottom: -4px; /* Лінія під кнопкою */
+//   left: 50%;
+//   width: 0;
+//   height: 3px;
+//   background-color: #ffaa00;
+//   transition: width 0.3s ease, left 0.3s ease;
+//   transform-origin: center;
+// }
 
-.fixedButton:hover::after {
-  width: 100%;
-  left: 0;
-}
+// .fixedButton:hover::after {
+//   width: 100%;
+//   left: 0;
+// }
 
 .modalSearchButton {
   position: relative; /* Додаємо відносне позиціонування */
@@ -77,22 +77,22 @@
 }
 
 /* Псевдоелемент для анімації підкреслення */
-.modalSearchButton::after {
-  content: "";
-  position: absolute;
-  bottom: -4px; /* Лінія під кнопкою */
-  left: 50%;
-  width: 0;
-  height: 3px;
-  background-color: #ffaa00;
-  transition: width 0.3s ease, left 0.3s ease;
-  transform-origin: center;
-}
+// .modalSearchButton::after {
+//   content: "";
+//   position: absolute;
+//   bottom: -4px; /* Лінія під кнопкою */
+//   left: 50%;
+//   width: 0;
+//   height: 3px;
+//   background-color: #ffaa00;
+//   transition: width 0.3s ease, left 0.3s ease;
+//   transform-origin: center;
+// }
 
-.modalSearchButton:hover::after {
-  width: 100%; /* Підкреслення по всій ширині при наведенні */
-  left: 0;
-}
+// .modalSearchButton:hover::after {
+//   width: 100%; /* Підкреслення по всій ширині при наведенні */
+//   left: 0;
+// }
 
 .modalSearchButton:hover,
 .modalSearchButton:focus {

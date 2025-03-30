@@ -103,44 +103,24 @@
   margin-right: 5px;
 }
 
-.delete,
-.edit {
-  position: relative;
-  padding: 2px 20px;
-  border: none;
-  border-radius: 4px;
+.icon {
   cursor: pointer;
-  font-size: 16px;
-  background-color: #a2a2a2;
-  color: #333;
-  transition: background-color 0.3s, color 0.3s;
-  outline: none;
-  overflow: visible;
+  font-size: 1.1rem;
+  transition: color 0.2s;
 }
 
-.delete::after,
-.edit::after {
-  content: "";
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  width: 0;
-  height: 2px;
-  background-color: #ffc658;
-  transition: width 0.3s ease, left 0.3s ease;
-  transform-origin: center;
+.edit .icon {
+  color: #555;
+
+  &:hover {
+    color: #ffcc00;
+  }
 }
 
-.delete:hover::after,
-.edit:hover::after {
-  width: 100%;
-  left: 0;
-}
+.delete .icon {
+  color: #555;
 
-.delete:hover,
-.delete:focus,
-.edit:hover,
-.edit:focus {
-  background-color: #333;
-  color: #82ca9d;
+  &:hover {
+    color: #d00000;
+  }
 }

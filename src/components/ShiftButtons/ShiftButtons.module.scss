@@ -25,19 +25,19 @@
   overflow: visible;
 }
 
-.shiftBtn::after {
-  content: "";
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  width: 0;
-  height: 2px;
-  background-color: #ffc658;
-  transition: width 0.3s ease, left 0.3s ease;
-  transform-origin: center;
-}
+// .shiftBtn::after {
+//   content: "";
+//   position: absolute;
+//   bottom: -4px;
+//   left: 50%;
+//   width: 0;
+//   height: 2px;
+//   background-color: #ffc658;
+//   transition: width 0.3s ease, left 0.3s ease;
+//   transform-origin: center;
+// }
 
-.shiftBtn:hover::after {
-  width: 100%;
-  left: 0;
-}
+// .shiftBtn:hover::after {
+//   width: 100%;
+//   left: 0;
+// }
