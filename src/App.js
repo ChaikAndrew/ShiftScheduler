@@ -115,6 +115,7 @@ function App() {
   const [showMachineSummary, setShowMachineSummary] = useState(false);
   const [showUpButton, setShowUpButton] = useState(false);
   const [editingEntryId, setEditingEntryId] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [form, setForm] = useState({
     startTime: "",
     endTime: "",
@@ -367,6 +368,24 @@ function App() {
   const isSelectionComplete =
     selectedLeader && selectedMachine && selectedOperator;
 
+  //оновлюємо коментар
+  const handleUpdateEntryComment = (updatedEntry) => {
+    setEntries((prev) => {
+      const updated = { ...prev };
+      const list = updated[updatedEntry.shift]?.[updatedEntry.machine];
+      if (list) {
+        const index = list.findIndex((e) => e._id === updatedEntry._id);
+        if (index !== -1) {
+          list[index] = updatedEntry;
+        }
+      }
+      return updated;
+    });
+
+    // ⬅️ Тригеримо оновлення компонента
+    setRefreshKey((prev) => prev + 1);
+  };
+
   const [isCollapsed, setIsCollapsed] = useState(true);
   return (
     <div className={`app-container ${isCollapsed ? "collapsed" : ""}`}>
@@ -451,6 +470,7 @@ function App() {
                   {/* Відображення записів */}
                   {filteredEntries.length > 0 && (
                     <EntryTable
+                      key={refreshKey} // 🆕 Перемалює компонент при кожному збереженні
                       entries={filteredEntries
                         .sort(
                           (a, b) =>
@@ -476,6 +496,7 @@ function App() {
                           localStorage.getItem("token") // ⬅️ передаємо токен
                         )
                       }
+                      onUpdateEntry={handleUpdateEntryComment} // 🆕 ⬅️ Ось це
                     />
                   )}
 

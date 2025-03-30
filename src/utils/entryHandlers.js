@@ -77,6 +77,7 @@ export async function handleSaveEntryToDB({
     product: form.product,
     color: form.color,
     reason: form.reason,
+    comment: form.comment || "",
     quantity: parseInt(form.quantity, 10),
   };
 
@@ -99,6 +100,7 @@ export async function handleSaveEntryToDB({
       color: "",
       reason: "",
       quantity: 0,
+      comment: "",
     });
 
     if (onSuccess) onSuccess();
