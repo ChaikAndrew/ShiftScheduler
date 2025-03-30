@@ -12,6 +12,7 @@ import {
 import { VscPreview } from "react-icons/vsc";
 import { SlPrinter } from "react-icons/sl";
 import { GrGroup } from "react-icons/gr";
+import { BsClock } from "react-icons/bs";
 
 import styles from "./NavBar.module.scss";
 
@@ -104,7 +105,7 @@ const NavBar = ({ isCollapsed, setIsCollapsed }) => {
             isActive ? `${styles.link} ${styles.active}` : styles.link
           }
         >
-          <SlPrinter className={styles.icon} />
+          <BsClock className={styles.icon} />
           <span className={styles.linkText}>Machine Time Stats</span>
         </NavLink>
         <NavLink

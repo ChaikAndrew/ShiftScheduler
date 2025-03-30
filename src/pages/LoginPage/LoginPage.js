@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "./LoginPage.module.scss"; // Підключаємо модулі стилів
+import style from "./LoginPage.module.scss"; // Підключаємо модулі стилів
 import { FiEye, FiEyeOff } from "react-icons/fi"; // Додаємо іконки
 import loginImage from "../../images/login.png";
 import infoImage from "../../images/info.png";
@@ -105,68 +105,93 @@ const LoginPage = () => {
   };
 
   return (
-    <div className={styles.loginWrapper}>
+    <div className={style.loginWrapper}>
       {" "}
-      <div className={styles.loginContainer}>
+      <div className={style.loginContainer}>
         <div></div>
         <img
           src={loginImage}
           alt="Login illustration"
-          className={styles.loginImage}
+          className={style.loginImage}
         />
-        <h2 className={styles.header}>Login</h2>
+        <h2 className={style.header}>Login</h2>
         <form onSubmit={handleLogin}>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Username</label>
+          <div className={style.formGroup}>
+            <label className={style.label}>Username</label>
             <input
               type="text"
-              className={styles.input}
+              className={style.input}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter username"
             />
           </div>
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Password</label>
-            <div className={styles.passwordContainer}>
+          <div className={style.formGroup}>
+            <label className={style.label}>Password</label>
+            <div className={style.passwordContainer}>
               <input
                 type={showPassword ? "text" : "password"}
-                className={styles.input}
+                className={style.input}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password"
               />
               <button
                 type="button"
-                className={styles.togglePassword}
+                className={style.togglePassword}
                 onClick={toggleShowPassword}
               >
                 {showPassword ? <FiEyeOff /> : <FiEye />}
               </button>
             </div>
           </div>
-          {error && <p className={styles.errorMessage}>{error}</p>}
-          <button type="submit" className={styles.button}>
+          {error && <p className={style.errorMessage}>{error}</p>}
+          <button type="submit" className={style.button}>
             Login
           </button>
         </form>
       </div>
-      <div className={styles.descriptionBox}>
+      <div className={style.descriptionBox}>
         <h2>What is ShiftPrint Manager?</h2>
         <p>
           ShiftPrint Manager is a system for registering shifts, tasks, and
-          operator productivity. It allows managing work data, viewing detailed
-          statistics, and simplifies control over T-shirt production.
+          operator productivity. It allows you to manage work data, view
+          detailed statistics, and streamline control over your production.
         </p>
         <ul>
-          <li>- Instant access to analytics</li>
-          <li>- Simple login system</li>
-          <li>- Flexible shift management</li>
+          <li>
+            <span className={style.highlighted}>- Real-time analytics</span> :
+            instantly view productivity, downtime, output volume, and more
+          </li>
+          <li>
+            <span className={style.highlighted}>- Simple and secure login</span>{" "}
+            : access only for registered users with roles
+          </li>
+          <li>
+            <span className={style.highlighted}>
+              - Flexible shift management
+            </span>{" "}
+            : shifts, machines, and operators all under control
+          </li>
+          <li>
+            <span className={style.highlighted}>- Task comments</span> : leave
+            notes or feedback on any entry
+          </li>
+          <li>
+            <span className={style.highlighted}>
+              - Time-saving for team leaders
+            </span>{" "}
+            : no more Excel chaos, everything is automated
+          </li>
+          <li>
+            <span className={style.highlighted}>- Cloud-based storage</span> :
+            all data is centralized, safe, and accessible
+          </li>
         </ul>
         <img
           src={infoImage}
           alt="Login illustration"
-          className={styles.infoImage}
+          className={style.infoImage}
         />
       </div>
     </div>

@@ -9,6 +9,8 @@ import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { updateEntryInDB } from "../../utils/api/shiftApi";
 
+import { FcComments } from "react-icons/fc";
+
 function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
   const [commentId, setCommentId] = useState(null);
   const [newComment, setNewComment] = useState("");
@@ -50,17 +52,15 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
         { comment: newComment },
         token
       );
-      const updatedEntry = res.data.entry; // 💥 Оце головне!
-
-      showToast("Коментар збережено ✅", "success");
+      const updatedEntry = res.data.entry;
+      showToast("Comment saved successfully", "success");
       setIsModalOpen(false);
       setCommentId(null);
       setNewComment("");
 
       if (onUpdateEntry) onUpdateEntry(updatedEntry); // 🔄 Оновлюємо локально
     } catch (err) {
-      console.error("❌ Помилка при збереженні коментаря:", err);
-      showToast("Помилка при збереженні коментаря", "error");
+      showToast("Failed to save comment", "error");
     }
   };
 
@@ -116,15 +116,12 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
                 >
                   {entry.operator}
                   {entry.comment && (
-                    <>
-                      <span role="img" aria-label="comment">
-                        {" "}
-                        📝{" "}
-                      </span>
+                    <span className={style.comment}>
+                      <FcComments className={style.commentIcon} />
                       <span className={style.commentTooltip}>
                         {entry.comment}
                       </span>
-                    </>
+                    </span>
                   )}
                 </span>
               </td>
@@ -150,7 +147,7 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
                   className={style.edit}
                   onClick={() => onEdit(filteredIndex, entry.originalIndex)}
                 >
-                  <FaRegEdit className={style.icon} title="Edit" />
+                  <FaRegEdit className={style.icon} />
                 </button>
                 <button
                   className={style.delete}
@@ -163,7 +160,7 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
                     )
                   }
                 >
-                  <RiDeleteBin5Line className={style.icon} title="Delete" />
+                  <RiDeleteBin5Line className={style.icon} />
                 </button>
               </td>
             </tr>
@@ -174,17 +171,17 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
       {isModalOpen && (
         <div className={style.modalOverlay}>
           <div className={style.modalContent}>
-            <h2>Додати коментар</h2>
+            <h2>Add Comment</h2>
             <textarea
               className={style.commentInput}
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Введіть коментар"
+              placeholder="Enter your comment here..."
               rows="5"
             />
             <div className={style.modalActions}>
-              <button onClick={handleSaveComment}>Зберегти</button>
-              <button onClick={handleCloseModal}>Скасувати</button>
+              <button onClick={handleSaveComment}>Save</button>
+              <button onClick={handleCloseModal}>Cancel</button>
             </div>
           </div>
         </div>

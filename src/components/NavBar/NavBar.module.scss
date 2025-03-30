@@ -13,7 +13,7 @@
   left: 0;
 
   transition: width 0.3s ease;
-  z-index: 100;
+  z-index: 10;
 
   &.collapsed {
     width: 70px;
