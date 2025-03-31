@@ -23,6 +23,10 @@
     }
   }
 
+  .linkText {
+    font-size: 14px;
+  }
+
   .logoContainer {
     display: flex;
     flex-direction: column;
@@ -59,7 +63,7 @@
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
   }
 
   .link {
@@ -68,7 +72,7 @@
     gap: 10px;
     text-decoration: none;
     color: inherit;
-    font-size: 16px;
+    font-size: 14px;
     padding: 10px;
     border-radius: 4px;
     transition: background 0.2s;
@@ -93,7 +97,7 @@
 
   .userInfo {
     text-align: center;
-    font-size: 16px;
+    font-size: 12px;
     margin-bottom: 10px;
   }
 
@@ -112,6 +116,7 @@
     align-items: center;
     gap: 5px;
     padding: 10px;
+    margin-bottom: 10px;
     border-radius: 4px;
 
     transition: background-color 0.2s ease;
@@ -121,4 +126,8 @@
       background-color: rgba(255, 255, 255, 0.1);
     }
   }
+}
+
+.dashboardLink {
+  margin-top: 30px;
 }

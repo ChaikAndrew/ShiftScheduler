@@ -116,6 +116,7 @@ function App() {
   const [showUpButton, setShowUpButton] = useState(false);
   const [editingEntryId, setEditingEntryId] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [form, setForm] = useState({
     startTime: "",
     endTime: "",
@@ -389,7 +390,17 @@ function App() {
   const [isCollapsed, setIsCollapsed] = useState(true);
   return (
     <div className={`app-container ${isCollapsed ? "collapsed" : ""}`}>
-      <NavBar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+      <NavBar
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
+        setIsSearchModalOpen={setIsSearchModalOpen} // ⬅️ ось що бракує!
+      />
+      <SearchByZlecenieName
+        entries={entries}
+        isModalOpen={isSearchModalOpen}
+        setIsModalOpen={setIsSearchModalOpen}
+      />
+
       <div className={`content container`}>
         <ToastContainer />
         <Routes>
@@ -501,7 +512,6 @@ function App() {
                   )}
 
                   {/* Додаємо компонент пошуку */}
-                  <SearchByZlecenieName entries={entries} />
 
                   {/* Підсумки */}
                   <div className="summary">

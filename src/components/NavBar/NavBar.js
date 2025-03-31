@@ -13,10 +13,11 @@ import { VscPreview } from "react-icons/vsc";
 import { SlPrinter } from "react-icons/sl";
 import { GrGroup } from "react-icons/gr";
 import { BsClock } from "react-icons/bs";
+import { FiSearch } from "react-icons/fi";
 
 import styles from "./NavBar.module.scss";
 
-const NavBar = ({ isCollapsed, setIsCollapsed }) => {
+const NavBar = ({ isCollapsed, setIsCollapsed, setIsSearchModalOpen }) => {
   const navigate = useNavigate();
   const [role, setRole] = useState(localStorage.getItem("role"));
   const [username, setUsername] = useState(localStorage.getItem("username"));
@@ -126,11 +127,20 @@ const NavBar = ({ isCollapsed, setIsCollapsed }) => {
           <GrGroup className={styles.icon} />
           <span className={styles.linkText}>Operator Statistics</span>
         </NavLink>
-
+        <NavLink
+          to="#"
+          onClick={() => setIsSearchModalOpen(true)}
+          className={styles.link}
+        >
+          <FiSearch className={styles.icon} />
+          <span className={styles.linkText}>Zlecenie Search</span>
+        </NavLink>
         <NavLink
           to={dashboardLink.path}
           className={({ isActive }) =>
-            isActive ? `${styles.link} ${styles.active}` : styles.link
+            `${styles.link} ${isActive ? styles.active : ""} ${
+              styles.dashboardLink
+            }`
           }
         >
           <VscPreview className={styles.icon} />
