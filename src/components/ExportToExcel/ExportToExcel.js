@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import * as XLSX from "xlsx";
+import * as XLSX from "xlsx-js-style";
 import { saveAs } from "file-saver";
 import DateSelector from "../../components/DateSelector/DateSelector";
 import ShiftButtons from "../../components/ShiftButtons/ShiftButtons";
@@ -33,9 +33,9 @@ const ExportToExcel = ({ entries }) => {
     const downtimeReasonMap = new Map();
     const totalTasks = {};
     const totalProducts = {};
+    const leaderNameSet = new Set();
     let grandTotalQty = 0;
     let totalZlecenieQty = 0;
-    let leaderName = "";
     const knownTasks = ["POD", "POF", "Sample", "Test"];
     const allProductsSet = new Set();
 
@@ -56,102 +56,112 @@ const ExportToExcel = ({ entries }) => {
       const machinesInShift = entries[shift] || {};
       const shiftRows = [];
 
-      for (const machine in machinesInShift) {
-        const records = machinesInShift[machine].filter((e) =>
-          e.date?.startsWith(selectedDate)
-        );
-
-        if (records.length === 0) continue;
-
-        let totalQuantity = 0;
-        let downtime = 0;
-        let workingTime = 0;
-        let tasksPerMachine = {};
-        let productsPerMachine = {};
-        const reasonMap = new Map();
-
-        records.forEach((entry) => {
-          const qty = entry.quantity || 0;
-          totalQuantity += qty;
-          downtime += entry.downtime || 0;
-          workingTime += entry.workingTime || 0;
-
-          if (entry.task) {
-            tasksPerMachine[entry.task] =
-              (tasksPerMachine[entry.task] || 0) + qty;
-            totalTasks[entry.task] = (totalTasks[entry.task] || 0) + qty;
-          }
-
-          const isZlecenie = !knownTasks.includes(entry.task);
-          if (isZlecenie && entry.task) {
-            totalZlecenieQty += qty;
-          }
-
-          if (entry.product) {
-            productsPerMachine[entry.product] =
-              (productsPerMachine[entry.product] || 0) + qty;
-            totalProducts[entry.product] =
-              (totalProducts[entry.product] || 0) + qty;
-          }
-
-          if (entry.reason) {
-            const reasonEntry = reasons.find(
-              (r) => r.description === entry.reason
-            );
-            const reasonNum = reasonEntry?.id;
-            if (reasonNum !== undefined) {
-              reasonMap.set(
-                reasonNum,
-                (reasonMap.get(reasonNum) || 0) + entry.downtime
-              );
-              if (!downtimeReasonMap.has(reasonNum)) {
-                const cleanDesc = entry.reason.replace(/^[\d.]+\s*/, "");
-                downtimeReasonMap.set(reasonNum, cleanDesc);
-              }
-            }
-          }
-        });
-
-        const reasonNumbers = Array.from(reasonMap.keys()).sort(
-          (a, b) => a - b
-        );
-
-        const row = {
-          Date: selectedDate,
-          Shift: shift,
-          Leader: records[0]?.leader || "",
-          Machine: machine,
-          Quantity: totalQuantity,
-          Operators: Array.from(
-            new Set(records.map((e) => e.operator).filter(Boolean))
-          ).join(", "),
-        };
-
-        knownTasks.forEach((task) => {
-          row[task] = tasksPerMachine[task] || 0;
-        });
-
-        row["Zlecenie"] =
-          totalQuantity -
-          knownTasks.reduce(
-            (acc, task) => acc + (tasksPerMachine[task] || 0),
-            0
+      Object.keys(machinesInShift)
+        .sort((a, b) => {
+          const numA = parseInt(a.match(/\d+/)?.[0] || 0);
+          const numB = parseInt(b.match(/\d+/)?.[0] || 0);
+          return numA - numB;
+        })
+        .forEach((machine) => {
+          const records = machinesInShift[machine].filter((e) =>
+            e.date?.startsWith(selectedDate)
           );
 
-        allProducts.forEach((prod) => {
-          row[prod] = productsPerMachine[prod] || 0;
+          if (records.length === 0) return;
+
+          let totalQuantity = 0;
+          let downtime = 0;
+          let workingTime = 0;
+          let tasksPerMachine = {};
+          let productsPerMachine = {};
+          const reasonMap = new Map();
+
+          records.forEach((entry) => {
+            const qty = entry.quantity || 0;
+            totalQuantity += qty;
+            downtime += entry.downtime || 0;
+            workingTime += entry.workingTime || 0;
+
+            if (entry.task) {
+              tasksPerMachine[entry.task] =
+                (tasksPerMachine[entry.task] || 0) + qty;
+              totalTasks[entry.task] = (totalTasks[entry.task] || 0) + qty;
+            }
+
+            const isZlecenie = !knownTasks.includes(entry.task);
+            if (isZlecenie && entry.task) {
+              totalZlecenieQty += qty;
+            }
+
+            if (entry.product) {
+              productsPerMachine[entry.product] =
+                (productsPerMachine[entry.product] || 0) + qty;
+              totalProducts[entry.product] =
+                (totalProducts[entry.product] || 0) + qty;
+            }
+
+            if (entry.reason) {
+              const reasonEntry = reasons.find(
+                (r) => r.description === entry.reason
+              );
+              const reasonNum = reasonEntry?.id;
+              if (reasonNum !== undefined) {
+                reasonMap.set(
+                  reasonNum,
+                  (reasonMap.get(reasonNum) || 0) + entry.downtime
+                );
+                if (!downtimeReasonMap.has(reasonNum)) {
+                  const cleanDesc = entry.reason.replace(/^[\d.]+\s*/, "");
+                  downtimeReasonMap.set(reasonNum, cleanDesc);
+                }
+              }
+            }
+          });
+
+          const reasonNumbers = Array.from(reasonMap.keys()).sort(
+            (a, b) => a - b
+          );
+
+          const row = {
+            Date: selectedDate,
+            Shift: shift,
+            Leader: records[0]?.leader || "",
+            Machine: machine,
+            Quantity: totalQuantity,
+            Operators: Array.from(
+              new Set(records.map((e) => e.operator).filter(Boolean))
+            ).join(", "),
+          };
+
+          const shiftLeader = records[0]?.leader;
+          if (shiftLeader) {
+            leaderNameSet.add(shiftLeader);
+          }
+
+          knownTasks.forEach((task) => {
+            row[task] = tasksPerMachine[task] || 0;
+          });
+
+          row["Zlecenie"] =
+            totalQuantity -
+            knownTasks.reduce(
+              (acc, task) => acc + (tasksPerMachine[task] || 0),
+              0
+            );
+
+          allProducts.forEach((prod) => {
+            row[prod] = productsPerMachine[prod] || 0;
+          });
+
+          row["Working Time"] = formatTime(workingTime);
+          row["Downtime"] = formatTime(downtime);
+          row["Downtime Reasons"] = reasonNumbers
+            .map((num) => `${num} (${formatTime(reasonMap.get(num))})`)
+            .join(", ");
+
+          shiftRows.push(row);
+          grandTotalQty += totalQuantity;
         });
-
-        row["Working Time"] = formatTime(workingTime);
-        row["Downtime"] = formatTime(downtime);
-        row["Downtime Reasons"] = reasonNumbers
-          .map((num) => `${num} (${formatTime(reasonMap.get(num))})`)
-          .join(", ");
-
-        shiftRows.push(row);
-        leaderName = records[0]?.leader || "";
-        grandTotalQty += totalQuantity;
-      }
 
       result.push(...shiftRows);
       if (shiftIndex < shiftsToExport.length - 1) {
@@ -164,15 +174,14 @@ const ExportToExcel = ({ entries }) => {
       return;
     }
 
-    const sortedTasks = Object.entries(totalTasks)
-      .filter(([, val]) => val > 0)
-      .sort(([a, b]) => {
-        const isKnownA = knownTasks.includes(a);
-        const isKnownB = knownTasks.includes(b);
-        if (isKnownA && !isKnownB) return -1;
-        if (!isKnownA && isKnownB) return 1;
-        return a.localeCompare(b);
-      });
+    const sortedTasks = [
+      ...knownTasks
+        .filter((task) => totalTasks[task])
+        .map((task) => [task, totalTasks[task]]),
+      ...Object.entries(totalTasks)
+        .filter(([task]) => !knownTasks.includes(task))
+        .sort(([a], [b]) => a.localeCompare(b)),
+    ];
 
     const taskSummaryLine = sortedTasks
       .map(([task, qty]) => `${task}: ${qty}`)
@@ -183,11 +192,23 @@ const ExportToExcel = ({ entries }) => {
       .map(([prod, qty]) => `${prod}: ${qty}`)
       .join(" | ");
 
+    const allLeaders = Array.from(leaderNameSet).join(", ");
+
     const headerLines = [
       [
-        `Shift Summary | Date: ${selectedDate} | ${
-          mode === "all" ? "All Shifts" : `Shift: ${currentShift}`
-        } | Leader: ${leaderName} | Total Quantity: ${grandTotalQty}`,
+        {
+          v: `Shift Summary | Date: ${selectedDate} | ${
+            mode === "all" ? "All Shifts" : `Shift: ${currentShift}`
+          } | Leader: ${allLeaders} | Total Quantity: ${grandTotalQty}`,
+          s: {
+            font: {
+              bold: true,
+              color: { rgb: "6AA84F" },
+              name: "Arial",
+              sz: 11,
+            },
+          },
+        },
       ],
       [taskSummaryLine],
       ["Zlecenie total: " + totalZlecenieQty],
@@ -202,6 +223,27 @@ const ExportToExcel = ({ entries }) => {
       skipHeader: false,
     });
 
+    worksheet["!rows"] = [{ hpt: 25 }, { hpt: 25 }, { hpt: 25 }, { hpt: 25 }];
+
+    const headerKeys = Object.keys(result[0] || {});
+    headerKeys.forEach((key, colIndex) => {
+      const cellAddress = XLSX.utils.encode_cell({ r: 5, c: colIndex }); // A6 = r:5
+      if (worksheet[cellAddress]) {
+        worksheet[cellAddress].s = {
+          font: {
+            bold: true,
+            color: { rgb: "FFFFFF" },
+          },
+          fill: {
+            fgColor: { rgb: "4F81BD" }, // синенький фон
+          },
+          alignment: {
+            horizontal: "center",
+            vertical: "center",
+          },
+        };
+      }
+    });
     const columnWidths = Object.keys(result[0]).map((key) => {
       const maxLength = result.reduce((acc, row) => {
         const cell = row[key];
@@ -213,7 +255,17 @@ const ExportToExcel = ({ entries }) => {
       return { wch: Math.max(8, Math.min(maxLength + 2, maxWidth)) };
     });
     worksheet["!cols"] = columnWidths;
-
+    Object.keys(worksheet).forEach((cell) => {
+      if (cell[0] === "!") return;
+      worksheet[cell].s = {
+        ...worksheet[cell].s,
+        alignment: {
+          ...(worksheet[cell].s?.alignment || {}),
+          horizontal: "left",
+          vertical: "center",
+        },
+      };
+    });
     const legend = [
       [],
       ["Downtime reason list:"],
