@@ -8,8 +8,13 @@ import { showToast } from "../ToastNotification/ToastNotification";
 import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { updateEntryInDB } from "../../utils/api/shiftApi";
-
 import { FcComments } from "react-icons/fc";
+
+// 🔥 Функція для правильної обробки нічної зміни
+const parseDateTimeForThirdShift = (isoStr) => {
+  const dt = DateTime.fromISO(isoStr, { zone: "utc" });
+  return dt.hour < 6 ? dt.plus({ days: 1 }) : dt;
+};
 
 function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
   const [commentId, setCommentId] = useState(null);
@@ -24,7 +29,7 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
 
     showConfirmDialog({
       title: "Delete Confirmation",
-      message: message,
+      message,
       onConfirm: () => {
         onDelete(index);
         showToast(
@@ -58,7 +63,7 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
       setCommentId(null);
       setNewComment("");
 
-      if (onUpdateEntry) onUpdateEntry(updatedEntry); // 🔄 Оновлюємо локально
+      if (onUpdateEntry) onUpdateEntry(updatedEntry);
     } catch (err) {
       showToast("Failed to save comment", "error");
     }
@@ -93,78 +98,93 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
           </tr>
         </thead>
         <tbody>
-          {entries.map((entry, filteredIndex) => (
-            <tr key={filteredIndex}>
-              <td>{entry.shift}</td>
-              <td>{entry.displayDate}</td>
-              <td>
-                {DateTime.fromISO(entry.startTime, { zone: "utc" }).toFormat(
-                  "HH:mm"
-                )}
-              </td>
-              <td>
-                {DateTime.fromISO(entry.endTime, { zone: "utc" }).toFormat(
-                  "HH:mm"
-                )}
-              </td>
-              <td>{entry.leader}</td>
-              <td>{entry.machine}</td>
-              <td className={style.operatorCell}>
-                <span
-                  className={style.operatorName}
-                  onClick={() => handleAddComment(entry)}
-                >
-                  {entry.operator}
-                  {entry.comment && (
-                    <span className={style.comment}>
-                      <FcComments className={style.commentIcon} />
-                      <span className={style.commentTooltip}>
-                        {entry.comment}
+          {[...entries]
+            .sort((a, b) => {
+              const timeA =
+                a.shift === "third"
+                  ? parseDateTimeForThirdShift(a.startTime)
+                  : DateTime.fromISO(a.startTime, { zone: "utc" });
+
+              const timeB =
+                b.shift === "third"
+                  ? parseDateTimeForThirdShift(b.startTime)
+                  : DateTime.fromISO(b.startTime, { zone: "utc" });
+
+              return timeA - timeB;
+            })
+            .map((entry, filteredIndex) => (
+              <tr key={filteredIndex}>
+                <td>{entry.shift}</td>
+                <td>{entry.displayDate}</td>
+                <td>
+                  {DateTime.fromISO(entry.startTime, { zone: "utc" }).toFormat(
+                    "HH:mm"
+                  )}
+                </td>
+                <td>
+                  {DateTime.fromISO(entry.endTime, { zone: "utc" }).toFormat(
+                    "HH:mm"
+                  )}
+                </td>
+                <td>{entry.leader}</td>
+                <td>{entry.machine}</td>
+                <td className={style.operatorCell}>
+                  <span
+                    className={style.operatorName}
+                    onClick={() => handleAddComment(entry)}
+                  >
+                    {entry.operator}
+                    {entry.comment && (
+                      <span className={style.comment}>
+                        <FcComments className={style.commentIcon} />
+                        <span className={style.commentTooltip}>
+                          {entry.comment}
+                        </span>
                       </span>
+                    )}
+                  </span>
+                </td>
+                <td>{entry.task}</td>
+                <td>{entry.product}</td>
+                <td>{entry.color}</td>
+                <td className={style.reasonDescription}>
+                  {reasons.find((r) => r.description === entry.reason)?.id ||
+                    ""}
+                  {entry.reason && (
+                    <span className={style.tooltip}>
+                      {
+                        reasons.find((r) => r.description === entry.reason)
+                          ?.description
+                      }
                     </span>
                   )}
-                </span>
-              </td>
-              <td>{entry.task}</td>
-              <td>{entry.product}</td>
-              <td>{entry.color}</td>
-              <td className={style.reasonDescription}>
-                {reasons.find((r) => r.description === entry.reason)?.id || ""}
-                {entry.reason && (
-                  <span className={style.tooltip}>
-                    {
-                      reasons.find((r) => r.description === entry.reason)
-                        ?.description
+                </td>
+                <td>{entry.quantity > 0 ? entry.quantity : ""}</td>
+                <td>{formatTime(entry.workingTime)}</td>
+                <td>{formatTime(entry.downtime)}</td>
+                <td>
+                  <button
+                    className={style.edit}
+                    onClick={() => onEdit(filteredIndex, entry.originalIndex)}
+                  >
+                    <FaRegEdit className={style.icon} />
+                  </button>
+                  <button
+                    className={style.delete}
+                    onClick={() =>
+                      handleDelete(
+                        filteredIndex,
+                        entry.operator,
+                        entry.task,
+                        entry.quantity
+                      )
                     }
-                  </span>
-                )}
-              </td>
-              <td>{entry.quantity > 0 ? entry.quantity : ""}</td>
-              <td>{formatTime(entry.workingTime)}</td>
-              <td>{formatTime(entry.downtime)}</td>
-              <td>
-                <button
-                  className={style.edit}
-                  onClick={() => onEdit(filteredIndex, entry.originalIndex)}
-                >
-                  <FaRegEdit className={style.icon} />
-                </button>
-                <button
-                  className={style.delete}
-                  onClick={() =>
-                    handleDelete(
-                      filteredIndex,
-                      entry.operator,
-                      entry.task,
-                      entry.quantity
-                    )
-                  }
-                >
-                  <RiDeleteBin5Line className={style.icon} />
-                </button>
-              </td>
-            </tr>
-          ))}
+                  >
+                    <RiDeleteBin5Line className={style.icon} />
+                  </button>
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
 

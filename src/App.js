@@ -53,6 +53,8 @@ import MonthlyLeaderStatistics from "./components/MonthlyLeaderStatistics/Monthl
 import MachineStatistics from "./components/MachineTimeStats/MachineTimeStats";
 import MonthlyMachineStatistics from "./components/MachinesQuantityStats/MachinesQuantityStats";
 
+import ExportToExcel from "./components/ExportToExcel/ExportToExcel";
+
 import NavBar from "./components/NavBar/NavBar";
 import Footer from "./components/Footer/Footer";
 
@@ -687,6 +689,20 @@ function App() {
             element={
               <PrivateRoute allowedRoles={["operator", "leader", "admin"]}>
                 <OperatorDashboard />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/export-to-excel"
+            element={
+              <PrivateRoute allowedRoles={["operator", "admin", "leader"]}>
+                <ExportToExcel
+                  entries={entries}
+                  selectedDate={selectedDate}
+                  currentShift={currentShift}
+                  leaders={leaders}
+                />
               </PrivateRoute>
             }
           />

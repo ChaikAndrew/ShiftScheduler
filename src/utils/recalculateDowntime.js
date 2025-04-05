@@ -2,6 +2,15 @@ import { DateTime, Interval } from "luxon";
 import { shiftStartTimes } from "./constants";
 
 /**
+ * Парсить ISO-час для третьої зміни.
+ * Якщо час < 6:00 — вважаємо його наступним днем, щоб уникнути плутанини в сортуванні.
+ */
+const parseDateTimeForThirdShift = (dateTimeStr) => {
+  const dt = DateTime.fromISO(dateTimeStr, { zone: "utc" });
+  return dt.hour < 6 ? dt.plus({ days: 1 }) : dt;
+};
+
+/**
  * Перераховує час простою (downtime) для кожної дати окремо.
  *
  * @param {Object} updatedEntries - Оновлені записи змін.
@@ -16,7 +25,7 @@ export function recalculateDowntime(
 ) {
   const shiftEntries = updatedEntries[currentShift][selectedMachine] || [];
 
-  // Групуємо записи по даті
+  // Групуємо записи по даті (з ISO startTime)
   const entriesByDate = shiftEntries.reduce((acc, entry) => {
     const date = DateTime.fromISO(entry.startTime, { zone: "utc" }).toISODate();
     if (!acc[date]) acc[date] = [];
@@ -28,63 +37,57 @@ export function recalculateDowntime(
   Object.keys(entriesByDate).forEach((date) => {
     let entriesForDate = entriesByDate[date];
 
-    // ✅ Фільтруємо записи без часу
+    // Видаляємо порожні записи
     entriesForDate = entriesForDate.filter(
       (entry) => entry.startTime && entry.endTime
     );
 
-    // ✅ Сортуємо по startTime
-    entriesForDate.sort(
-      (a, b) => new Date(a.startTime) - new Date(b.startTime)
-    );
+    // Сортування з урахуванням нічної зміни
+    entriesForDate.sort((a, b) => {
+      const timeA =
+        currentShift === "third"
+          ? parseDateTimeForThirdShift(a.startTime)
+          : DateTime.fromISO(a.startTime, { zone: "utc" });
 
+      const timeB =
+        currentShift === "third"
+          ? parseDateTimeForThirdShift(b.startTime)
+          : DateTime.fromISO(b.startTime, { zone: "utc" });
+
+      return timeA - timeB;
+    });
+
+    // Розрахунок downtime
     entriesByDate[date] = entriesForDate.map((entry, index) => {
       try {
-        const startTime = DateTime.fromISO(entry.startTime, { zone: "utc" });
+        const startTime =
+          currentShift === "third"
+            ? parseDateTimeForThirdShift(entry.startTime)
+            : DateTime.fromISO(entry.startTime, { zone: "utc" });
+
         const shiftStart = DateTime.fromISO(
           `${date}T${shiftStartTimes[currentShift]}`,
           { zone: "utc" }
         );
 
         if (index === 0) {
-          // Перший запис на дату
-          if (currentShift === "third") {
-            const thirdStart = DateTime.fromISO(`${date}T22:00`, {
-              zone: "utc",
-            });
-            const isAfterMidnight = startTime.hour < 6;
-
-            const trueStart = isAfterMidnight
-              ? thirdStart.minus({ days: 1 }) // нічна зміна після півночі
-              : thirdStart;
-
-            entry.downtime = Math.max(
-              Math.round(startTime.diff(trueStart, "minutes").minutes),
-              0
-            );
-          } else {
-            entry.downtime = Math.max(
-              Math.round(startTime.diff(shiftStart, "minutes").minutes),
-              0
-            );
-          }
+          // Перший запис: downtime від початку зміни
+          const downtime = Math.round(
+            startTime.diff(shiftStart, "minutes").minutes
+          );
+          entry.downtime = Math.max(downtime, 0);
         } else {
-          // Наступні записи — рахуємо від попереднього endTime
-          const prevEnd = DateTime.fromISO(entriesForDate[index - 1].endTime, {
-            zone: "utc",
-          });
+          // Наступні записи — від кінця попереднього
+          const prevEnd =
+            currentShift === "third"
+              ? parseDateTimeForThirdShift(entriesForDate[index - 1].endTime)
+              : DateTime.fromISO(entriesForDate[index - 1].endTime, {
+                  zone: "utc",
+                });
 
-          let correctedStart = startTime;
-
-          if (currentShift === "third" && correctedStart < prevEnd) {
-            correctedStart = correctedStart.plus({ days: 1 });
-          }
-
-          const downtime = Interval.fromDateTimes(
-            prevEnd,
-            correctedStart
-          ).length("minutes");
-
+          const downtime = Interval.fromDateTimes(prevEnd, startTime).length(
+            "minutes"
+          );
           entry.downtime = Math.max(Math.round(downtime), 0);
         }
       } catch (err) {
@@ -96,7 +99,7 @@ export function recalculateDowntime(
     });
   });
 
-  // Збираємо всі перераховані записи
+  // Об'єднуємо всі дати назад
   const recalculatedEntries = Object.values(entriesByDate).flat();
 
   return {

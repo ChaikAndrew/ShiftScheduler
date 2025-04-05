@@ -14,6 +14,7 @@ import { SlPrinter } from "react-icons/sl";
 import { GrGroup } from "react-icons/gr";
 import { BsClock } from "react-icons/bs";
 import { FiSearch } from "react-icons/fi";
+import { TbFileExport } from "react-icons/tb";
 
 import styles from "./NavBar.module.scss";
 
@@ -134,6 +135,15 @@ const NavBar = ({ isCollapsed, setIsCollapsed, setIsSearchModalOpen }) => {
         >
           <FiSearch className={styles.icon} />
           <span className={styles.linkText}>Zlecenie Search</span>
+        </NavLink>
+        <NavLink
+          to="/export-to-excel"
+          className={({ isActive }) =>
+            isActive ? `${styles.link} ${styles.active}` : styles.link
+          }
+        >
+          <TbFileExport className={styles.icon} />
+          <span className={styles.linkText}>Export to Excel</span>
         </NavLink>
         <NavLink
           to={dashboardLink.path}
