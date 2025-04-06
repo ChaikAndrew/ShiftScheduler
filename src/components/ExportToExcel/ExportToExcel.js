@@ -219,7 +219,7 @@ const ExportToExcel = ({ entries }) => {
         },
       ],
       [taskSummaryLine],
-      ["Zlecenie total: " + totalZlecenieQty],
+      totalZlecenieQty > 0 ? ["Zlecenie total: " + totalZlecenieQty] : [],
       [productSummaryLine],
       [],
     ];

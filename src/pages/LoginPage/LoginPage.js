@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import style from "./LoginPage.module.scss"; // Підключаємо модулі стилів
-import { FiEye, FiEyeOff } from "react-icons/fi"; // Додаємо іконки
+import style from "./LoginPage.module.scss";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import loginImage from "../../images/login.png";
 import infoImage from "../../images/info.png";
 
@@ -46,6 +46,9 @@ const LoginPage = () => {
     e.preventDefault();
     console.log("Login started");
 
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+
     try {
       console.log("Sending request to:", `${baseUrl}/auth/login`);
 
@@ -54,7 +57,10 @@ const LoginPage = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({
+          username: trimmedUsername,
+          password: trimmedPassword,
+        }),
       });
 
       console.log("Response received");
@@ -76,7 +82,6 @@ const LoginPage = () => {
       const userRole = data.user?.role;
       console.log("User role:", userRole);
 
-      // Перехід на відповідний Dashboard
       switch (userRole) {
         case "admin":
           navigate("/admin-dashboard");
@@ -92,10 +97,9 @@ const LoginPage = () => {
           return;
       }
 
-      // Дайте час навігації і оновіть сторінку
       setTimeout(() => {
         window.location.reload();
-      }, 300); // Затримка 300 мс
+      }, 300);
     } catch (error) {
       console.error("Login error:", error);
       setError("Login failed. Please try again.");
@@ -106,7 +110,6 @@ const LoginPage = () => {
 
   return (
     <div className={style.loginWrapper}>
-      {" "}
       <div className={style.loginContainer}>
         <div></div>
         <img

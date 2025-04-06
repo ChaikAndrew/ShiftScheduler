@@ -198,3 +198,9 @@ select {
 .app-container.collapsed .content {
   margin-left: 70px; /* Коли NavBar згорнутий */
 }
+
+/* Блокування прокрутки та взаємодії з основною сторінкою */
+body.modal-open {
+  overflow: hidden !important; /* Забороняємо прокрутку */
+  height: 100vh;
+}

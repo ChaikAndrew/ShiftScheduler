@@ -47,6 +47,9 @@ function SearchByZlecenieName({ entries, isModalOpen, setIsModalOpen }) {
 
     if (isModalOpen) {
       document.addEventListener("keydown", handleKeyDown);
+      document.body.classList.add("modal-open"); // Блокуємо прокрутку сторінки
+    } else {
+      document.body.classList.remove("modal-open"); // Відновлюємо прокрутку
     }
 
     return () => {

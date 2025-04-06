@@ -73,7 +73,7 @@ export async function handleSaveEntryToDB({
     initialDowntime,
     leader: selectedLeader,
     operator: selectedOperator,
-    task: form.task === "Zlecenie" ? form.customTaskName : form.task,
+    task: form.task === "Zlecenie" ? form.customTaskName.trim() : form.task,
     product: form.product,
     color: form.color,
     reason: form.reason,

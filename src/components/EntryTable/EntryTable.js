@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DateTime } from "luxon";
 import { formatTime } from "../../utils/formatTime";
 import { reasons } from "../../utils/constants";
@@ -73,6 +73,29 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
     setIsModalOpen(false);
     setCommentId(null);
     setNewComment("");
+  };
+
+  // Закриття модалки по клавіші Escape або кліку по фону
+  useEffect(() => {
+    const handleEscapeKey = (e) => {
+      if (e.key === "Escape") {
+        handleCloseModal();
+      }
+    };
+
+    // Додаємо обробник події для клавіші Escape
+    document.addEventListener("keydown", handleEscapeKey);
+
+    // Очищаємо обробник події при розмонтуванні компонента
+    return () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+    };
+  }, []);
+
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      handleCloseModal();
+    }
   };
 
   return (
@@ -189,7 +212,7 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
       </table>
 
       {isModalOpen && (
-        <div className={style.modalOverlay}>
+        <div className={style.modalOverlay} onClick={handleOverlayClick}>
           <div className={style.modalContent}>
             <h2>Add Comment</h2>
             <textarea

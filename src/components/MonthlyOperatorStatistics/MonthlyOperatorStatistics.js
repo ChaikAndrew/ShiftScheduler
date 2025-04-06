@@ -164,6 +164,10 @@ const MonthlyOperatorStatistics = ({ entries, operators }) => {
 
   const reportTitle = `${formattedMonth} ${selectedMonth.year}`;
 
+  const isDataAvailable =
+    sortedMonthlyTotals.length > 0 ||
+    Object.keys(operatorEfficiency).length > 0;
+
   return (
     <div className={style.container}>
       <div className={style.selection}>
@@ -190,165 +194,180 @@ const MonthlyOperatorStatistics = ({ entries, operators }) => {
         </label>
       </div>
 
-      {/* 1. Daily Operator Statistics */}
-      <div className={style.section}>
-        <h3 className={style.title}>
-          Daily Operator Statistics – {reportTitle}
-        </h3>
-        <table className={style.table}>
-          <thead>
-            <tr>
-              <th>Operator</th>
-              <th>Average per Day</th>
-              {Array.from({ length: daysInMonth }, (_, i) => (
-                <th key={i}>{i + 1}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {sortedMonthlyTotals.map((total) => {
-              const daysWithRecords = monthlyStatistics[total.operator].filter(
-                (data) => data.total > 0
-              ).length;
-              const averagePerDay =
-                daysWithRecords > 0
-                  ? Math.round(total.total / daysWithRecords)
-                  : "0";
-              return (
-                <tr key={total.operator}>
-                  <td className={style.operatorCell}>{total.operator}</td>
-                  <td>{averagePerDay}</td>
-                  {monthlyStatistics[total.operator].map((data, index) => (
-                    <td key={index}>{data.total || ""}</td>
+      {/* Check if data exists, otherwise display message */}
+      {isDataAvailable ? (
+        <>
+          {/* 1. Daily Operator Statistics */}
+          <div className={style.section}>
+            <h3 className={style.title}>
+              Daily Operator Statistics – {reportTitle}
+            </h3>
+            <table className={style.table}>
+              <thead>
+                <tr>
+                  <th>Operator</th>
+                  <th>Average per Day</th>
+                  {Array.from({ length: daysInMonth }, (_, i) => (
+                    <th key={i}>{i + 1}</th>
                   ))}
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {sortedMonthlyTotals.map((total) => {
+                  const daysWithRecords = monthlyStatistics[
+                    total.operator
+                  ].filter((data) => data.total > 0).length;
+                  const averagePerDay =
+                    daysWithRecords > 0
+                      ? Math.round(total.total / daysWithRecords)
+                      : "0";
+                  return (
+                    <tr key={total.operator}>
+                      <td className={style.operatorCell}>{total.operator}</td>
+                      <td>{averagePerDay}</td>
+                      {monthlyStatistics[total.operator].map((data, index) => (
+                        <td key={index}>{data.total || ""}</td>
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
 
-      {/* 2. Monthly Task Summary */}
-      <div className={style.section}>
-        <h3 className={style.title}>Monthly Task Summary – {reportTitle}</h3>
-        <table className={style.table}>
-          <thead>
-            <tr>
-              <th>Operator</th>
-              <th>Total</th>
-              {tasks.map((task) => (
-                <th key={task}>{task}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {sortedMonthlyTotals.map((total) => (
-              <tr key={total.operator}>
-                <td>{total.operator}</td>
-                <td>{total.total}</td>
-                {tasks.map((task) => (
-                  <td key={task}>{total.taskSummary[task] || ""}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* 3. Monthly Product Summary */}
-      <div className={style.section}>
-        <h3 className={style.title}>Monthly Product Summary – {reportTitle}</h3>
-        <table className={style.table}>
-          <thead>
-            <tr>
-              <th>Operator</th>
-              {products.map((product) => (
-                <th key={product}>{product}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {sortedMonthlyTotals.map((total) => (
-              <tr key={total.operator}>
-                <td>{total.operator}</td>
-                {products.map((product) => (
-                  <td key={product}>{total.productSummary[product] || ""}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* 4. Operator Work Efficiency */}
-      <div className={style.section}>
-        <h3 className={style.title}>
-          Operator Work Efficiency – {reportTitle}
-        </h3>
-        <table className={style.table}>
-          <thead>
-            <tr>
-              <th>Operator</th>
-              <th>Work Hours</th>
-              <th>Total Products</th>
-              <th>Average Speed (units/hr)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(operatorEfficiency).map(([operator, data]) => (
-              <tr key={operator}>
-                <td>{operator}</td>
-                <td>{formatTime(Math.round(data.totalWorkHours * 60))}</td>
-                <td>{data.totalProducts}</td>
-                <td>
-                  {data.totalWorkHours > 0
-                    ? Math.round(data.totalProducts / data.totalWorkHours)
-                    : "-"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* 5. Detailed Product Breakdown */}
-      <div className={style.section}>
-        <h3 className={style.title}>
-          Detailed Product Breakdown – {reportTitle}
-        </h3>
-        <table className={style.table}>
-          <thead>
-            <tr>
-              <th>Operator</th>
-              <th>Product</th>
-              <th>Total</th>
-              <th>Speed (units/hr)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Object.entries(operatorEfficiency).map(([operator, data]) => {
-              const productDetails = Object.entries(data.productDetails).filter(
-                ([_, val]) => val.total > 0
-              );
-
-              return productDetails.map(([product, val], index) => (
-                <tr key={`${operator}-${product}`}>
-                  {index === 0 && (
-                    <td rowSpan={productDetails.length}>{operator}</td>
-                  )}
-                  <td>{product}</td>
-                  <td>{val.total}</td>
-                  <td>
-                    {val.workHours > 0
-                      ? Math.round(val.total / val.workHours)
-                      : "-"}
-                  </td>
+          {/* 2. Monthly Task Summary */}
+          <div className={style.section}>
+            <h3 className={style.title}>
+              Monthly Task Summary – {reportTitle}
+            </h3>
+            <table className={style.table}>
+              <thead>
+                <tr>
+                  <th>Operator</th>
+                  <th>Total</th>
+                  {tasks.map((task) => (
+                    <th key={task}>{task}</th>
+                  ))}
                 </tr>
-              ));
-            })}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {sortedMonthlyTotals.map((total) => (
+                  <tr key={total.operator}>
+                    <td>{total.operator}</td>
+                    <td>{total.total}</td>
+                    {tasks.map((task) => (
+                      <td key={task}>{total.taskSummary[task] || ""}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 3. Monthly Product Summary */}
+          <div className={style.section}>
+            <h3 className={style.title}>
+              Monthly Product Summary – {reportTitle}
+            </h3>
+            <table className={style.table}>
+              <thead>
+                <tr>
+                  <th>Operator</th>
+                  {products.map((product) => (
+                    <th key={product}>{product}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {sortedMonthlyTotals.map((total) => (
+                  <tr key={total.operator}>
+                    <td>{total.operator}</td>
+                    {products.map((product) => (
+                      <td key={product}>
+                        {total.productSummary[product] || ""}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 4. Operator Work Efficiency */}
+          <div className={style.section}>
+            <h3 className={style.title}>
+              Operator Work Efficiency – {reportTitle}
+            </h3>
+            <table className={style.table}>
+              <thead>
+                <tr>
+                  <th>Operator</th>
+                  <th>Work Hours</th>
+                  <th>Total Products</th>
+                  <th>Average Speed (units/hr)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(operatorEfficiency).map(([operator, data]) => (
+                  <tr key={operator}>
+                    <td>{operator}</td>
+                    <td>{formatTime(Math.round(data.totalWorkHours * 60))}</td>
+                    <td>{data.totalProducts}</td>
+                    <td>
+                      {data.totalWorkHours > 0
+                        ? Math.round(data.totalProducts / data.totalWorkHours)
+                        : "-"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 5. Detailed Product Breakdown */}
+          <div className={style.section}>
+            <h3 className={style.title}>
+              Detailed Product Breakdown – {reportTitle}
+            </h3>
+            <table className={style.table}>
+              <thead>
+                <tr>
+                  <th>Operator</th>
+                  <th>Product</th>
+                  <th>Total</th>
+                  <th>Speed (units/hr)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(operatorEfficiency).map(([operator, data]) => {
+                  const productDetails = Object.entries(
+                    data.productDetails
+                  ).filter(([_, val]) => val.total > 0);
+
+                  return productDetails.map(([product, val], index) => (
+                    <tr key={`${operator}-${product}`}>
+                      {index === 0 && (
+                        <td rowSpan={productDetails.length}>{operator}</td>
+                      )}
+                      <td>{product}</td>
+                      <td>{val.total}</td>
+                      <td>
+                        {val.workHours > 0
+                          ? Math.round(val.total / val.workHours)
+                          : "-"}
+                      </td>
+                    </tr>
+                  ));
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      ) : (
+        <div className={style.noDataMessage}>
+          <p>No data available for this month.</p>
+        </div>
+      )}
     </div>
   );
 };
