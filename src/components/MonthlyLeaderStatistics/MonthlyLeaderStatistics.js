@@ -1,10 +1,7 @@
+// MonthlyLeaderStatistics.js
 import React, { useState } from "react";
 import { getLeaderStatisticsForMonth } from "../../utils/leaderStatisticsHelpers";
-import { renderDailyStatistics } from "./renderDailyStatistics";
-import { renderMonthlySummary } from "./renderMonthlySummary";
-import { exportDailyStatisticsToPDF } from "../../utils/exportDailyStatisticsToPDF";
-import { exportMonthlySummaryToPDF } from "../../utils/exportMonthlySummaryToPDF";
-import { showToast } from "../ToastNotification/ToastNotification";
+import { products, tasks } from "../../utils/constants";
 import styles from "./MonthlyLeaderStatistics.module.scss";
 
 const MonthlyLeaderStatistics = ({ entries, leaders }) => {
@@ -13,89 +10,147 @@ const MonthlyLeaderStatistics = ({ entries, leaders }) => {
     month: new Date().getMonth(),
   });
 
-  const [selectedDate, setSelectedDate] = useState("");
-
   const statistics = getLeaderStatisticsForMonth(
     entries,
     leaders,
     selectedMonth
   );
+
   const daysInMonth = new Date(
     selectedMonth.year,
     selectedMonth.month + 1,
     0
   ).getDate();
 
-  const dailyData = leaders.flatMap((leader) =>
-    statistics[leader].map((day, index) => ({
-      Leader: leader,
-      Day: index + 1,
-      Total: day.total,
-      ...day.taskSummary,
-      ...day.productSummary,
-    }))
-  );
+  const handleMonthChange = (e) => {
+    setSelectedMonth((prev) => ({
+      ...prev,
+      month: parseInt(e.target.value, 10),
+    }));
+  };
 
-  const summaryData = leaders.map((leader) => {
-    const total = statistics[leader].reduce((sum, day) => sum + day.total, 0);
-    const taskSummary = statistics[leader].reduce(
-      (acc, day) => {
-        Object.keys(day.taskSummary).forEach((task) => {
-          acc[task] += day.taskSummary[task];
-        });
-        return acc;
-      },
-      { POD: 0, POF: 0, Zlecenie: 0, Sample: 0, Test: 0 }
+  const handleYearChange = (e) => {
+    setSelectedMonth((prev) => ({
+      ...prev,
+      year: parseInt(e.target.value, 10),
+    }));
+  };
+
+  const renderDailyStatistics = () => {
+    const hasData = Object.values(statistics).some((leaderData) =>
+      leaderData.some((day) => day.total > 0)
     );
 
-    const productSummary = statistics[leader].reduce(
-      (acc, day) => {
-        Object.keys(day.productSummary).forEach((product) => {
-          acc[product] += day.productSummary[product];
-        });
-        return acc;
-      },
-      {
-        "T-shirts": 0,
-        Hoodie: 0,
-        Bags: 0,
-        Sleeves: 0,
-        Children: 0,
-        Others: 0,
-      }
-    );
-
-    return {
-      Leader: leader,
-      Total: total,
-      ...taskSummary,
-      ...productSummary,
-    };
-  });
-
-  const handleExportDaily = () => {
-    if (!selectedDate) {
-      showToast("Please select a date for the export.", "warning");
-      return;
+    if (!hasData) {
+      return <p>No data available for the selected month and leaders.</p>;
     }
 
-    const filteredData = dailyData.filter((row) => {
-      const rowDate = new Date(
-        selectedMonth.year,
-        selectedMonth.month,
-        row.Day
-      );
-      const exportDate = new Date(selectedDate);
+    return (
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            <th>Leader</th>
+            {Array.from({ length: daysInMonth }, (_, i) => (
+              <th key={i}>{i + 1}</th>
+            ))}
+            <th>Average per Day</th>
+          </tr>
+        </thead>
+        <tbody>
+          {leaders.map((leader) => {
+            const monthlyData = statistics[leader];
+            const totalQuantity = monthlyData.reduce(
+              (sum, day) => sum + day.total,
+              0
+            );
+            const daysWithData = monthlyData.filter(
+              (day) => day.total > 0
+            ).length;
+            const averagePerDay =
+              daysWithData > 0 ? Math.round(totalQuantity / daysWithData) : 0;
+
+            return (
+              <tr key={leader}>
+                <td>{leader}</td>
+                {monthlyData.map((day, index) => (
+                  <td key={index}>{day.total > 0 ? day.total : ""}</td>
+                ))}
+                <td>{averagePerDay > 0 ? averagePerDay : ""}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    );
+  };
+
+  const renderMonthlySummary = () => {
+    const hasData = leaders.some((leader) =>
+      statistics[leader].some((day) => day.total > 0)
+    );
+
+    if (!hasData) {
       return (
-        rowDate.getFullYear() === exportDate.getFullYear() &&
-        rowDate.getMonth() === exportDate.getMonth() &&
-        rowDate.getDate() === exportDate.getDate()
+        <p>No summary data available for the selected month and leaders.</p>
       );
+    }
+
+    const monthlyTotals = leaders.map((leader) => {
+      const monthlyData = statistics[leader];
+      const total = monthlyData.reduce((sum, day) => sum + day.total, 0);
+
+      const taskSummary = monthlyData.reduce((acc, day) => {
+        tasks.forEach((task) => {
+          acc[task] += day.taskSummary[task] || 0;
+        });
+        return acc;
+      }, Object.fromEntries(tasks.map((task) => [task, 0])));
+
+      const productSummary = monthlyData.reduce((acc, day) => {
+        products.forEach((product) => {
+          acc[product] += day.productSummary[product] || 0;
+        });
+        return acc;
+      }, Object.fromEntries(products.map((product) => [product, 0])));
+
+      return { leader, total, taskSummary, productSummary };
     });
 
-    exportDailyStatisticsToPDF(
-      filteredData,
-      `Daily_Statistics_${selectedDate}`
+    return (
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            <th>Leader</th>
+            <th>Total Quantity</th>
+            {tasks.map((task) => (
+              <th key={task}>{task}</th>
+            ))}
+            {products.map((product) => (
+              <th key={product}>{product}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {monthlyTotals.map(
+            ({ leader, total, taskSummary, productSummary }) => (
+              <tr key={leader}>
+                <td>{leader}</td>
+                <td>{total > 0 ? total : ""}</td>
+                {tasks.map((task) => (
+                  <td key={task}>
+                    {taskSummary[task] > 0 ? taskSummary[task] : ""}
+                  </td>
+                ))}
+                {products.map((product) => (
+                  <td key={product}>
+                    {productSummary[product] > 0 ? productSummary[product] : ""}
+                  </td>
+                ))}
+              </tr>
+            )
+          )}
+        </tbody>
+      </table>
     );
   };
 
@@ -103,19 +158,10 @@ const MonthlyLeaderStatistics = ({ entries, leaders }) => {
     <div className={styles.container}>
       <h1>Monthly Leader Statistics</h1>
 
-      {/* Вибір місяця і року */}
       <div>
         <label>
           Select Month:
-          <select
-            value={selectedMonth.month}
-            onChange={(e) =>
-              setSelectedMonth((prev) => ({
-                ...prev,
-                month: parseInt(e.target.value, 10),
-              }))
-            }
-          >
+          <select value={selectedMonth.month} onChange={handleMonthChange}>
             {Array.from({ length: 12 }, (_, i) => (
               <option key={i} value={i}>
                 {new Date(0, i).toLocaleString("en-US", { month: "long" })}
@@ -126,15 +172,7 @@ const MonthlyLeaderStatistics = ({ entries, leaders }) => {
 
         <label>
           Select Year:
-          <select
-            value={selectedMonth.year}
-            onChange={(e) =>
-              setSelectedMonth((prev) => ({
-                ...prev,
-                year: parseInt(e.target.value, 10),
-              }))
-            }
-          >
+          <select value={selectedMonth.year} onChange={handleYearChange}>
             {Array.from({ length: 5 }, (_, i) => (
               <option key={i} value={new Date().getFullYear() - 2 + i}>
                 {new Date().getFullYear() - 2 + i}
@@ -144,36 +182,8 @@ const MonthlyLeaderStatistics = ({ entries, leaders }) => {
         </label>
       </div>
 
-      {/* Відображення таблиць */}
-      {renderDailyStatistics(statistics, leaders, daysInMonth)}
-
-      {/* Поле для вибору дати */}
-      <div>
-        <label>
-          Select Date for Daily Export:
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
-        </label>
-      </div>
-
-      <button onClick={handleExportDaily}>
-        Export Daily Statistics to PDF
-      </button>
-      {renderMonthlySummary(statistics, leaders)}
-      <button
-        onClick={() =>
-          exportMonthlySummaryToPDF(
-            summaryData,
-            "Monthly_Summary_Statistics",
-            selectedMonth
-          )
-        }
-      >
-        Export Monthly Summary to PDF
-      </button>
+      {renderDailyStatistics()}
+      {renderMonthlySummary()}
     </div>
   );
 };

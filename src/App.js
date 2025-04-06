@@ -4,6 +4,8 @@ import "./styles.css";
 import { DateTime } from "luxon";
 import { ToastContainer } from "react-toastify";
 
+import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import LoginPage from "../src/pages/LoginPage/LoginPage";
 import AdminDashboard from "../src/pages/AdminDashboard/AdminDashboard";
 import OperatorDashboard from "../src/pages/OperatorDashboard/OperatorDashboard";
@@ -65,13 +67,51 @@ import { recalculateDowntime } from "./utils/recalculateDowntime";
 // Додамо AdminDashboard і OperatorDashboard пізніше
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingToken, setIsCheckingToken] = useState(true);
   const [entries, setEntries] = useState(() => {
     const savedEntries = localStorage.getItem("entries");
     return savedEntries
       ? JSON.parse(savedEntries)
       : { first: {}, second: {}, third: {} };
   });
+
+  const navigate = useNavigate();
+  const location = useLocation();
   useEffect(() => {
+    const checkTokenExpiration = () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const decoded = JSON.parse(atob(token.split(".")[1]));
+          const expirationDate = new Date(decoded.exp * 1000).toLocaleString();
+
+          if (decoded.exp * 1000 < Date.now()) {
+            console.warn("⏰ Токен протермінований");
+            localStorage.removeItem("token");
+            setIsAuthenticated(false);
+            navigate("/login");
+          } else {
+            console.log("✅ Токен чинний до:", expirationDate);
+            setIsAuthenticated(true);
+          }
+        } catch (err) {
+          console.error("❌ Помилка токена:", err);
+          localStorage.removeItem("token");
+          setIsAuthenticated(false);
+          navigate("/login");
+        }
+      } else {
+        setIsAuthenticated(false);
+        navigate("/login");
+      }
+
+      // ✅ після перевірки токена:
+      setIsCheckingToken(false);
+    };
+
+    checkTokenExpiration(); // ⬅️ викликаємо одразу
+
     const fetchData = async () => {
       const token = localStorage.getItem("token");
 
@@ -107,7 +147,7 @@ function App() {
     };
 
     fetchData();
-  }, []);
+  }, [navigate]);
   const [editingIndex, setEditingIndex] = useState(null);
   const [currentShift, setCurrentShift] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
@@ -390,13 +430,18 @@ function App() {
   };
 
   const [isCollapsed, setIsCollapsed] = useState(true);
+  if (isCheckingToken) {
+    return <div>Loading...</div>; // або твій кастомний спінер
+  }
   return (
     <div className={`app-container ${isCollapsed ? "collapsed" : ""}`}>
-      <NavBar
-        isCollapsed={isCollapsed}
-        setIsCollapsed={setIsCollapsed}
-        setIsSearchModalOpen={setIsSearchModalOpen} // ⬅️ ось що бракує!
-      />
+      {isAuthenticated && location.pathname !== "/login" && (
+        <NavBar
+          isCollapsed={isCollapsed}
+          setIsCollapsed={setIsCollapsed}
+          setIsSearchModalOpen={setIsSearchModalOpen}
+        />
+      )}
       <SearchByZlecenieName
         entries={entries}
         isModalOpen={isSearchModalOpen}
@@ -642,7 +687,7 @@ function App() {
             }
           />
           <Route
-            path="//machines-quantity-stats"
+            path="/machines-quantity-stats"
             element={
               <PrivateRoute allowedRoles={["operator", "admin", "leader"]}>
                 <MonthlyMachineStatistics

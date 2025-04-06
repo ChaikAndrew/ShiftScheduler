@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // Для перенаправлення, якщо токен недійсний
+import { useNavigate } from "react-router-dom";
 import styles from "./AdminDashboard.module.scss";
 
 import OperatorManager from "../../components/OperatorManager/OperatorManager";
@@ -25,11 +25,29 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const fetchUsers = async (url) => {
+      try {
+        const response = await axios.get(`${url}/auth/users`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          timeout: 5000,
+        });
+        setUsers(response.data);
+        setError(null);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        setError("Failed to fetch users. Please try again.");
+        if (error.response && error.response.status === 401) {
+          navigate("/login");
+        }
+      }
+    };
+
     const checkLocalhost = async () => {
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 1000); // Тайм-аут 1 секунда
-
+        const timeout = setTimeout(() => controller.abort(), 1000);
         const response = await fetch("http://localhost:4040", {
           signal: controller.signal,
         });
@@ -38,33 +56,18 @@ const AdminDashboard = () => {
         if (response.ok) {
           console.log("Localhost available, switching to localhost.");
           setBaseUrl("http://localhost:4040");
+          fetchUsers("http://localhost:4040");
+        } else {
+          fetchUsers(baseUrl);
         }
       } catch {
         console.log("Localhost not available, using Vercel.");
+        fetchUsers(baseUrl);
       }
     };
 
-    checkLocalhost().then(fetchUsers); // Викликаємо fetchUsers після перевірки localhost
-  }, []);
-
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get(`${baseUrl}/auth/users`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        timeout: 5000, // Тайм-аут 5 секунд
-      });
-      setUsers(response.data);
-      setError(null); // Якщо запит успішний, очищаємо помилку
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      setError("Failed to fetch users. Please try again.");
-      if (error.response && error.response.status === 401) {
-        navigate("/login"); // Перенаправлення, якщо токен недійсний
-      }
-    }
-  };
+    checkLocalhost();
+  }, [baseUrl, navigate]);
 
   const handleAddUser = async () => {
     if (!newUser.username || !newUser.password || !newUser.confirmPassword) {
@@ -89,7 +92,7 @@ const AdminDashboard = () => {
         role: "operator",
       });
       setIsAdding(false);
-      await fetchUsers();
+      window.location.reload();
     } catch (error) {
       console.error("Error adding user:", error);
       alert("Failed to add user.");
@@ -126,7 +129,7 @@ const AdminDashboard = () => {
         timeout: 5000,
       });
       setIsEditing(false);
-      await fetchUsers();
+      window.location.reload();
     } catch (error) {
       console.error("Error editing user:", error);
       alert("Failed to update user.");
@@ -142,7 +145,7 @@ const AdminDashboard = () => {
         },
         timeout: 5000,
       });
-      await fetchUsers();
+      window.location.reload();
     } catch (error) {
       console.error("Error deleting user:", error);
       alert("Failed to delete user.");

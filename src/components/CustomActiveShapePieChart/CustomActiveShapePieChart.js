@@ -84,7 +84,7 @@ const CustomActiveShapePieChart = ({ data, colors }) => {
   };
 
   return (
-    <ResponsiveContainer width="100%" height={250} className="chart-container">
+    <ResponsiveContainer width="100%" height={330} className="chart-container">
       <PieChart>
         <Pie
           activeIndex={activeIndex}
@@ -92,8 +92,8 @@ const CustomActiveShapePieChart = ({ data, colors }) => {
           data={data}
           cx="50%"
           cy="50%"
-          innerRadius={60}
-          outerRadius={80}
+          innerRadius={85}
+          outerRadius={100}
           fill="#8884d8"
           dataKey="value"
           onMouseEnter={onPieEnter}

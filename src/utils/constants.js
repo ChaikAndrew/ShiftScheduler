@@ -7,10 +7,12 @@ export const tasks = ["POD", "POF", "Zlecenie", "Sample", "Test"];
 //Продукти, які можуть друкуватися
 export const products = [
   "T-shirts",
-  "Hoodie",
+  "T-shirts (Children)",
+  "Hoodies",
+  "Hoodies (Children)",
   "Bags",
   "Sleeves",
-  "Children",
+  "Baby Bodysuits",
   "Others",
 ];
 
@@ -46,9 +48,8 @@ export const reasons = [
   { id: 22, description: "22.Operatywka" },
   { id: 23, description: "23.Zalewanie się palety sprayem" },
   { id: 24, description: "24.Przezbrojenie (zmiana temperatury pieca)" },
-  { id: 25, description: "25.Brak poprzedniej zmiany" },
-  { id: 26, description: "26.Zbiorniki na odpady płynne są pełne(wymiana)" },
-  { id: 27, description: "27.Restart aplikacji" },
+  { id: 26, description: "25.Zbiorniki na odpady płynne są pełne(wymiana)" },
+  { id: 27, description: "26.Restart aplikacji" },
 ];
 
 //Список лідерів змін

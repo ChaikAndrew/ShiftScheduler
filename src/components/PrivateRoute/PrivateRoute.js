@@ -1,38 +1,45 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode"; // Або { decode as jwtDecode }
+import { Navigate, useLocation } from "react-router-dom";
+import { jwtDecode } from "jwt-decode"; // або { decode as jwtDecode }
 
 const PrivateRoute = ({ children, allowedRoles = [] }) => {
   const token = localStorage.getItem("token");
+  const location = useLocation(); // 🆕 отримуємо поточний шлях
 
   if (!token) {
-    console.warn("No token found, redirecting to login.");
-    return <Navigate to="/login" replace />;
+    console.warn("🚫 No token found, redirecting to login.");
+    return location.pathname === "/login" ? null : (
+      <Navigate to="/login" replace />
+    );
   }
 
   try {
     const decoded = jwtDecode(token);
 
     if (decoded.exp * 1000 < Date.now()) {
-      console.warn("Token expired, redirecting to login.");
+      console.warn("⏰ Token expired, redirecting to login.");
       localStorage.removeItem("token");
-      return <Navigate to="/login" replace />;
+      return location.pathname === "/login" ? null : (
+        <Navigate to="/login" replace />
+      );
     }
 
     if (!allowedRoles.includes(decoded.role)) {
       return (
         <div style={{ textAlign: "center", marginTop: "50px" }}>
-          <h2>Access Denied</h2>
-          <p>You don't have permission to access this page.</p>
+          <h2>🔒 Access Denied</h2>
+          <p>У тебе немає доступу до цієї сторінки.</p>
         </div>
       );
     }
 
     return children;
   } catch (error) {
-    console.error("Token decoding failed:", error);
+    console.error("❌ Token decoding failed:", error);
     localStorage.removeItem("token");
-    return <Navigate to="/login" replace />;
+    return location.pathname === "/login" ? null : (
+      <Navigate to="/login" replace />
+    );
   }
 };
 

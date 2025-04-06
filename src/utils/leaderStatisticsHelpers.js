@@ -1,16 +1,5 @@
-/**
- * Обчислює статистику для кожного лідера за кожен день обраного місяця.
- *
- * @param {Object} entries - Об'єкт із записами, згрупованими по змінах та машинах.
- * @param {string[]} leaders - Масив імен лідерів.
- * @param {{ year: number, month: number }} selectedMonth - Об'єкт з вибраним місяцем і роком (місяць від 0 до 11).
- * @returns {Object} Об'єкт, де ключ — це ім'я лідера, а значення — масив з даними по кожному дню.
- *
- * Кожен день містить:
- * - total: загальна кількість виконаних завдань
- * - taskSummary: об'єкт з кількістю по кожному типу задач (POD, POF, Zlecenie, Sample, Test)
- * - productSummary: об'єкт з кількістю по кожному продукту (T-shirts, Hoodie, Bags, Sleeves, Children, Others)
- */
+import { tasks, products } from "../utils/constants"; // або "../../utils/constants" — залежно від розташування
+
 export const getLeaderStatisticsForMonth = (
   entries,
   leaders,
@@ -23,18 +12,11 @@ export const getLeaderStatisticsForMonth = (
   ).getDate();
 
   const statistics = leaders.reduce((acc, leader) => {
-    acc[leader] = Array(daysInMonth).fill({
+    acc[leader] = Array.from({ length: daysInMonth }, () => ({
       total: 0,
-      taskSummary: { POD: 0, POF: 0, Zlecenie: 0, Sample: 0, Test: 0 },
-      productSummary: {
-        "T-shirts": 0,
-        Hoodie: 0,
-        Bags: 0,
-        Sleeves: 0,
-        Children: 0,
-        Others: 0,
-      },
-    });
+      taskSummary: Object.fromEntries(tasks.map((task) => [task, 0])),
+      productSummary: Object.fromEntries(products.map((p) => [p, 0])),
+    }));
     return acc;
   }, {});
 
@@ -57,30 +39,28 @@ export const getLeaderStatisticsForMonth = (
         (entry) => entry.leader === leader
       );
 
-      let taskSummary = { POD: 0, POF: 0, Zlecenie: 0, Sample: 0, Test: 0 };
-      let productSummary = {
-        "T-shirts": 0,
-        Hoodie: 0,
-        Bags: 0,
-        Sleeves: 0,
-        Children: 0,
-        Others: 0,
-      };
+      const taskSummary = Object.fromEntries(tasks.map((task) => [task, 0]));
+      const productSummary = Object.fromEntries(
+        products.map((product) => [product, 0])
+      );
       let total = 0;
 
       leaderEntries.forEach((entry) => {
-        const task = entry.task;
+        const task = entry.task?.trim();
+        const product = entry.product?.trim();
         const quantity = parseInt(entry.quantity, 10) || 0;
-        if (task in taskSummary) {
+
+        if (tasks.includes(task)) {
           taskSummary[task] += quantity;
         } else {
-          taskSummary.Zlecenie += quantity;
+          taskSummary["Zlecenie"] += quantity;
         }
-        total += quantity;
 
-        if (entry.product in productSummary) {
-          productSummary[entry.product] += quantity;
+        if (products.includes(product)) {
+          productSummary[product] += quantity;
         }
+
+        total += quantity;
       });
 
       statistics[leader][day - 1] = { total, taskSummary, productSummary };

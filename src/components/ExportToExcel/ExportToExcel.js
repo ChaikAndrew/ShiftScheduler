@@ -15,6 +15,14 @@ const ExportToExcel = ({ entries }) => {
     return `${h > 0 ? `${h}h` : ""} ${m > 0 ? `${m}min` : ""}`.trim();
   };
 
+  if (!entries || Object.keys(entries).length === 0) {
+    return (
+      <div style={{ padding: "2rem", fontSize: "18px", color: "#555" }}>
+        ⏳ Завантаження даних з бази даних...
+      </div>
+    );
+  }
+
   const handleExport = (mode = "single") => {
     if (!selectedDate) {
       alert("Вибери дату.");
@@ -124,13 +132,13 @@ const ExportToExcel = ({ entries }) => {
 
           const row = {
             Date: selectedDate,
-            Shift: shift,
             Leader: records[0]?.leader || "",
-            Machine: machine,
-            Quantity: totalQuantity,
+            Shift: shift,
             Operators: Array.from(
               new Set(records.map((e) => e.operator).filter(Boolean))
             ).join(", "),
+            Machine: machine,
+            Quantity: totalQuantity,
           };
 
           const shiftLeader = records[0]?.leader;
@@ -203,7 +211,7 @@ const ExportToExcel = ({ entries }) => {
           s: {
             font: {
               bold: true,
-              color: { rgb: "6AA84F" },
+              color: { rgb: "006100" },
               name: "Arial",
               sz: 11,
             },
@@ -227,7 +235,7 @@ const ExportToExcel = ({ entries }) => {
 
     const headerKeys = Object.keys(result[0] || {});
     headerKeys.forEach((key, colIndex) => {
-      const cellAddress = XLSX.utils.encode_cell({ r: 5, c: colIndex }); // A6 = r:5
+      const cellAddress = XLSX.utils.encode_cell({ r: 5, c: colIndex });
       if (worksheet[cellAddress]) {
         worksheet[cellAddress].s = {
           font: {
@@ -235,7 +243,7 @@ const ExportToExcel = ({ entries }) => {
             color: { rgb: "FFFFFF" },
           },
           fill: {
-            fgColor: { rgb: "4F81BD" }, // синенький фон
+            fgColor: { rgb: "4F81BD" },
           },
           alignment: {
             horizontal: "center",
@@ -244,6 +252,7 @@ const ExportToExcel = ({ entries }) => {
         };
       }
     });
+
     const columnWidths = Object.keys(result[0]).map((key) => {
       const maxLength = result.reduce((acc, row) => {
         const cell = row[key];
@@ -255,6 +264,7 @@ const ExportToExcel = ({ entries }) => {
       return { wch: Math.max(8, Math.min(maxLength + 2, maxWidth)) };
     });
     worksheet["!cols"] = columnWidths;
+
     Object.keys(worksheet).forEach((cell) => {
       if (cell[0] === "!") return;
       worksheet[cell].s = {
@@ -266,6 +276,28 @@ const ExportToExcel = ({ entries }) => {
         },
       };
     });
+
+    // Виділяємо колонку Quantity зеленим
+    const quantityColIndex = headerKeys.indexOf("Quantity");
+    if (quantityColIndex !== -1) {
+      for (let rowIndex = 6; rowIndex < result.length + 6; rowIndex++) {
+        const cellAddress = XLSX.utils.encode_cell({
+          r: rowIndex,
+          c: quantityColIndex,
+        });
+        if (worksheet[cellAddress]) {
+          worksheet[cellAddress].s = {
+            ...worksheet[cellAddress].s,
+
+            font: {
+              ...(worksheet[cellAddress].s?.font || {}),
+              color: { rgb: "006100" }, // темно-зелений текст
+            },
+          };
+        }
+      }
+    }
+
     const legend = [
       [],
       ["Downtime reason list:"],
@@ -285,7 +317,14 @@ const ExportToExcel = ({ entries }) => {
     const blob = new Blob([excelBuffer], {
       type: "application/octet-stream",
     });
-    saveAs(blob, `shift-report_${selectedDate}_${mode}.xlsx`);
+
+    const shiftMap = { first: "1", second: "2", third: "3" };
+    const fileName =
+      mode === "all"
+        ? `${selectedDate}_All-Shifts.xlsx`
+        : `${selectedDate}_Shift-${shiftMap[currentShift]}.xlsx`;
+
+    saveAs(blob, fileName);
   };
 
   return (

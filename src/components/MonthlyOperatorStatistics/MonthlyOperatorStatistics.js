@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import style from "./MonthlyOperatorStatistics.module.scss";
-
 import { calculateWorkTime } from "../../utils/timeCalculations";
 import { formatTime } from "../../utils/formatTime";
+import { tasks, products } from "../../utils/constants";
 
-const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
+const MonthlyOperatorStatistics = ({ entries, operators }) => {
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
 
@@ -25,15 +25,8 @@ const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
     operators.forEach((operator) => {
       statistics[operator] = Array.from({ length: daysInMonth }, () => ({
         total: 0,
-        taskSummary: { POD: 0, POF: 0, Zlecenie: 0, Sample: 0, Test: 0 },
-        productSummary: {
-          "T-shirts": 0,
-          Hoodie: 0,
-          Bags: 0,
-          Sleeves: 0,
-          Children: 0,
-          Others: 0,
-        },
+        taskSummary: Object.fromEntries(tasks.map((t) => [t, 0])),
+        productSummary: Object.fromEntries(products.map((p) => [p, 0])),
       }));
     });
 
@@ -56,36 +49,25 @@ const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
           (entry) => entry.operator === operator
         );
 
-        let taskSummary = { POD: 0, POF: 0, Zlecenie: 0, Sample: 0, Test: 0 };
-        let productSummary = {
-          "T-shirts": 0,
-          Hoodie: 0,
-          Bags: 0,
-          Sleeves: 0,
-          Children: 0,
-          Others: 0,
-        };
+        let taskSummary = Object.fromEntries(tasks.map((t) => [t, 0]));
+        let productSummary = Object.fromEntries(products.map((p) => [p, 0]));
         let total = 0;
 
         operatorEntries.forEach((entry) => {
           const task = entry.task;
           const quantity = parseInt(entry.quantity, 10) || 0;
-          if (task === "POD") {
-            taskSummary.POD += quantity;
-          } else if (task === "POF") {
-            taskSummary.POF += quantity;
-          } else if (task === "Test") {
-            taskSummary.Test += quantity;
-          } else if (task === "Sample") {
-            taskSummary.Sample += quantity;
+
+          if (task in taskSummary) {
+            taskSummary[task] += quantity;
           } else {
-            taskSummary.Zlecenie += quantity;
+            taskSummary["Zlecenie"] += quantity;
           }
-          total += quantity;
 
           if (entry.product in productSummary) {
             productSummary[entry.product] += quantity;
           }
+
+          total += quantity;
         });
 
         statistics[operator][day - 1] = { total, taskSummary, productSummary };
@@ -114,57 +96,25 @@ const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
       const monthlyTotal = monthlyStatistics[operator].reduce(
         (acc, data) => {
           acc.total += data.total;
-          Object.keys(data.taskSummary).forEach((task) => {
+          tasks.forEach((task) => {
             acc.taskSummary[task] += data.taskSummary[task];
           });
-          Object.keys(data.productSummary).forEach((product) => {
+          products.forEach((product) => {
             acc.productSummary[product] += data.productSummary[product];
           });
           return acc;
         },
         {
           total: 0,
-          taskSummary: { POD: 0, POF: 0, Zlecenie: 0, Sample: 0, Test: 0 },
-          productSummary: {
-            "T-shirts": 0,
-            Hoodie: 0,
-            Bags: 0,
-            Sleeves: 0,
-            Children: 0,
-            Others: 0,
-          },
+          taskSummary: Object.fromEntries(tasks.map((t) => [t, 0])),
+          productSummary: Object.fromEntries(products.map((p) => [p, 0])),
         }
       );
 
       return { operator, ...monthlyTotal };
     })
-    .filter((total) => total.total > 0) // Фільтруємо операторів без показників
+    .filter((total) => total.total > 0)
     .sort((a, b) => b.total - a.total);
-
-  const totalStatistics = sortedMonthlyTotals.reduce(
-    (acc, operatorData) => {
-      acc.total += operatorData.total;
-      Object.keys(operatorData.taskSummary).forEach((task) => {
-        acc.taskSummary[task] += operatorData.taskSummary[task];
-      });
-      Object.keys(operatorData.productSummary).forEach((product) => {
-        acc.productSummary[product] += operatorData.productSummary[product];
-      });
-      return acc;
-    },
-    {
-      total: 0,
-      taskSummary: { POD: 0, POF: 0, Zlecenie: 0, Sample: 0, Test: 0 },
-      productSummary: {
-        "T-shirts": 0,
-        Hoodie: 0,
-        Bags: 0,
-        Sleeves: 0,
-        Children: 0,
-        Others: 0,
-      },
-    }
-  );
 
   const filteredEntries = Object.values(entries)
     .flatMap((shiftEntries) => Object.values(shiftEntries).flat())
@@ -176,7 +126,6 @@ const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
       );
     });
 
-  // 🔹 Обчислення робочого часу операторів та продуктивності
   const operatorEfficiency = {};
 
   filteredEntries.forEach((entry) => {
@@ -191,7 +140,7 @@ const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
     }
 
     const { workingTime } = calculateWorkTime(startTime, endTime);
-    const workHours = workingTime / 60; // Конвертуємо хвилини в години
+    const workHours = workingTime / 60;
 
     operatorEfficiency[operator].totalWorkHours += workHours;
     operatorEfficiency[operator].totalProducts += quantity;
@@ -199,24 +148,20 @@ const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
     if (!operatorEfficiency[operator].productDetails[product]) {
       operatorEfficiency[operator].productDetails[product] = {
         total: 0,
-        workHours: 0, // 🔹 Додаємо окремий час для кожного продукту
+        workHours: 0,
         speed: 0,
       };
     }
 
     operatorEfficiency[operator].productDetails[product].total += quantity;
-    operatorEfficiency[operator].productDetails[product].workHours += workHours; // 🔥 Вставити тут!
+    operatorEfficiency[operator].productDetails[product].workHours += workHours;
   });
 
-  // Отримуємо назву вибраного місяця
   const formattedMonth = new Date(
     selectedMonth.year,
     selectedMonth.month
-  ).toLocaleString("en-US", {
-    month: "long",
-  });
+  ).toLocaleString("en-US", { month: "long" });
 
-  // Формуємо заголовок
   const reportTitle = `${formattedMonth} ${selectedMonth.year}`;
 
   return (
@@ -245,6 +190,7 @@ const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
         </label>
       </div>
 
+      {/* 1. Daily Operator Statistics */}
       <div className={style.section}>
         <h3 className={style.title}>
           Daily Operator Statistics – {reportTitle}
@@ -261,21 +207,17 @@ const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
           </thead>
           <tbody>
             {sortedMonthlyTotals.map((total) => {
-              // Розраховуємо кількість днів з даними для цього оператора
               const daysWithRecords = monthlyStatistics[total.operator].filter(
                 (data) => data.total > 0
               ).length;
-
-              // Якщо є дні з даними, обчислюємо середнє, інакше ставимо "0"
               const averagePerDay =
                 daysWithRecords > 0
                   ? Math.round(total.total / daysWithRecords)
                   : "0";
-
               return (
                 <tr key={total.operator}>
                   <td className={style.operatorCell}>{total.operator}</td>
-                  <td className={style.averageCell}>{averagePerDay}</td>
+                  <td>{averagePerDay}</td>
                   {monthlyStatistics[total.operator].map((data, index) => (
                     <td key={index}>{data.total || ""}</td>
                   ))}
@@ -285,187 +227,127 @@ const MonthlyOperatorStatistics = ({ entries, operators, products }) => {
           </tbody>
         </table>
       </div>
+
+      {/* 2. Monthly Task Summary */}
       <div className={style.section}>
-        <h3 className={style.title}>Monthly Total Summary - {reportTitle}</h3>
+        <h3 className={style.title}>Monthly Task Summary – {reportTitle}</h3>
         <table className={style.table}>
           <thead>
             <tr>
               <th>Operator</th>
-              <th>Total Quantity</th>
-              <th>POD</th>
-              <th>POF</th>
-              <th>Zlecenie</th>
-              <th>Sample</th>
-              <th>Test</th>
-              <th>T-shirts</th>
-              <th>Hoodie</th>
-              <th>Bags</th>
-              <th>Sleeves</th>
-              <th>Children</th>
-              <th>Others</th>
+              <th>Total</th>
+              {tasks.map((task) => (
+                <th key={task}>{task}</th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {sortedMonthlyTotals.map((total) => (
               <tr key={total.operator}>
-                <td className={style.operatorCell}>{total.operator}</td>
-                <td className={style.averageCell}>{total.total || ""}</td>
-                <td>{total.taskSummary.POD || ""}</td>
-                <td>{total.taskSummary.POF || ""}</td>
-                <td>{total.taskSummary.Zlecenie || ""}</td>
-                <td>{total.taskSummary.Sample || ""}</td>
-                <td>{total.taskSummary.Test || ""}</td>
-                <td>{total.productSummary["T-shirts"] || ""}</td>
-                <td>{total.productSummary.Hoodie || ""}</td>
-                <td>{total.productSummary.Bags || ""}</td>
-                <td>{total.productSummary.Sleeves || ""}</td>
-                <td>{total.productSummary.Children || ""}</td>
-                <td>{total.productSummary.Others || ""}</td>
+                <td>{total.operator}</td>
+                <td>{total.total}</td>
+                {tasks.map((task) => (
+                  <td key={task}>{total.taskSummary[task] || ""}</td>
+                ))}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* 3. Monthly Product Summary */}
+      <div className={style.section}>
+        <h3 className={style.title}>Monthly Product Summary – {reportTitle}</h3>
+        <table className={style.table}>
+          <thead>
+            <tr>
+              <th>Operator</th>
+              {products.map((product) => (
+                <th key={product}>{product}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {sortedMonthlyTotals.map((total) => (
+              <tr key={total.operator}>
+                <td>{total.operator}</td>
+                {products.map((product) => (
+                  <td key={product}>{total.productSummary[product] || ""}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* 4. Operator Work Efficiency */}
       <div className={style.section}>
         <h3 className={style.title}>
-          Overall Monthly Statistics - {reportTitle}, ( All operators )
+          Operator Work Efficiency – {reportTitle}
         </h3>
         <table className={style.table}>
           <thead>
             <tr>
-              <th>Total Quantity</th>
-              <th>POD</th>
-              <th>POF</th>
-              <th>Zlecenie</th>
-              <th>Sample</th>
-              <th>Test</th>
-              <th>T-shirts</th>
-              <th>Hoodie</th>
-              <th>Bags</th>
-              <th>Sleeves</th>
-              <th>Children</th>
-              <th>Others</th>
+              <th>Operator</th>
+              <th>Work Hours</th>
+              <th>Total Products</th>
+              <th>Average Speed (units/hr)</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>{totalStatistics.total || ""}</td>
-              <td>{totalStatistics.taskSummary.POD || ""}</td>
-              <td>{totalStatistics.taskSummary.POF || ""}</td>
-              <td>{totalStatistics.taskSummary.Zlecenie || ""}</td>
-              <td>{totalStatistics.taskSummary.Sample || ""}</td>
-              <td>{totalStatistics.taskSummary.Test || ""}</td>
-              <td>{totalStatistics.productSummary["T-shirts"] || ""}</td>
-              <td>{totalStatistics.productSummary.Hoodie || ""}</td>
-              <td>{totalStatistics.productSummary.Bags || ""}</td>
-              <td>{totalStatistics.productSummary.Sleeves || ""}</td>
-              <td>{totalStatistics.productSummary.Children || ""}</td>
-              <td>{totalStatistics.productSummary.Others || ""}</td>
-            </tr>
+            {Object.entries(operatorEfficiency).map(([operator, data]) => (
+              <tr key={operator}>
+                <td>{operator}</td>
+                <td>{formatTime(Math.round(data.totalWorkHours * 60))}</td>
+                <td>{data.totalProducts}</td>
+                <td>
+                  {data.totalWorkHours > 0
+                    ? Math.round(data.totalProducts / data.totalWorkHours)
+                    : "-"}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
-      <div className={style.rowSection}>
-        {" "}
-        <div className={style.section}>
-          {" "}
-          <h3 className={style.title}>
-            Operator Work Efficiency – {reportTitle}
-          </h3>
-          <table className={style.table}>
-            <thead>
-              <tr>
-                <th>Operator</th>
-                <th>Work Hours</th>
-                <th>Total Products</th>
-                <th>Average Speed (units/hr)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.keys(operatorEfficiency).map((operator) => {
-                const data = operatorEfficiency[operator];
-                const avgSpeed = data.totalWorkHours
-                  ? Math.round(data.totalProducts / data.totalWorkHours)
-                  : 0;
 
-                return (
-                  <tr key={operator}>
-                    <td>{operator}</td>
-                    <td>{formatTime(Math.round(data.totalWorkHours * 60))}</td>
-                    <td>{data.totalProducts}</td>
-                    <td>{avgSpeed}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        <div className={`${style.section} ${style.scrollTable}`}>
-          {" "}
-          <h3 className={style.stickyTitle}>
-            Detailed Product Breakdown – {reportTitle}
-          </h3>
-          <table className={`${style.table} ${style.stickyHeaderTable}`}>
-            <thead>
-              <tr>
-                <th>Operator</th>
-                <th>Product</th>
-                <th>Total Produced</th>
-                <th>Speed (units/hr)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.keys(operatorEfficiency).map((operator) => {
-                const productDetails = Object.keys(
-                  operatorEfficiency[operator].productDetails
-                )
-                  .filter(
-                    (product) =>
-                      operatorEfficiency[operator].productDetails[product]
-                        .total > 0
-                  )
-                  .map((product) => {
-                    const details =
-                      operatorEfficiency[operator].productDetails[product];
-                    const productSpeed =
-                      details.workHours > 0
-                        ? Math.round(details.total / details.workHours)
-                        : "-";
-                    return {
-                      product,
-                      total: details.total,
-                      speed: productSpeed,
-                    };
-                  });
+      {/* 5. Detailed Product Breakdown */}
+      <div className={style.section}>
+        <h3 className={style.title}>
+          Detailed Product Breakdown – {reportTitle}
+        </h3>
+        <table className={style.table}>
+          <thead>
+            <tr>
+              <th>Operator</th>
+              <th>Product</th>
+              <th>Total</th>
+              <th>Speed (units/hr)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(operatorEfficiency).map(([operator, data]) => {
+              const productDetails = Object.entries(data.productDetails).filter(
+                ([_, val]) => val.total > 0
+              );
 
-                if (productDetails.length === 0) return null; // Пропускаємо операторів без продуктів
-
-                return (
-                  <React.Fragment key={operator}>
-                    <tr>
-                      <td
-                        rowSpan={productDetails.length}
-                        className={style.operatorName}
-                      >
-                        {operator}
-                      </td>
-                      <td>{productDetails[0].product}</td>
-                      <td>{productDetails[0].total}</td>
-                      <td>{productDetails[0].speed}</td>
-                    </tr>
-                    {productDetails.slice(1).map((entry) => (
-                      <tr key={`${operator}-${entry.product}`}>
-                        <td>{entry.product}</td>
-                        <td>{entry.total}</td>
-                        <td>{entry.speed}</td>
-                      </tr>
-                    ))}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+              return productDetails.map(([product, val], index) => (
+                <tr key={`${operator}-${product}`}>
+                  {index === 0 && (
+                    <td rowSpan={productDetails.length}>{operator}</td>
+                  )}
+                  <td>{product}</td>
+                  <td>{val.total}</td>
+                  <td>
+                    {val.workHours > 0
+                      ? Math.round(val.total / val.workHours)
+                      : "-"}
+                  </td>
+                </tr>
+              ));
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );

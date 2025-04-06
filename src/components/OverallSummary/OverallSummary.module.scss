@@ -46,12 +46,12 @@
 
 .taskName,
 .productName {
-  font-weight: bold; /* Виділяємо назви жирним */
+  font-size: 14px;
 }
 
 .taskValue,
 .productValue {
-  padding-left: 0.5rem; /* Відступ між назвою і значенням */
+  padding-left: 0.1rem; /* Відступ між назвою і значенням */
 }
 
 @keyframes fadeInUp {
@@ -111,6 +111,20 @@
 .description:nth-child(6) {
   animation-delay: 2.1s;
   border-bottom: 5px solid #b3429d;
+  border-radius: 3px;
+  padding: 10px;
+}
+
+.description:nth-child(7) {
+  animation-delay: 2.1s;
+  border-bottom: 5px solid #8884d8;
+  border-radius: 3px;
+  padding: 10px;
+}
+
+.description:nth-child(8) {
+  animation-delay: 2.1s;
+  border-bottom: 5px solid #82ca9d;
   border-radius: 3px;
   padding: 10px;
 }

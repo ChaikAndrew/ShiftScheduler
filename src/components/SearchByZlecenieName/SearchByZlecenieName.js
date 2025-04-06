@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import style from "./SearchByZlecenieName.module.scss";
 
 function SearchByZlecenieName({ entries, isModalOpen, setIsModalOpen }) {
@@ -6,12 +6,12 @@ function SearchByZlecenieName({ entries, isModalOpen, setIsModalOpen }) {
   const [filteredEntries, setFilteredEntries] = useState([]);
   const [searchPerformed, setSearchPerformed] = useState(false);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setIsModalOpen(false);
     setSearchTerm("");
     setFilteredEntries([]);
     setSearchPerformed(false);
-  };
+  }, [setIsModalOpen]);
 
   const handleSearch = () => {
     if (!searchTerm.trim()) return;
@@ -47,12 +47,19 @@ function SearchByZlecenieName({ entries, isModalOpen, setIsModalOpen }) {
 
     if (isModalOpen) {
       document.addEventListener("keydown", handleKeyDown);
-    } else {
-      document.removeEventListener("keydown", handleKeyDown);
     }
 
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isModalOpen]);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isModalOpen, closeModal]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token && isModalOpen) {
+      setIsModalOpen(false);
+    }
+  }, [isModalOpen, setIsModalOpen]);
 
   if (!isModalOpen) return null;
 
@@ -70,7 +77,7 @@ function SearchByZlecenieName({ entries, isModalOpen, setIsModalOpen }) {
         <h3>Search by Zlecenie Name</h3>
         <form
           onSubmit={(e) => {
-            e.preventDefault(); // щоб не перезавантажувалось
+            e.preventDefault();
             handleSearch();
           }}
         >
