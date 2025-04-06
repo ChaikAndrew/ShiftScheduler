@@ -17,6 +17,7 @@ import { FiSearch } from "react-icons/fi";
 import { TbFileExport } from "react-icons/tb";
 
 import styles from "./NavBar.module.scss";
+import LogoWithAnimation from "../LogoWithAnimation/LogoWithAnimation";
 
 const NavBar = ({ isCollapsed, setIsCollapsed, setIsSearchModalOpen }) => {
   const navigate = useNavigate();
@@ -145,6 +146,7 @@ const NavBar = ({ isCollapsed, setIsCollapsed, setIsSearchModalOpen }) => {
           <TbFileExport className={styles.icon} />
           <span className={styles.linkText}>Export to Excel</span>
         </NavLink>
+
         <NavLink
           to={dashboardLink.path}
           className={({ isActive }) =>
@@ -158,6 +160,7 @@ const NavBar = ({ isCollapsed, setIsCollapsed, setIsSearchModalOpen }) => {
         </NavLink>
       </div>
       <div className={styles.userSection}>
+        <LogoWithAnimation />
         <div className={styles.userInfo}>
           <div className={styles.username}>{username}</div>
           <div className={styles.role}>({role})</div>

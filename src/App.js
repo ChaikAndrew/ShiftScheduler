@@ -64,6 +64,8 @@ import { handleSaveEntryToDB } from "../src/utils/entryHandlers";
 import { getEntriesFromDB } from "../src/utils/api/shiftApi";
 import { recalculateDowntime } from "./utils/recalculateDowntime";
 
+import { FaArrowUp } from "react-icons/fa";
+
 // Додамо AdminDashboard і OperatorDashboard пізніше
 
 function App() {
@@ -638,8 +640,12 @@ function App() {
                   </div>
 
                   {showUpButton && (
-                    <button className="btn-up" onClick={scrollToTop}>
-                      go up
+                    <button
+                      className="btn-up"
+                      onClick={scrollToTop}
+                      title="Go up"
+                    >
+                      <FaArrowUp size={20} />
                     </button>
                   )}
                 </div>

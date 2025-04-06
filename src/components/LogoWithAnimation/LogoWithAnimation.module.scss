@@ -1,0 +1,23 @@
+/* components/LogoWithAnimation.module.css */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.logoContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo {
+  padding: 5px;
+  margin-bottom: 5px;
+  width: 35px; /* Встановлюємо ширину */
+  height: 35px; /* Встановлюємо висоту */
+  animation: spin 3s linear infinite;
+}

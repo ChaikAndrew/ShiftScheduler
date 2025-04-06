@@ -91,25 +91,6 @@ button {
   color: #82ca9d;
 }
 
-/* Псевдоелемент для анімації підкреслення */
-/* .btn-summary::after {
-  content: "";
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  width: 0;
-  height: 3px;
-  background-color: #ffaa00;
-  transition: width 0.3s ease, left 0.3s ease;
-  transform-origin: center;
-}
-
-.btn-summary:hover::after,
-.btn-summary:active::after {
-  width: 100%;
-  left: 0;
-} */
-
 /* Стиль для селекту та інпутів */
 input[type="date"],
 input[type="time"],
@@ -161,8 +142,8 @@ select {
 
 .input-quantity::-webkit-inner-spin-button,
 .input-quantity::-webkit-outer-spin-button {
-  -webkit-appearance: none; /* Для Chrome, Safari, Edge */
-  margin: 0; /* Убираємо відступи */
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .zlecenie-input {
@@ -178,48 +159,28 @@ select {
 .btn-up {
   z-index: 10;
   position: fixed;
-  bottom: 22px; /* Відступ від нижнього краю */
-  right: 5px; /* Відступ від правого краю */
+  bottom: 60px;
+  right: 30px;
+  width: 40px;
+  height: 40px;
   color: #333;
   border: none;
-  background-color: #a2a2a2;
+  background-color: #bbbbbbd9;
   cursor: pointer;
-  font-size: 16px;
-  padding: 2px 20px;
+
   transition: background-color 0.3s, color 0.3s;
   outline: none;
-  overflow: visible; /* Дозволяє показувати анімацію поза межами кнопки */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s, transform 0.2s;
 }
 
-/* .btn-up::after,
-.btn-up::after {
-  content: "";
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  width: 0;
-  height: 3px;
-  background-color: #ffc658;
-  transition: width 0.3s ease, left 0.3s ease;
-  transform-origin: center;
-}
-
-.btn-up:hover::after,
-.btn-up:hover::after {
-  width: 100%;
-  left: 0;
-} */
-
-.btn-up:hover,
-.btn-up:focus {
+.btn-up:hover {
   background-color: #333;
   color: #82ca9d;
-}
-
-.editing-form {
-  border: 2px solid #ffcc00; /* Жовта рамка для привернення уваги */
-  background-color: #fffbe6; /* Світло-жовтий фон */
-  transition: all 0.3s ease-in-out; /* Гладка анімація */
+  transform: scale(1.1);
 }
 
 .app-container {
