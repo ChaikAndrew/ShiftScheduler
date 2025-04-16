@@ -60,6 +60,13 @@ const ExportToExcel = ({ entries }) => {
 
     const allProducts = Array.from(allProductsSet);
 
+    const styleGreenText = {
+      font: {
+        bold: true,
+        color: { rgb: "006100" },
+      },
+    };
+
     shiftsToExport.forEach((shift, shiftIndex) => {
       const machinesInShift = entries[shift] || {};
       const shiftRows = [];
@@ -170,10 +177,11 @@ const ExportToExcel = ({ entries }) => {
           shiftRows.push(row);
           grandTotalQty += totalQuantity;
         });
-
-      result.push(...shiftRows);
-      if (shiftIndex < shiftsToExport.length - 1) {
-        result.push({});
+      if (shiftRows.length > 0) {
+        result.push(...shiftRows);
+        if (mode === "all" && shiftIndex < shiftsToExport.length - 1) {
+          result.push({ __emptyRow: true });
+        }
       }
     });
 
@@ -191,23 +199,17 @@ const ExportToExcel = ({ entries }) => {
         .sort(([a], [b]) => a.localeCompare(b)),
     ];
 
-    const taskSummaryLine = sortedTasks
-      .map(([task, qty]) => `${task}: ${qty}`)
-      .join(" | ");
-
-    const productSummaryLine = Object.entries(totalProducts)
-      .filter(([, val]) => val > 0)
-      .map(([prod, qty]) => `${prod}: ${qty}`)
-      .join(" | ");
-
     const allLeaders = Array.from(leaderNameSet).join(", ");
+
+    const zlecenieRow =
+      totalZlecenieQty > 0 ? [["ZLECENIE", totalZlecenieQty]] : [];
 
     const headerLines = [
       [
         {
-          v: `Shift Summary | Date: ${selectedDate} | ${
+          v: `Shift Summary\nDate: ${selectedDate}\n${
             mode === "all" ? "All Shifts" : `Shift: ${currentShift}`
-          } | Leader: ${allLeaders} | Total Quantity: ${grandTotalQty}`,
+          }\nLeader: ${allLeaders}\nTotal Quantity: ${grandTotalQty}`,
           s: {
             font: {
               bold: true,
@@ -215,27 +217,73 @@ const ExportToExcel = ({ entries }) => {
               name: "Arial",
               sz: 11,
             },
+            alignment: {
+              wrapText: true,
+              horizontal: "center",
+              vertical: "center",
+            },
           },
         },
       ],
-      [taskSummaryLine],
-      totalZlecenieQty > 0 ? ["Zlecenie total: " + totalZlecenieQty] : [],
-      [productSummaryLine],
+      [
+        {
+          v: "Task summary:",
+          s: {
+            font: { bold: true, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "4F81BD" } },
+            alignment: { horizontal: "left", vertical: "center" },
+          },
+        },
+      ],
+      ...sortedTasks.map(([task, qty]) => [task, qty]),
+      ...zlecenieRow,
+      [
+        {
+          v: "Product summary:",
+          s: {
+            font: { bold: true, color: { rgb: "FFFFFF" } },
+            fill: { fgColor: { rgb: "4F81BD" } },
+            alignment: { horizontal: "left", vertical: "center" },
+          },
+        },
+      ],
+      ...Object.entries(totalProducts)
+        .filter(([, val]) => val > 0)
+        .map(([prod, qty]) => [prod, qty]),
       [],
     ];
+    const headerRowCount = headerLines.length;
 
     const worksheet = XLSX.utils.json_to_sheet([]);
     XLSX.utils.sheet_add_aoa(worksheet, headerLines, { origin: "A1" });
-    XLSX.utils.sheet_add_json(worksheet, result, {
-      origin: "A6",
+    const cleanedResult = result.filter((row) => !row.__emptyRow);
+    XLSX.utils.sheet_add_json(worksheet, cleanedResult, {
+      origin: `A${headerRowCount + 1}`,
       skipHeader: false,
     });
-
-    worksheet["!rows"] = [{ hpt: 25 }, { hpt: 25 }, { hpt: 25 }, { hpt: 25 }];
-
+    headerLines.forEach((row, rowIndex) => {
+      if (
+        Array.isArray(row) &&
+        row.length === 2 &&
+        typeof row[0] === "string" &&
+        (knownTasks.includes(row[0]) || row[0] === "ZLECENIE")
+      ) {
+        const cell = XLSX.utils.encode_cell({ r: rowIndex, c: 0 }); // A-колонка
+        if (worksheet[cell]) {
+          worksheet[cell].s = {
+            ...worksheet[cell].s,
+            ...styleGreenText,
+          };
+        }
+      }
+    });
     const headerKeys = Object.keys(result[0] || {});
+    const tableStartRow = headerRowCount;
     headerKeys.forEach((key, colIndex) => {
-      const cellAddress = XLSX.utils.encode_cell({ r: 5, c: colIndex });
+      const cellAddress = XLSX.utils.encode_cell({
+        r: tableStartRow,
+        c: colIndex,
+      });
       if (worksheet[cellAddress]) {
         worksheet[cellAddress].s = {
           font: {
@@ -253,7 +301,25 @@ const ExportToExcel = ({ entries }) => {
       }
     });
 
-    const columnWidths = Object.keys(result[0]).map((key) => {
+    const getMaxLen = (val) =>
+      val && typeof val === "string"
+        ? val.length
+        : typeof val === "object" && val.v
+        ? val.v.length
+        : 0;
+
+    let columnWidths = [];
+
+    headerLines.forEach((line, rowIndex) => {
+      line.forEach((cell, colIndex) => {
+        const len = getMaxLen(cell);
+        if (!columnWidths[colIndex] || columnWidths[colIndex].wch < len + 2) {
+          columnWidths[colIndex] = { wch: len + 2 };
+        }
+      });
+    });
+
+    Object.keys(result[0] || {}).forEach((key, colIndex) => {
       const maxLength = result.reduce((acc, row) => {
         const cell = row[key];
         const len = cell ? cell.toString().length : 0;
@@ -261,9 +327,50 @@ const ExportToExcel = ({ entries }) => {
       }, key.length);
       const isWideColumn = ["Downtime Reasons", "Operators"].includes(key);
       const maxWidth = isWideColumn ? 50 : 20;
-      return { wch: Math.max(8, Math.min(maxLength + 2, maxWidth)) };
+      const wch = Math.max(8, Math.min(maxLength + 2, maxWidth));
+      columnWidths[colIndex] = {
+        wch: Math.max(columnWidths[colIndex]?.wch || 0, wch),
+      };
     });
+    columnWidths[0] = { wpx: 100 };
     worksheet["!cols"] = columnWidths;
+
+    worksheet["!merges"] = [
+      {
+        s: { r: 0, c: 0 },
+        e: { r: 0, c: headerKeys.length - 1 },
+      },
+      {
+        s: { r: 1, c: 0 },
+        e: { r: 1, c: headerKeys.length - 1 },
+      },
+      {
+        s: { r: sortedTasks.length + 3, c: 0 },
+        e: { r: sortedTasks.length + 3, c: headerKeys.length - 1 },
+      },
+    ];
+
+    const styleBlueHeader = {
+      font: { bold: true, color: { rgb: "FFFFFF" } },
+      fill: { fgColor: { rgb: "4F81BD" } },
+      alignment: { horizontal: "left", vertical: "center" },
+    };
+
+    if (worksheet["A2"]) {
+      worksheet["A2"].s = styleBlueHeader;
+    }
+
+    const productSummaryRow = `A${sortedTasks.length + 4}`;
+    if (worksheet[productSummaryRow]) {
+      worksheet[productSummaryRow].s = styleBlueHeader;
+    }
+
+    worksheet["A1"].s.alignment = {
+      ...worksheet["A1"].s.alignment,
+      wrapText: true,
+      horizontal: "center",
+      vertical: "center",
+    };
 
     Object.keys(worksheet).forEach((cell) => {
       if (cell[0] === "!") return;
@@ -277,10 +384,13 @@ const ExportToExcel = ({ entries }) => {
       };
     });
 
-    // Виділяємо колонку Quantity зеленим
     const quantityColIndex = headerKeys.indexOf("Quantity");
     if (quantityColIndex !== -1) {
-      for (let rowIndex = 6; rowIndex < result.length + 6; rowIndex++) {
+      for (
+        let rowIndex = tableStartRow + 1;
+        rowIndex < result.length + tableStartRow + 1;
+        rowIndex++
+      ) {
         const cellAddress = XLSX.utils.encode_cell({
           r: rowIndex,
           c: quantityColIndex,
@@ -291,7 +401,51 @@ const ExportToExcel = ({ entries }) => {
 
             font: {
               ...(worksheet[cellAddress].s?.font || {}),
-              color: { rgb: "006100" }, // темно-зелений текст
+              color: { rgb: "006100" },
+            },
+          };
+        }
+      }
+    }
+    const workingTimeColIndex = headerKeys.indexOf("Working Time");
+    if (workingTimeColIndex !== -1) {
+      for (
+        let rowIndex = tableStartRow + 1;
+        rowIndex < result.length + tableStartRow + 1;
+        rowIndex++
+      ) {
+        const cellAddress = XLSX.utils.encode_cell({
+          r: rowIndex,
+          c: workingTimeColIndex,
+        });
+        if (worksheet[cellAddress]) {
+          worksheet[cellAddress].s = {
+            ...worksheet[cellAddress].s,
+            font: {
+              ...(worksheet[cellAddress].s?.font || {}),
+              color: { rgb: "006100" },
+            },
+          };
+        }
+      }
+    }
+    const downtimeColIndex = headerKeys.indexOf("Downtime");
+    if (downtimeColIndex !== -1) {
+      for (
+        let rowIndex = tableStartRow + 1;
+        rowIndex < result.length + tableStartRow + 1;
+        rowIndex++
+      ) {
+        const cellAddress = XLSX.utils.encode_cell({
+          r: rowIndex,
+          c: downtimeColIndex,
+        });
+        if (worksheet[cellAddress]) {
+          worksheet[cellAddress].s = {
+            ...worksheet[cellAddress].s,
+            font: {
+              ...(worksheet[cellAddress].s?.font || {}),
+              color: { rgb: "9C0006" },
             },
           };
         }
@@ -315,7 +469,7 @@ const ExportToExcel = ({ entries }) => {
       type: "array",
     });
     const blob = new Blob([excelBuffer], {
-      type: "application/octet-stream",
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
 
     const shiftMap = { first: "1", second: "2", third: "3" };
