@@ -5,6 +5,7 @@ import DateSelector from "../../components/DateSelector/DateSelector";
 import ShiftButtons from "../../components/ShiftButtons/ShiftButtons";
 import { reasons } from "../../utils/constants";
 import useEntriesLoader from "../../hooks/useEntriesLoader";
+import { recalculateDowntime } from "../../utils/recalculateDowntime";
 
 const ExportToExcel = () => {
   const [selectedDate, setSelectedDate] = useState(
@@ -99,6 +100,20 @@ const ExportToExcel = () => {
           const records = machinesInShift[machine].filter((e) =>
             e.date?.startsWith(selectedDate)
           );
+
+          if (records.length > 0) {
+            const shiftEntriesObject = {
+              [shift]: {
+                [machine]: records,
+              },
+            };
+            const updated = recalculateDowntime(
+              shiftEntriesObject,
+              shift,
+              machine
+            );
+            records.splice(0, records.length, ...updated[shift][machine]);
+          }
 
           if (records.length === 0) return;
 
