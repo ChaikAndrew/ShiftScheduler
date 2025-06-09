@@ -4,7 +4,9 @@ import useEntriesLoader from "../../hooks/useEntriesLoader";
 import { recalculateDowntime } from "../../utils/recalculateDowntime";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import CustomDatePicker from "../CustomDatePicker/CustomDatePicker";
 
+import style from "./MachineTimeStats.module.scss";
 const MachineTimeStats = ({ machines = [] }) => {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
@@ -63,18 +65,16 @@ const MachineTimeStats = ({ machines = [] }) => {
   };
 
   return (
-    <div>
-      <h1>Machine Time Stats</h1>
+    <div className={style.container}>
+      <h2>Machine Time Stats</h2>
 
       <div>
-        <label>
-          Select Date:
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
+        <div style={{ marginBottom: "1rem" }}>
+          <CustomDatePicker
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
           />
-        </label>
+        </div>
 
         <label>
           Select Shift:
@@ -135,7 +135,7 @@ const MachineTimeStats = ({ machines = [] }) => {
               </tbody>
             </table>
           ) : (
-            <p>Немає даних на цю дату і зміну.</p>
+            <p>No data found for this date and shift.</p>
           )}
         </>
       )}

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import style from "./MonthlyOperatorStatistics.module.scss";
-import { calculateWorkTime } from "../../utils/timeCalculations";
 import { formatTime } from "../../utils/formatTime";
 import { tasks, products } from "../../utils/constants";
 import useEntriesLoader from "../../hooks/useEntriesLoader";
@@ -137,7 +136,7 @@ const MonthlyOperatorStatistics = ({ operators }) => {
   const operatorEfficiency = {};
 
   filteredEntries.forEach((entry) => {
-    const { operator, startTime, endTime, quantity, product } = entry;
+    const { operator, quantity, product } = entry;
 
     if (!operatorEfficiency[operator]) {
       operatorEfficiency[operator] = {
@@ -147,12 +146,13 @@ const MonthlyOperatorStatistics = ({ operators }) => {
       };
     }
 
-    const { workingTime } = calculateWorkTime(startTime, endTime);
+    const workingTime = entry.workingTime || 0;
     const workHours = workingTime / 60;
 
     operatorEfficiency[operator].totalWorkHours += workHours;
     operatorEfficiency[operator].totalProducts += quantity;
 
+    if (!product) return;
     if (!operatorEfficiency[operator].productDetails[product]) {
       operatorEfficiency[operator].productDetails[product] = {
         total: 0,

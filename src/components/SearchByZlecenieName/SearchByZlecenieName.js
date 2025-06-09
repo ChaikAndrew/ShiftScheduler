@@ -204,7 +204,9 @@ function SearchByZlecenieName({ isModalOpen, setIsModalOpen }) {
                       <td>{entry.leader}</td>
                       <td>{entry.operator}</td>
                       <td>{entry.machine}</td>
-                      <td className={style.searchZlecenie}>{entry.task}</td>
+                      <td className={style.searchZlecenie}>
+                        {entry.task?.toUpperCase()}
+                      </td>
                       <td>{entry.product}</td>
                       <td>{entry.color}</td>
                       <td>{entry.quantity}</td>

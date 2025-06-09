@@ -19,8 +19,19 @@ function SummaryHeader({
   return (
     <div className={style.titleMachineForDate}>
       <div> {selectedDate}</div>
-      <div>Shift {currentShift}</div>
-      <div>{selectedMachine && ` ${selectedMachine}`}</div>
+      <div>
+        Shift:{" "}
+        {currentShift &&
+          currentShift.charAt(0).toUpperCase() + currentShift.slice(1)}
+      </div>
+      <div>
+        {selectedMachine &&
+          ` ${selectedMachine.charAt(0).toUpperCase()}${selectedMachine.slice(
+            1,
+            -1
+          )} ${selectedMachine.slice(-1)}`}
+      </div>
+      <div>Total: {totalQuantity}</div>
     </div>
   );
 }

@@ -28,6 +28,10 @@ video {
   height: auto;
 }
 
+.container {
+  padding: 20px;
+}
+
 /* Загальні стилі для контейнера */
 
 /* Стилі для таблиці */
@@ -104,6 +108,7 @@ select {
 
 select {
   background-color: #fff;
+  outline: none;
 }
 
 /* Загальний стиль для header меню вибору змін та інпутів*/
@@ -190,7 +195,7 @@ select {
 
 .content {
   flex-grow: 1;
-  padding: 0 20px;
+
   margin-left: 250px; /* Коли NavBar розгорнутий */
   transition: margin-left 0.5s ease-in-out;
 }

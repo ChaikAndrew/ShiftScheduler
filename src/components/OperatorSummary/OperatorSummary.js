@@ -63,7 +63,7 @@ function OperatorSummary({ operators, operatorSummary }) {
             </div>
           );
         }
-        return null; // Не відображаємо операторів з нульовими значеннями
+        return null;
       })}
     </div>
   );

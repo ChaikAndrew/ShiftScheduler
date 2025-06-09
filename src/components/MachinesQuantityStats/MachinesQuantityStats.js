@@ -4,6 +4,7 @@ import { getMachineStatistics } from "../../utils/machineStatisticsHelpers";
 import useEntriesLoader from "../../hooks/useEntriesLoader";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import CustomDatePicker from "../CustomDatePicker/CustomDatePicker";
 
 const MachinesQuantityStats = ({ machines = [] }) => {
   const [selectedDate, setSelectedDate] = useState(
@@ -37,20 +38,22 @@ const MachinesQuantityStats = ({ machines = [] }) => {
     return "Unknown";
   }, [entries, selectedShift, selectedDate]);
 
+  const totalShiftQuantity = useMemo(() => {
+    return statistics.reduce((sum, stat) => sum + (stat.totalQuantity || 0), 0);
+  }, [statistics]);
+
   return (
     <div className={styles.container}>
       <h2>Machines Quantity Stats</h2>
 
       {/* Фільтри */}
       <div className={styles.filters}>
-        <label>
-          Select Date:
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
+        <div style={{ marginBottom: "1rem" }}>
+          <CustomDatePicker
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
           />
-        </label>
+        </div>
 
         <label>
           Select Shift:
@@ -105,7 +108,10 @@ const MachinesQuantityStats = ({ machines = [] }) => {
       ) : (
         <>
           <p>
-            <strong>Shift Leader:</strong> {leader}
+            <p>
+              <strong>Shift Leader:</strong> {leader} &nbsp; | &nbsp;
+              <strong>Total Quantity:</strong> {totalShiftQuantity}
+            </p>
           </p>
 
           {statistics.length > 0 ? (
@@ -144,7 +150,7 @@ const MachinesQuantityStats = ({ machines = [] }) => {
               </tbody>
             </table>
           ) : (
-            <p>Даних на цю дату і зміну немає.</p>
+            <p>No data available for the selected date and shift.</p>
           )}
         </>
       )}

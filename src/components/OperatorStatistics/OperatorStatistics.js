@@ -4,10 +4,15 @@ import useEntriesLoader from "../../hooks/useEntriesLoader";
 import style from "./OperatorStatistics.module.scss";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import CustomDatePicker from "../CustomDatePicker/CustomDatePicker";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 function OperatorStatistics({ tasks = [], products = [] }) {
   const [viewType, setViewType] = useState("day");
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [selectedMonth, setSelectedMonth] = useState("");
   const [operatorsFromDB, setOperatorsFromDB] = useState([]);
   const [selectedOperator, setSelectedOperator] = useState("");
@@ -147,18 +152,26 @@ function OperatorStatistics({ tasks = [], products = [] }) {
       {/* Date / Month Input */}
       <div className={style.dateSelection}>
         {viewType === "day" ? (
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={handleDateChange}
-            className={style.dateInput}
+          <CustomDatePicker
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
           />
         ) : (
-          <input
-            type="month"
-            value={selectedMonth}
-            onChange={handleMonthChange}
-            className={style.monthInput}
+          <DatePicker
+            selected={
+              selectedMonth ? new Date(`${selectedMonth}-01`) : new Date()
+            }
+            onChange={(date) => {
+              if (!date) return;
+              const formatted = `${date.getFullYear()}-${String(
+                date.getMonth() + 1
+              ).padStart(2, "0")}`;
+              setSelectedMonth(formatted);
+            }}
+            dateFormat="MM/yyyy"
+            showMonthYearPicker
+            showFullMonthYearPicker
+            className={style.customMonthPicker}
           />
         )}
       </div>

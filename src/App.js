@@ -11,6 +11,7 @@ import AdminDashboard from "../src/pages/AdminDashboard/AdminDashboard";
 import OperatorDashboard from "../src/pages/OperatorDashboard/OperatorDashboard";
 import LeaderDashboard from "../src/pages/LeaderDashboard/LeaderDashboard";
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
+import CustomDatePicker from "./components/CustomDatePicker/CustomDatePicker";
 
 import {
   machines,
@@ -39,7 +40,6 @@ import ShiftButtons from "./components/ShiftButtons/ShiftButtons";
 import SelectionFields from "./components/SelectionFields/SelectionFields";
 import EntryForm from "./components/EntryForm/EntryForm";
 
-import DateSelector from "./components/DateSelector/DateSelector";
 import OverallSummary from "./components/OverallSummary/OverallSummary";
 import TotalSummary from "./components/TotalSummary/TotalSummary";
 import ProductSummary from "./components/ProductSummary/ProductSummary";
@@ -72,7 +72,9 @@ import { FaArrowUp } from "react-icons/fa";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingToken, setIsCheckingToken] = useState(true);
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState(() =>
+    DateTime.now().toISODate()
+  );
   const [entries, setEntries] = useState(() => {
     const savedEntries = localStorage.getItem("entries");
     return savedEntries
@@ -320,22 +322,7 @@ function App() {
     (operator) => summary.operatorSummary[operator]?.total > 0
   );
 
-  // Функція для обробки зміни дати
-  const handleDateChangeLocal = (newDate) => {
-    const isoDate = DateTime.fromISO(newDate).toISODate();
-    console.log("New selected date:", isoDate);
-    handleDateChange(
-      isoDate,
-      setSelectedDate,
-      setCurrentShift,
-      setSelectedLeader,
-      setSelectedMachine,
-      setSelectedOperator
-    );
-  };
-
   // Функція для обробки редагування запису
-  // Оновлений виклик handleEdit у App.js
   const handleEdit = (index) => {
     let dateToUse = selectedDate;
 
@@ -474,9 +461,18 @@ function App() {
                     <h2>Shift Scheduler</h2>
                     {/* DateSelector */}
                     {/* Компонент вибору дати */}
-                    <DateSelector
+                    <CustomDatePicker
                       selectedDate={selectedDate}
-                      onDateChange={handleDateChangeLocal}
+                      onDateChange={(isoDate) =>
+                        handleDateChange(
+                          isoDate,
+                          setSelectedDate,
+                          setCurrentShift,
+                          setSelectedLeader,
+                          setSelectedMachine,
+                          setSelectedOperator
+                        )
+                      }
                     />
 
                     {/*Компонент ShiftButtons відповідає за відображення кнопок вибору зміни (Shift 1, Shift 2, Shift 3)*/}

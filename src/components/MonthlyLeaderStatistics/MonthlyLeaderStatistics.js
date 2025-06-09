@@ -50,7 +50,7 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
 
   return (
     <div className={styles.container}>
-      <h1>Monthly Leader Statistics</h1>
+      <h2>Monthly Leader Statistics</h2>
 
       <div>
         <label>

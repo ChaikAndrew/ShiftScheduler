@@ -167,7 +167,11 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
                     )}
                   </span>
                 </td>
-                <td>{entry.task}</td>
+                <td>
+                  {["POD", "POF", "Sample", "Test"].includes(entry.task)
+                    ? entry.task
+                    : entry.task?.toUpperCase()}
+                </td>
                 <td>{entry.product}</td>
                 <td>{entry.color}</td>
                 <td className={style.reasonDescription}>

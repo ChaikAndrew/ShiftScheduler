@@ -1,12 +1,16 @@
 import React, { useState } from "react";
 import * as XLSX from "xlsx-js-style";
 import { saveAs } from "file-saver";
-import DateSelector from "../../components/DateSelector/DateSelector";
+import { showToast } from "../ToastNotification/ToastNotification";
 import ShiftButtons from "../../components/ShiftButtons/ShiftButtons";
 import { reasons } from "../../utils/constants";
 import useEntriesLoader from "../../hooks/useEntriesLoader";
 import { recalculateDowntime } from "../../utils/recalculateDowntime";
 
+import CustomDatePicker from "../CustomDatePicker/CustomDatePicker";
+import style from "./ExportToExcel.module.scss";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 const ExportToExcel = () => {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
@@ -27,7 +31,13 @@ const ExportToExcel = () => {
     return `${h > 0 ? `${h}h` : ""} ${m > 0 ? `${m}min` : ""}`.trim();
   };
 
-  if (loading) return <p style={{ padding: "2rem" }}>⏳ Завантаження...</p>;
+  if (loading) {
+    return (
+      <div style={{ padding: "2rem" }}>
+        <Skeleton count={8} height={30} style={{ marginBottom: "0.5rem" }} />
+      </div>
+    );
+  }
   if (error)
     return (
       <p style={{ padding: "2rem", color: "red" }}>
@@ -219,7 +229,7 @@ const ExportToExcel = () => {
     });
 
     if (result.length === 0) {
-      alert("Даних по вибраній даті немає.");
+      showToast("No data found for the selected date.", "warning");
       return;
     }
 
@@ -229,6 +239,7 @@ const ExportToExcel = () => {
         .map((task) => [task, totalTasks[task]]),
       ...Object.entries(totalTasks)
         .filter(([task]) => !knownTasks.includes(task))
+        .map(([task, qty]) => [task.toUpperCase(), qty]) // ← тут магія
         .sort(([a], [b]) => a.localeCompare(b)),
     ];
 
@@ -515,14 +526,14 @@ const ExportToExcel = () => {
   };
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div className={style.container}>
       <h2>Export to Excel</h2>
-      <div style={{ marginBottom: "1rem" }}>
-        <DateSelector
-          selectedDate={selectedDate}
-          onDateChange={setSelectedDate}
-        />
-      </div>
+
+      <CustomDatePicker
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+      />
+
       <ShiftButtons
         currentShift={currentShift}
         selectedDate={selectedDate}
@@ -533,10 +544,10 @@ const ExportToExcel = () => {
           onClick={() => handleExport("single")}
           disabled={!selectedDate || !currentShift}
         >
-          📅 Export selected shift
+          Export selected shift
         </button>
         <button onClick={() => handleExport("all")} disabled={!selectedDate}>
-          📊 Export all shifts
+          Export all shifts
         </button>
       </div>
     </div>
