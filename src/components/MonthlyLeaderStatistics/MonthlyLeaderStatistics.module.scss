@@ -1,7 +1,7 @@
 .container {
   padding: 20px;
-  display: flex;
 
+  text-align: center;
   flex-direction: column;
   align-items: center;
   margin-left: auto;
@@ -29,4 +29,13 @@
   tr:hover {
     background-color: #f1f1f1;
   }
+}
+
+.detailedTable {
+  border-collapse: collapse;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 41%);
+}
+
+.detailedInfo {
+  margin-top: 30px;
 }

@@ -1,45 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import styles from "./MachinesQuantityStats.module.scss";
 import { getMachineStatistics } from "../../utils/machineStatisticsHelpers";
+import useEntriesLoader from "../../hooks/useEntriesLoader";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
-const MachinesQuantityStats = ({
-  entries = {},
-  machines = [],
-  leaders = [],
-}) => {
+const MachinesQuantityStats = ({ machines = [] }) => {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
   const [selectedShift, setSelectedShift] = useState("");
 
-  // Отримання статистики машин
-  const statistics = getMachineStatistics(
-    entries,
-    machines,
-    selectedDate,
-    selectedShift
+  const selectedYear = new Date(selectedDate).getFullYear();
+  const selectedMonth = new Date(selectedDate).getMonth() + 1;
+
+  const { entries, loading, error } = useEntriesLoader(
+    selectedYear,
+    selectedMonth
   );
 
-  // Функція отримання лідера зміни
-  const getShiftLeader = (entries, selectedShift, selectedDate) => {
+  const statistics = useMemo(() => {
+    return getMachineStatistics(entries, machines, selectedDate, selectedShift);
+  }, [entries, machines, selectedDate, selectedShift]);
+
+  const leader = useMemo(() => {
     if (!entries[selectedShift]) return "Unknown";
 
     for (const machine in entries[selectedShift]) {
       const machineEntries = entries[selectedShift][machine];
       for (const entry of machineEntries) {
-        if (
-          entry.date &&
-          entry.date.split("T")[0] === selectedDate &&
-          entry.leader
-        ) {
+        if (entry.date?.split("T")[0] === selectedDate && entry.leader) {
           return entry.leader;
         }
       }
     }
     return "Unknown";
-  };
-
-  const leader = getShiftLeader(entries, selectedShift, selectedDate);
+  }, [entries, selectedShift, selectedDate]);
 
   return (
     <div className={styles.container}>
@@ -70,18 +66,11 @@ const MachinesQuantityStats = ({
         </label>
       </div>
 
-      {/* Показ лідера зміни */}
-      {selectedDate && selectedShift && (
-        <p>
-          <strong>Shift Leader:</strong> {leader}
-        </p>
-      )}
-
-      {/* Таблиця статистики */}
-      {!selectedDate || !selectedShift ? (
-        <p>Please select both date and shift to view statistics.</p>
-      ) : statistics.length > 0 ? (
+      {/* Статус */}
+      {loading ? (
         <>
+          <Skeleton height={30} width={200} style={{ marginBottom: "1rem" }} />
+          <Skeleton height={40} count={1} style={{ marginBottom: "1rem" }} />
           <table className={styles.table}>
             <thead>
               <tr>
@@ -91,42 +80,73 @@ const MachinesQuantityStats = ({
                 <th>Zlecenie</th>
                 <th>Sample</th>
                 <th>Test</th>
-                <th>Total Quantity</th>
+                <th>Total</th>
               </tr>
             </thead>
             <tbody>
-              {statistics.map((machineStat) => {
-                // 🛠 Визначаємо кількість Zlecenie як все, що не POD, POF, Sample, Test
-                const zlecenieCount =
-                  machineStat.totalQuantity -
-                  (machineStat.POD +
-                    machineStat.POF +
-                    machineStat.Sample +
-                    machineStat.Test);
-
-                return (
-                  <tr key={machineStat.machine}>
-                    <td>{machineStat.machine}</td>
-                    <td>{machineStat.POD > 0 ? machineStat.POD : ""}</td>
-                    <td>{machineStat.POF > 0 ? machineStat.POF : ""}</td>
-                    <td>{zlecenieCount > 0 ? zlecenieCount : ""}</td>
-                    <td>{machineStat.Sample > 0 ? machineStat.Sample : ""}</td>
-                    <td>{machineStat.Test > 0 ? machineStat.Test : ""}</td>
-                    <td>
-                      <strong>
-                        {machineStat.totalQuantity > 0
-                          ? machineStat.totalQuantity
-                          : ""}
-                      </strong>
-                    </td>
-                  </tr>
-                );
-              })}
+              {[...Array(5)].map((_, index) => (
+                <tr key={index}>
+                  {Array(7)
+                    .fill(0)
+                    .map((_, i) => (
+                      <td key={i}>
+                        <Skeleton height={20} />
+                      </td>
+                    ))}
+                </tr>
+              ))}
             </tbody>
           </table>
         </>
+      ) : error ? (
+        <p>Помилка: {error.message}</p>
+      ) : !selectedDate || !selectedShift ? (
+        <p>Please select a date and shift to view statistics.</p>
       ) : (
-        <p>No data available for the selected date and shift.</p>
+        <>
+          <p>
+            <strong>Shift Leader:</strong> {leader}
+          </p>
+
+          {statistics.length > 0 ? (
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Machine</th>
+                  <th>POD</th>
+                  <th>POF</th>
+                  <th>Zlecenie</th>
+                  <th>Sample</th>
+                  <th>Test</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {statistics.map((stat) => {
+                  const zlecenie =
+                    stat.totalQuantity -
+                    (stat.POD + stat.POF + stat.Sample + stat.Test);
+
+                  return (
+                    <tr key={stat.machine}>
+                      <td>{stat.machine}</td>
+                      <td>{stat.POD || ""}</td>
+                      <td>{stat.POF || ""}</td>
+                      <td>{zlecenie > 0 ? zlecenie : ""}</td>
+                      <td>{stat.Sample || ""}</td>
+                      <td>{stat.Test || ""}</td>
+                      <td>
+                        <strong>{stat.totalQuantity || ""}</strong>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : (
+            <p>Даних на цю дату і зміну немає.</p>
+          )}
+        </>
       )}
     </div>
   );

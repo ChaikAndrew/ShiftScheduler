@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { calculateSummary } from "../../utils/calculateSummaries";
+import useEntriesLoader from "../../hooks/useEntriesLoader";
 import style from "./OperatorStatistics.module.scss";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
-function OperatorStatistics({
-  entries = { first: {}, second: {}, third: {} },
-  tasks = [],
-  products = [],
-}) {
+function OperatorStatistics({ tasks = [], products = [] }) {
   const [viewType, setViewType] = useState("day");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("");
@@ -14,6 +13,20 @@ function OperatorStatistics({
   const [selectedOperator, setSelectedOperator] = useState("");
   const [baseUrl, setBaseUrl] = useState(
     "https://shift-scheduler-server.vercel.app"
+  );
+
+  const selectedYear =
+    viewType === "day"
+      ? new Date(selectedDate).getFullYear()
+      : new Date(`${selectedMonth}-01`).getFullYear();
+  const selectedMonthNumber =
+    viewType === "day"
+      ? new Date(selectedDate).getMonth() + 1
+      : new Date(`${selectedMonth}-01`).getMonth() + 1;
+
+  const { entries, loading, error } = useEntriesLoader(
+    selectedYear,
+    selectedMonthNumber
   );
 
   const handleViewTypeChange = (e) => setViewType(e.target.value);
@@ -61,6 +74,16 @@ function OperatorStatistics({
       fetchOperators();
     }
   }, [baseUrl]);
+
+  useEffect(() => {
+    if (viewType === "month" && !selectedMonth) {
+      const now = new Date();
+      const formattedMonth = `${now.getFullYear()}-${String(
+        now.getMonth() + 1
+      ).padStart(2, "0")}`;
+      setSelectedMonth(formattedMonth);
+    }
+  }, [viewType, selectedMonth]);
 
   const filteredEntries = entries
     ? Object.entries(entries).flatMap(([shift, machines]) =>
@@ -162,7 +185,18 @@ function OperatorStatistics({
       {/* Results */}
       <div className={style.resultTables}>
         <h3>Results</h3>
-        {selectedOperator ? (
+        {loading ? (
+          <div className={style.skeletonWrapper}>
+            <Skeleton
+              height={40}
+              width={250}
+              style={{ marginBottom: "1rem" }}
+            />
+            <Skeleton height={30} count={8} />
+          </div>
+        ) : error ? (
+          <p className={style.error}>❌ Error: {error.message}</p>
+        ) : selectedOperator ? (
           <>
             {/* Tasks */}
             <div className={style.tableContainer}>

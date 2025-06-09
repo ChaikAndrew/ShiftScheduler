@@ -1,50 +1,71 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { getMachineStatistics } from "../../utils/machineStatisticsHelpers";
+import useEntriesLoader from "../../hooks/useEntriesLoader";
+import { recalculateDowntime } from "../../utils/recalculateDowntime";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
-const MachineTimeStats = ({ entries, machines }) => {
+const MachineTimeStats = ({ machines = [] }) => {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
   const [selectedShift, setSelectedShift] = useState("");
 
-  // Отримання статистики машин
-  const statistics = getMachineStatistics(
-    entries,
-    machines,
-    selectedDate,
-    selectedShift
+  const selectedYear = new Date(selectedDate).getFullYear();
+  const selectedMonth = new Date(selectedDate).getMonth() + 1;
+
+  const { entries, loading, error } = useEntriesLoader(
+    selectedYear,
+    selectedMonth
   );
 
-  // Отримання лідера зміни
-  const getShiftLeader = (entries, selectedShift, selectedDate) => {
-    const shiftEntries = entries?.[selectedShift];
+  const enrichedEntries = useMemo(() => {
+    const newEntries = structuredClone(entries);
+    if (!selectedShift || !machines.length) return newEntries;
+
+    machines.forEach((machine) => {
+      if (newEntries[selectedShift]?.[machine]) {
+        recalculateDowntime(newEntries, selectedShift, machine);
+      }
+    });
+
+    return newEntries;
+  }, [entries, selectedShift, machines]);
+
+  const statistics = useMemo(() => {
+    return getMachineStatistics(
+      enrichedEntries,
+      machines,
+      selectedDate,
+      selectedShift
+    );
+  }, [enrichedEntries, machines, selectedDate, selectedShift]);
+
+  const leader = useMemo(() => {
+    const shiftEntries = enrichedEntries?.[selectedShift];
     if (!shiftEntries) return "Unknown";
 
     for (const machine in shiftEntries) {
       const machineEntries = shiftEntries[machine];
       for (const entry of machineEntries) {
         if (entry.displayDate === selectedDate && entry.leader) {
-          return entry.leader; // Повертаємо першого знайденого лідера
+          return entry.leader;
         }
       }
     }
     return "Unknown";
-  };
+  }, [enrichedEntries, selectedShift, selectedDate]);
 
-  const leader = getShiftLeader(entries, selectedShift, selectedDate);
-
-  // Форматування часу у години:хвилини
   const formatTime = (minutes) => {
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return `${hours}h ${remainingMinutes}m`;
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return `${h}h ${m}m`;
   };
 
   return (
     <div>
       <h1>Machine Time Stats</h1>
 
-      {/* Фільтри */}
       <div>
         <label>
           Select Date:
@@ -69,49 +90,54 @@ const MachineTimeStats = ({ entries, machines }) => {
         </label>
       </div>
 
-      {/* Показ лідера зміни */}
-      {selectedDate && selectedShift && (
-        <p>
-          <strong>Shift Leader:</strong> {leader}
-        </p>
-      )}
-
-      {/* Таблиця статистики */}
-      {!selectedDate || !selectedShift ? (
-        <p>Please select both date and shift to view statistics.</p>
-      ) : statistics.length > 0 ? (
-        <>
-          <table>
-            <thead>
-              <tr>
-                <th>Machine</th>
-                <th>Working Time</th>
-                <th>Downtime</th>
-                <th>Downtime Reasons</th>
-              </tr>
-            </thead>
-            <tbody>
-              {statistics.map((machineStat) => (
-                <tr key={machineStat.machine}>
-                  <td>{machineStat.machine}</td>
-                  <td>{formatTime(machineStat.workingTime)}</td>
-                  <td>{formatTime(machineStat.downtime)}</td>
-                  <td>
-                    {Object.entries(machineStat.downtimeReasons).map(
-                      ([reason, time]) => (
-                        <div key={reason}>
-                          {reason}: {formatTime(time)}
-                        </div>
-                      )
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
+      {loading ? (
+        <div>
+          <Skeleton height={40} width={250} style={{ margin: "1rem 0" }} />
+          <Skeleton height={30} count={5} />
+        </div>
+      ) : error ? (
+        <p>Помилка: {error.message}</p>
+      ) : !selectedDate || !selectedShift ? (
+        <p>Select a date and shift to view statistics. </p>
       ) : (
-        <p>No data available for the selected date and shift.</p>
+        <>
+          <p>
+            <strong>Shift Leader:</strong> {leader}
+          </p>
+
+          {statistics.length > 0 ? (
+            <table>
+              <thead>
+                <tr>
+                  <th>Machine</th>
+                  <th>Working Time</th>
+                  <th>Downtime</th>
+                  <th>Downtime Reasons</th>
+                </tr>
+              </thead>
+              <tbody>
+                {statistics.map((stat) => (
+                  <tr key={stat.machine}>
+                    <td>{stat.machine}</td>
+                    <td>{formatTime(stat.workingTime)}</td>
+                    <td>{formatTime(stat.downtime)}</td>
+                    <td>
+                      {Object.entries(stat.downtimeReasons).map(
+                        ([reason, time]) => (
+                          <div key={reason}>
+                            {reason}: {formatTime(time)}
+                          </div>
+                        )
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>Немає даних на цю дату і зміну.</p>
+          )}
+        </>
       )}
     </div>
   );

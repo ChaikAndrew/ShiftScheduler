@@ -1,10 +1,13 @@
 .container {
-  margin-left: auto;
-  margin-right: auto;
+  padding: 20px;
+
+  text-align: center;
 }
 
 .selection {
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 10px;
   margin-bottom: 20px;
 
@@ -58,7 +61,6 @@
 .section {
   margin-bottom: 40px;
   flex: 1;
-  min-width: 450px;
 }
 
 .rowSection {
@@ -72,28 +74,4 @@
 .scrollTable {
   max-height: 567px;
   overflow-y: auto;
-}
-
-/* 🔥 Sticky шапка таблиці тільки для останньої */
-.stickyHeaderTable thead th {
-  position: sticky;
-  top: 40px; // 👈 висота заголовка h3
-  background-color: #f2f2f2;
-  z-index: 2;
-  height: 40px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-/* 🔥 Sticky заголовок h3 */
-.stickyHeaderWrapper {
-  position: relative;
-}
-
-.stickyTitle {
-  position: sticky;
-  top: 0;
-  background-color: white;
-  z-index: 3;
-  padding: 10px 0;
-  text-align: center;
 }

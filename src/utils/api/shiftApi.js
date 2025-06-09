@@ -80,3 +80,34 @@ export const getEntriesFromDB = async (token) => {
     },
   });
 };
+
+/**
+ * Отримує записи за конкретний місяць.
+ * @param {number} year - Наприклад, 2025
+ * @param {number} month - Наприклад, 6 (червень)
+ * @param {string} token - JWT токен
+ * @returns {Promise} - Масив записів
+ */
+export const getEntriesByMonth = async (year, month, token) => {
+  return axios.get(`${API_BASE}/month/${year}/${month}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+export async function getEntriesByMonthRange(
+  { startMonth, startYear, endMonth, endYear },
+  token
+) {
+  try {
+    const response = await axios.get(`${API_BASE}/range`, {
+      headers: { Authorization: `Bearer ${token}` },
+      params: { startMonth, startYear, endMonth, endYear },
+    });
+    return response;
+  } catch (error) {
+    console.error("❌ Error fetching entries by month range:", error.message);
+    throw error;
+  }
+}

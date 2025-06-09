@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import "./styles.css";
 import { DateTime } from "luxon";
 import { ToastContainer } from "react-toastify";
-
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import LoginPage from "../src/pages/LoginPage/LoginPage";
@@ -11,6 +11,7 @@ import AdminDashboard from "../src/pages/AdminDashboard/AdminDashboard";
 import OperatorDashboard from "../src/pages/OperatorDashboard/OperatorDashboard";
 import LeaderDashboard from "../src/pages/LeaderDashboard/LeaderDashboard";
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
+
 import {
   machines,
   tasks,
@@ -61,7 +62,7 @@ import NavBar from "./components/NavBar/NavBar";
 import Footer from "./components/Footer/Footer";
 
 import { handleSaveEntryToDB } from "../src/utils/entryHandlers";
-import { getEntriesFromDB } from "../src/utils/api/shiftApi";
+import { getEntriesByMonth } from "../src/utils/api/shiftApi";
 import { recalculateDowntime } from "./utils/recalculateDowntime";
 
 import { FaArrowUp } from "react-icons/fa";
@@ -71,6 +72,7 @@ import { FaArrowUp } from "react-icons/fa";
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingToken, setIsCheckingToken] = useState(true);
+  const [selectedDate, setSelectedDate] = useState("");
   const [entries, setEntries] = useState(() => {
     const savedEntries = localStorage.getItem("entries");
     return savedEntries
@@ -80,6 +82,51 @@ function App() {
 
   const navigate = useNavigate();
   const location = useLocation();
+  // Функція поза useEffect
+  const fetchData = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    if (!selectedDate) return;
+
+    const dt = DateTime.fromISO(selectedDate);
+    const year = dt.year;
+    const month = dt.month;
+
+    try {
+      const response = await getEntriesByMonth(year, month, token);
+      const dbEntries = response.data;
+
+      const grouped = { first: {}, second: {}, third: {} };
+      dbEntries.forEach((entry) => {
+        const { shift, machine } = entry;
+        if (!grouped[shift][machine]) {
+          grouped[shift][machine] = [];
+        }
+        grouped[shift][machine].push(entry);
+      });
+
+      let fullyRecalculated = { ...grouped };
+      for (const shift in grouped) {
+        for (const machine in grouped[shift]) {
+          fullyRecalculated = recalculateDowntime(
+            fullyRecalculated,
+            shift,
+            machine
+          );
+        }
+      }
+
+      setEntries(fullyRecalculated);
+    } catch (err) {
+      console.error("❌ Не вдалося завантажити записи за місяць:", err.message);
+    }
+  }, [selectedDate]); // ← залежність
+
+  // А тепер useEffect виглядає ок:
+  useEffect(() => {
+    if (selectedDate) {
+      fetchData();
+    }
+  }, [selectedDate, fetchData]);
   useEffect(() => {
     const checkTokenExpiration = () => {
       const token = localStorage.getItem("token");
@@ -107,52 +154,15 @@ function App() {
         setIsAuthenticated(false);
         navigate("/login");
       }
-
-      // ✅ після перевірки токена:
       setIsCheckingToken(false);
     };
 
-    checkTokenExpiration(); // ⬅️ викликаємо одразу
-
-    const fetchData = async () => {
-      const token = localStorage.getItem("token");
-
-      try {
-        const response = await getEntriesFromDB(token);
-        const dbEntries = response.data;
-
-        const grouped = { first: {}, second: {}, third: {} };
-        dbEntries.forEach((entry) => {
-          const { shift, machine } = entry;
-          if (!grouped[shift][machine]) {
-            grouped[shift][machine] = [];
-          }
-          grouped[shift][machine].push(entry);
-        });
-
-        // 🔁 Перераховуємо downtime для всіх змін і машин
-        let fullyRecalculated = { ...grouped };
-        for (const shift in grouped) {
-          for (const machine in grouped[shift]) {
-            fullyRecalculated = recalculateDowntime(
-              fullyRecalculated,
-              shift,
-              machine
-            );
-          }
-        }
-
-        setEntries(fullyRecalculated);
-      } catch (err) {
-        console.error("❌ Не вдалося завантажити записи з Mongo:", err.message);
-      }
-    };
-
-    fetchData();
+    checkTokenExpiration();
   }, [navigate]);
+
   const [editingIndex, setEditingIndex] = useState(null);
   const [currentShift, setCurrentShift] = useState(null);
-  const [selectedDate, setSelectedDate] = useState("");
+
   const [selectedLeader, setSelectedLeader] = useState("");
   const [selectedMachine, setSelectedMachine] = useState("");
   const [selectedOperator, setSelectedOperator] = useState("");
@@ -178,6 +188,8 @@ function App() {
     const fetchOperators = async () => {
       try {
         const token = localStorage.getItem("token");
+        if (!token) return;
+
         const res = await fetch(
           "https://shift-scheduler-server.vercel.app/api/operators",
           {
@@ -193,8 +205,10 @@ function App() {
       }
     };
 
-    fetchOperators();
-  }, []);
+    if (isAuthenticated) {
+      fetchOperators();
+    }
+  }, [isAuthenticated]);
 
   const onSaveEntry = () => {
     const token = localStorage.getItem("token");
@@ -212,10 +226,10 @@ function App() {
       token,
       onSuccess: async () => {
         try {
-          const response = await getEntriesFromDB(token);
+          const dt = DateTime.fromISO(selectedDate);
+          const response = await getEntriesByMonth(dt.year, dt.month, token);
           const dbEntries = response.data;
 
-          // 🔁 Групування за shift та machine
           const grouped = { first: {}, second: {}, third: {} };
           dbEntries.forEach((entry) => {
             const { shift, machine } = entry;
@@ -224,9 +238,6 @@ function App() {
             grouped[shift][machine].push(entry);
           });
 
-          // 🔧 Перерахунок downtime
-          // 🔧 Перерахунок downtime
-          // Спочатку сортуємо записи за часом
           grouped[currentShift][selectedMachine].sort(
             (a, b) => new Date(a.startTime) - new Date(b.startTime)
           );
@@ -253,7 +264,6 @@ function App() {
             reason: "",
             quantity: 0,
           });
-          console.log("✅ Дані оновлено з правильним downtime");
           console.log("✅ Дані оновлено з правильним downtime");
         } catch (error) {
           console.error("❌ Помилка при оновленні entries:", error.message);

@@ -3,8 +3,11 @@ import style from "./MonthlyOperatorStatistics.module.scss";
 import { calculateWorkTime } from "../../utils/timeCalculations";
 import { formatTime } from "../../utils/formatTime";
 import { tasks, products } from "../../utils/constants";
+import useEntriesLoader from "../../hooks/useEntriesLoader";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
-const MonthlyOperatorStatistics = ({ entries, operators }) => {
+const MonthlyOperatorStatistics = ({ operators }) => {
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth();
 
@@ -12,6 +15,11 @@ const MonthlyOperatorStatistics = ({ entries, operators }) => {
     year: currentYear,
     month: currentMonth,
   });
+
+  const { entries, loading, error } = useEntriesLoader(
+    selectedMonth.year,
+    selectedMonth.month + 1
+  );
 
   const daysInMonth = new Date(
     selectedMonth.year,
@@ -170,6 +178,7 @@ const MonthlyOperatorStatistics = ({ entries, operators }) => {
 
   return (
     <div className={style.container}>
+      <h2 className={style.pageTitle}>Monthly Operator Statistics</h2>
       <div className={style.selection}>
         <label>
           Month:
@@ -194,8 +203,14 @@ const MonthlyOperatorStatistics = ({ entries, operators }) => {
         </label>
       </div>
 
-      {/* Check if data exists, otherwise display message */}
-      {isDataAvailable ? (
+      {loading ? (
+        <div className={style.skeletonWrapper}>
+          <Skeleton height={40} width={250} style={{ marginBottom: "1rem" }} />
+          <Skeleton height={30} count={8} />
+        </div>
+      ) : error ? (
+        <p>Error: {error.message}</p>
+      ) : isDataAvailable ? (
         <>
           {/* 1. Daily Operator Statistics */}
           <div className={style.section}>

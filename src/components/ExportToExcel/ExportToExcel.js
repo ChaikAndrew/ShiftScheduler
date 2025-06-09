@@ -4,10 +4,21 @@ import { saveAs } from "file-saver";
 import DateSelector from "../../components/DateSelector/DateSelector";
 import ShiftButtons from "../../components/ShiftButtons/ShiftButtons";
 import { reasons } from "../../utils/constants";
+import useEntriesLoader from "../../hooks/useEntriesLoader";
 
-const ExportToExcel = ({ entries }) => {
-  const [selectedDate, setSelectedDate] = useState("");
+const ExportToExcel = () => {
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [currentShift, setCurrentShift] = useState(null);
+
+  const selectedYear = new Date(selectedDate).getFullYear();
+  const selectedMonth = new Date(selectedDate).getMonth() + 1;
+
+  const { entries, loading, error } = useEntriesLoader(
+    selectedYear,
+    selectedMonth
+  );
 
   const formatTime = (minutes) => {
     const h = Math.floor(minutes / 60);
@@ -15,10 +26,17 @@ const ExportToExcel = ({ entries }) => {
     return `${h > 0 ? `${h}h` : ""} ${m > 0 ? `${m}min` : ""}`.trim();
   };
 
+  if (loading) return <p style={{ padding: "2rem" }}>⏳ Завантаження...</p>;
+  if (error)
+    return (
+      <p style={{ padding: "2rem", color: "red" }}>
+        ❌ Помилка: {error.message}
+      </p>
+    );
   if (!entries || Object.keys(entries).length === 0) {
     return (
       <div style={{ padding: "2rem", fontSize: "18px", color: "#555" }}>
-        ⏳ Завантаження даних з бази даних...
+        ⏳ Дані не знайдено...
       </div>
     );
   }
@@ -499,23 +517,10 @@ const ExportToExcel = ({ entries }) => {
         <button
           onClick={() => handleExport("single")}
           disabled={!selectedDate || !currentShift}
-          style={{
-            padding: "0.5rem 1.5rem",
-            fontSize: "16px",
-            cursor: "pointer",
-          }}
         >
           📅 Export selected shift
         </button>
-        <button
-          onClick={() => handleExport("all")}
-          disabled={!selectedDate}
-          style={{
-            padding: "0.5rem 1.5rem",
-            fontSize: "16px",
-            cursor: "pointer",
-          }}
-        >
+        <button onClick={() => handleExport("all")} disabled={!selectedDate}>
           📊 Export all shifts
         </button>
       </div>
