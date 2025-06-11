@@ -1,0 +1,53 @@
+.toggleBlock {
+  margin-bottom: 1rem;
+}
+
+.toggleButton {
+  background: none;
+  border: none;
+
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.content {
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
+}
+
+.inner {
+  padding: 0.5rem 0.5rem;
+}
+
+.titleWithTooltip {
+  position: relative;
+  display: inline-block;
+  margin-left: 8px;
+}
+
+.tooltip {
+  visibility: hidden;
+  opacity: 0;
+  width: 300px;
+  background-color: #333;
+  color: #bebebe;
+  text-align: center;
+  padding: 6px;
+  border-radius: 4px;
+  position: absolute;
+  top: 120%; /* <<< тултіп буде знизу */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  transition: opacity 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.titleWithTooltip:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}

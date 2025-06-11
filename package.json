@@ -25,6 +25,7 @@
     "react-scripts": "5.0.1",
     "react-toastify": "^11.0.3",
     "recharts": "^2.13.3",
+    "sass-loader": "^16.0.5",
     "tailwind-merge": "^3.0.1",
     "web-vitals": "^2.1.4",
     "xlsx": "^0.18.5",

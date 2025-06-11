@@ -174,16 +174,10 @@ const EntryForm = ({
       <input
         className="input-quantity"
         type="number"
-        value={form.quantity}
+        value={form.quantity || ""}
         onChange={(e) => {
-          let value = e.target.value;
-
-          // Видаляємо всі нечислові символи
-          value = value.replace(/\D/, "");
-
-          // Прибираємо лідуючі нулі, залишаючи хоча б один нуль якщо поле пусте
-          value = value.replace(/^0+/, "") || "0";
-
+          let value = e.target.value.replace(/\D/g, "");
+          value = value.replace(/^0+/, "");
           setForm({ ...form, quantity: value });
         }}
         placeholder="0"

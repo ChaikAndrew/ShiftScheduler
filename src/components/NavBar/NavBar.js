@@ -4,10 +4,10 @@ import {
   FiLogOut,
   FiHome,
   FiCalendar,
-  FiBarChart,
   FiUsers,
   FiChevronLeft,
   FiChevronRight,
+  FiUser,
 } from "react-icons/fi";
 import { VscPreview } from "react-icons/vsc";
 import { SlPrinter } from "react-icons/sl";
@@ -90,7 +90,7 @@ const NavBar = ({ isCollapsed, setIsCollapsed, setIsSearchModalOpen }) => {
             isActive ? `${styles.link} ${styles.active}` : styles.link
           }
         >
-          <FiBarChart className={styles.icon} />
+          <GrGroup className={styles.icon} />
           <span className={styles.linkText}>Monthly Statistics</span>
         </NavLink>
         <NavLink
@@ -126,7 +126,7 @@ const NavBar = ({ isCollapsed, setIsCollapsed, setIsSearchModalOpen }) => {
             isActive ? `${styles.link} ${styles.active}` : styles.link
           }
         >
-          <GrGroup className={styles.icon} />
+          <FiUser className={styles.icon} />
           <span className={styles.linkText}>Operator Statistics</span>
         </NavLink>
         <NavLink

@@ -6,23 +6,37 @@ import styles from "./MonthlyLeaderStatistics.module.scss";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
+import LeaderProductBarChart from "../BarCharts/LeaderProductBarChart/LeaderProductBarChart";
+import LeaderTaskBarChart from "../BarCharts/LeaderTaskBarChart/LeaderTaskBarChart";
+
+import ToggleBlock from "../ToggleBlock/ToggleBlock";
+import {
+  renderMonthlySummary,
+  renderDailyStatistics,
+  renderDetailedDailyInfo,
+} from "../../utils/monthlyLeaderHelpers";
+
 const MonthlyLeaderStatistics = ({ leaders }) => {
+  // Стан для обраного місяця та року
   const [selectedMonth, setSelectedMonth] = useState({
     year: new Date().getFullYear(),
     month: new Date().getMonth(),
   });
 
+  // Завантаження записів з бази
   const { entries, loading, error } = useEntriesLoader(
     selectedMonth.year,
     selectedMonth.month + 1
   );
 
+  // Кількість днів у місяці
   const daysInMonth = new Date(
     selectedMonth.year,
     selectedMonth.month + 1,
     0
   ).getDate();
 
+  // Зміна місяця
   const handleMonthChange = (e) => {
     setSelectedMonth((prev) => ({
       ...prev,
@@ -30,6 +44,7 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
     }));
   };
 
+  // Зміна року
   const handleYearChange = (e) => {
     setSelectedMonth((prev) => ({
       ...prev,
@@ -37,22 +52,77 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
     }));
   };
 
+  // Статистика по лідерам
   const statistics =
     !loading && !error
       ? getLeaderStatisticsForMonth(entries, leaders, selectedMonth)
       : null;
 
+  // Чи є хоч якісь дані
   const hasData =
     statistics &&
     Object.values(statistics).some((leaderData) =>
       leaderData.some((day) => day.total > 0)
     );
 
+  const formattedMonth = new Date(
+    selectedMonth.year,
+    selectedMonth.month
+  ).toLocaleString("en-US", { month: "long" });
+
+  const reportTitle = `${formattedMonth} ${selectedMonth.year}`;
+
+  // Підсумки за місяць по кожному лідеру
+  const monthlyTotals = statistics
+    ? leaders.map((leader) => {
+        const monthlyData = statistics[leader];
+        const total = monthlyData.reduce((sum, day) => sum + day.total, 0);
+
+        const taskSummary = monthlyData.reduce((acc, day) => {
+          tasks.forEach((task) => {
+            acc[task] += day.taskSummary[task] || 0;
+          });
+          return acc;
+        }, Object.fromEntries(tasks.map((task) => [task, 0])));
+
+        const productSummary = monthlyData.reduce((acc, day) => {
+          products.forEach((product) => {
+            acc[product] += day.productSummary[product] || 0;
+          });
+          return acc;
+        }, Object.fromEntries(products.map((product) => [product, 0])));
+
+        return { leader, total, taskSummary, productSummary };
+      })
+    : [];
+
+  // Продукти, які мають хоча б одну одиницю
+  const nonZeroProductKeys = products.filter((product) =>
+    monthlyTotals.some(({ productSummary }) => productSummary[product] > 0)
+  );
+
+  // Дані для графіка по продуктах
+  const chartData = monthlyTotals.map(({ leader, productSummary }) => {
+    const filteredSummary = Object.fromEntries(
+      nonZeroProductKeys.map((key) => [key, productSummary[key]])
+    );
+    return { leader, ...filteredSummary };
+  });
+
+  // Дані для графіка по типах завдань
+  const taskChartData = monthlyTotals.map(({ leader, taskSummary }) => {
+    const filteredTasks = Object.entries(taskSummary)
+      .filter(([_, value]) => value > 0)
+      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+    return { leader, ...filteredTasks };
+  });
+
+  // Далі йде return з відображенням всього інтерфейсу...
   return (
     <div className={styles.container}>
       <h2>Monthly Leader Statistics</h2>
 
-      <div>
+      <div className={styles.selects}>
         <label>
           Select Month:
           <select value={selectedMonth.month} onChange={handleMonthChange}>
@@ -67,11 +137,14 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
         <label>
           Select Year:
           <select value={selectedMonth.year} onChange={handleYearChange}>
-            {Array.from({ length: 5 }, (_, i) => (
-              <option key={i} value={new Date().getFullYear() - 2 + i}>
-                {new Date().getFullYear() - 2 + i}
-              </option>
-            ))}
+            {Array.from({ length: 5 }, (_, i) => {
+              const year = new Date().getFullYear() - 2 + i;
+              return (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              );
+            })}
           </select>
         </label>
       </div>
@@ -84,16 +157,53 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
         <p>Помилка при завантаженні: {error.message}</p>
       ) : hasData ? (
         <>
-          {renderDailyStatistics(statistics, leaders, daysInMonth)}
-          {renderMonthlySummary(statistics, leaders)}
-          <div>
+          {/* Блок підсумку */}
+          <ToggleBlock
+            title={`Monthly Summary – ${reportTitle}`}
+            defaultOpen={false}
+            tooltip="Monthly summary for each leader: total quantity produced, breakdown by task type (POD, POF, etc.), and product type."
+          >
+            {renderMonthlySummary(statistics, leaders)}
+          </ToggleBlock>
+
+          {/* Графік продуктів та завданнь */}
+          {(chartData.length > 0 || taskChartData.length > 0) && (
+            <ToggleBlock
+              title={`Charts (Products & Tasks) – ${reportTitle}`}
+              defaultOpen={false}
+              tooltip="Charts showing the distribution of tasks and products by leader for the selected month."
+            >
+              {chartData.length > 0 && (
+                <LeaderProductBarChart data={chartData} />
+              )}
+              {taskChartData.length > 0 && (
+                <LeaderTaskBarChart data={taskChartData} />
+              )}
+            </ToggleBlock>
+          )}
+
+          {/* Щоденна таблиця */}
+          <ToggleBlock
+            title={`Daily Statistics – ${reportTitle}`}
+            defaultOpen={false}
+            tooltip="Table showing total quantity per day for each leader, along with the average on active days."
+          >
+            {renderDailyStatistics(statistics, leaders, daysInMonth)}
+          </ToggleBlock>
+
+          {/* Деталізація */}
+          <ToggleBlock
+            title={`Detailed Daily Info – ${reportTitle}`}
+            defaultOpen={false}
+            tooltip="Detailed table showing tasks and products completed by each leader on each day of the selected month."
+          >
             {renderDetailedDailyInfo(
               statistics,
               leaders,
               daysInMonth,
               selectedMonth
             )}
-          </div>
+          </ToggleBlock>
         </>
       ) : (
         <p>No data available for the selected month and leaders.</p>
@@ -101,167 +211,5 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
     </div>
   );
 };
-
-const renderDailyStatistics = (statistics, leaders, daysInMonth) => (
-  <table>
-    <thead>
-      <tr>
-        <th>Leader</th>
-        {Array.from({ length: daysInMonth }, (_, i) => (
-          <th key={i}>{i + 1}</th>
-        ))}
-        <th>Average per Day</th>
-      </tr>
-    </thead>
-    <tbody>
-      {leaders.map((leader) => {
-        const monthlyData = statistics[leader];
-        const totalQuantity = monthlyData.reduce(
-          (sum, day) => sum + day.total,
-          0
-        );
-        const daysWithData = monthlyData.filter((day) => day.total > 0).length;
-        const averagePerDay =
-          daysWithData > 0 ? Math.round(totalQuantity / daysWithData) : 0;
-
-        return (
-          <tr key={leader}>
-            <td>{leader}</td>
-            {monthlyData.map((day, index) => (
-              <td key={index}>{day.total > 0 ? day.total : ""}</td>
-            ))}
-            <td>{averagePerDay > 0 ? averagePerDay : ""}</td>
-          </tr>
-        );
-      })}
-    </tbody>
-  </table>
-);
-
-const renderMonthlySummary = (statistics, leaders) => {
-  const monthlyTotals = leaders.map((leader) => {
-    const monthlyData = statistics[leader];
-    const total = monthlyData.reduce((sum, day) => sum + day.total, 0);
-
-    const taskSummary = monthlyData.reduce((acc, day) => {
-      tasks.forEach((task) => {
-        acc[task] += day.taskSummary[task] || 0;
-      });
-      return acc;
-    }, Object.fromEntries(tasks.map((task) => [task, 0])));
-
-    const productSummary = monthlyData.reduce((acc, day) => {
-      products.forEach((product) => {
-        acc[product] += day.productSummary[product] || 0;
-      });
-      return acc;
-    }, Object.fromEntries(products.map((product) => [product, 0])));
-
-    return { leader, total, taskSummary, productSummary };
-  });
-
-  return (
-    <table>
-      <thead>
-        <tr>
-          <th>Leader</th>
-          <th>Total Quantity</th>
-          {tasks.map((task) => (
-            <th key={task}>{task}</th>
-          ))}
-          {products.map((product) => (
-            <th key={product}>{product}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {monthlyTotals.map(({ leader, total, taskSummary, productSummary }) => (
-          <tr key={leader}>
-            <td>{leader}</td>
-            <td>{total > 0 ? total : ""}</td>
-            {tasks.map((task) => (
-              <td key={task} className={styles.highlightedTask}>
-                {taskSummary[task] > 0 ? taskSummary[task] : ""}
-              </td>
-            ))}
-            {products.map((product) => (
-              <td key={product}>
-                {productSummary[product] > 0 ? productSummary[product] : ""}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-};
-
-const renderDetailedDailyInfo = (
-  statistics,
-  leaders,
-  daysInMonth,
-  selectedMonth
-) => (
-  <div className={styles.detailedInfo}>
-    {leaders.map((leader) => (
-      <div
-        className={styles.detailedTable}
-        key={leader}
-        style={{ marginBottom: "2rem" }}
-      >
-        <h4>
-          {" "}
-          {leader} - Detailed daily statistics for{" "}
-          {new Date(selectedMonth.year, selectedMonth.month).toLocaleString(
-            "en-US",
-            {
-              month: "long",
-              year: "numeric",
-            }
-          )}{" "}
-        </h4>
-        <table>
-          <thead>
-            <tr>
-              <th>Day</th>
-              {tasks.map((task) => (
-                <th key={task}>{task}</th>
-              ))}
-              {products.map((product) => (
-                <th key={product}>{product}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {Array.from({ length: daysInMonth }, (_, i) => {
-              const dayData = statistics[leader][i];
-              const hasData = dayData.total > 0;
-
-              return (
-                <tr key={i}>
-                  <td>{i + 1}</td>
-                  {tasks.map((task) => (
-                    <td key={task} className={styles.highlightedTask}>
-                      {hasData && dayData.taskSummary[task]
-                        ? dayData.taskSummary[task]
-                        : ""}
-                    </td>
-                  ))}
-                  {products.map((product) => (
-                    <td key={product}>
-                      {hasData && dayData.productSummary[product]
-                        ? dayData.productSummary[product]
-                        : ""}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    ))}
-  </div>
-);
 
 export default MonthlyLeaderStatistics;

@@ -35,8 +35,7 @@ function OperatorStatistics({ tasks = [], products = [] }) {
   );
 
   const handleViewTypeChange = (e) => setViewType(e.target.value);
-  const handleDateChange = (e) => setSelectedDate(e.target.value);
-  const handleMonthChange = (e) => setSelectedMonth(e.target.value);
+
   const handleOperatorChange = (e) => setSelectedOperator(e.target.value);
 
   useEffect(() => {
