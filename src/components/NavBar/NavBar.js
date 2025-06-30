@@ -84,51 +84,61 @@ const NavBar = ({ isCollapsed, setIsCollapsed, setIsSearchModalOpen }) => {
           <FiCalendar className={styles.icon} />
           <span className={styles.linkText}>Shift Scheduler</span>
         </NavLink>
-        <NavLink
-          to="/monthly-statistics"
-          className={({ isActive }) =>
-            isActive ? `${styles.link} ${styles.active}` : styles.link
-          }
-        >
-          <GrGroup className={styles.icon} />
-          <span className={styles.linkText}>Monthly Statistics</span>
-        </NavLink>
-        <NavLink
-          to="/leader-statistics"
-          className={({ isActive }) =>
-            isActive ? `${styles.link} ${styles.active}` : styles.link
-          }
-        >
-          <FiUsers className={styles.icon} />
-          <span className={styles.linkText}>Leader Statistics</span>
-        </NavLink>
-        <NavLink
-          to="/machine-time-stats"
-          className={({ isActive }) =>
-            isActive ? `${styles.link} ${styles.active}` : styles.link
-          }
-        >
-          <BsClock className={styles.icon} />
-          <span className={styles.linkText}>Machine Time Stats</span>
-        </NavLink>
-        <NavLink
-          to="/machines-quantity-stats"
-          className={({ isActive }) =>
-            isActive ? `${styles.link} ${styles.active}` : styles.link
-          }
-        >
-          <SlPrinter className={styles.icon} />
-          <span className={styles.linkText}>Machines Quantity Stats</span>
-        </NavLink>
-        <NavLink
-          to="/operator-statistics"
-          className={({ isActive }) =>
-            isActive ? `${styles.link} ${styles.active}` : styles.link
-          }
-        >
-          <FiUser className={styles.icon} />
-          <span className={styles.linkText}>Operator Statistics</span>
-        </NavLink>
+        {(role === "admin" || role === "leader") && (
+          <NavLink
+            to="/monthly-statistics"
+            className={({ isActive }) =>
+              isActive ? `${styles.link} ${styles.active}` : styles.link
+            }
+          >
+            <GrGroup className={styles.icon} />
+            <span className={styles.linkText}>Monthly Statistics</span>
+          </NavLink>
+        )}
+        {(role === "admin" || role === "leader") && (
+          <NavLink
+            to="/leader-statistics"
+            className={({ isActive }) =>
+              isActive ? `${styles.link} ${styles.active}` : styles.link
+            }
+          >
+            <FiUsers className={styles.icon} />
+            <span className={styles.linkText}>Leader Statistics</span>
+          </NavLink>
+        )}
+        {(role === "admin" || role === "leader") && (
+          <NavLink
+            to="/machine-time-stats"
+            className={({ isActive }) =>
+              isActive ? `${styles.link} ${styles.active}` : styles.link
+            }
+          >
+            <BsClock className={styles.icon} />
+            <span className={styles.linkText}>Machine Time Stats</span>
+          </NavLink>
+        )}
+        {(role === "admin" || role === "leader") && (
+          <NavLink
+            to="/machines-quantity-stats"
+            className={({ isActive }) =>
+              isActive ? `${styles.link} ${styles.active}` : styles.link
+            }
+          >
+            <SlPrinter className={styles.icon} />
+            <span className={styles.linkText}>Machines Quantity Stats</span>
+          </NavLink>
+        )}
+        {(role === "admin" || role === "leader") && (
+          <NavLink
+            to="/operator-statistics"
+            className={({ isActive }) =>
+              isActive ? `${styles.link} ${styles.active}` : styles.link
+            }
+          >
+            <FiUser className={styles.icon} />
+            <span className={styles.linkText}>Operator Statistics</span>
+          </NavLink>
+        )}
         <NavLink
           to="#"
           onClick={() => setIsSearchModalOpen(true)}
@@ -137,15 +147,17 @@ const NavBar = ({ isCollapsed, setIsCollapsed, setIsSearchModalOpen }) => {
           <FiSearch className={styles.icon} />
           <span className={styles.linkText}>Zlecenie Search</span>
         </NavLink>
-        <NavLink
-          to="/export-to-excel"
-          className={({ isActive }) =>
-            isActive ? `${styles.link} ${styles.active}` : styles.link
-          }
-        >
-          <TbFileExport className={styles.icon} />
-          <span className={styles.linkText}>Export to Excel</span>
-        </NavLink>
+        {(role === "admin" || role === "leader") && (
+          <NavLink
+            to="/export-to-excel"
+            className={({ isActive }) =>
+              isActive ? `${styles.link} ${styles.active}` : styles.link
+            }
+          >
+            <TbFileExport className={styles.icon} />
+            <span className={styles.linkText}>Export to Excel</span>
+          </NavLink>
+        )}
 
         <NavLink
           to={dashboardLink.path}

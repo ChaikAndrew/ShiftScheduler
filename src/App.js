@@ -663,7 +663,7 @@ function App() {
           <Route
             path="/monthly-statistics"
             element={
-              <PrivateRoute allowedRoles={["operator", "admin", "leader"]}>
+              <PrivateRoute allowedRoles={["admin", "leader"]}>
                 <MonthlyOperatorStatistics
                   entries={entries}
                   operators={operators}
@@ -679,7 +679,7 @@ function App() {
           <Route
             path="/leader-statistics"
             element={
-              <PrivateRoute allowedRoles={["operator", "admin", "leader"]}>
+              <PrivateRoute allowedRoles={["admin", "leader"]}>
                 <MonthlyLeaderStatistics
                   entries={entries}
                   leaders={leaders}
@@ -693,7 +693,7 @@ function App() {
           <Route
             path="/machine-time-stats"
             element={
-              <PrivateRoute allowedRoles={["operator", "admin", "leader"]}>
+              <PrivateRoute allowedRoles={["admin", "leader"]}>
                 <MachineStatistics entries={entries} machines={machines} />
               </PrivateRoute>
             }
@@ -701,7 +701,7 @@ function App() {
           <Route
             path="/machines-quantity-stats"
             element={
-              <PrivateRoute allowedRoles={["operator", "admin", "leader"]}>
+              <PrivateRoute allowedRoles={["admin", "leader"]}>
                 <MonthlyMachineStatistics
                   entries={entries}
                   machines={machines}
@@ -712,7 +712,7 @@ function App() {
           <Route
             path="/operator-statistics"
             element={
-              <PrivateRoute allowedRoles={["operator", "leader", "admin"]}>
+              <PrivateRoute allowedRoles={["leader", "admin"]}>
                 <OperatorStatistics
                   entries={entries}
                   operators={operators}
@@ -753,7 +753,7 @@ function App() {
           <Route
             path="/export-to-excel"
             element={
-              <PrivateRoute allowedRoles={["operator", "admin", "leader"]}>
+              <PrivateRoute allowedRoles={["admin", "leader"]}>
                 <ExportToExcel
                   entries={entries}
                   selectedDate={selectedDate}

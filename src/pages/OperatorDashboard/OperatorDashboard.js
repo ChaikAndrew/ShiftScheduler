@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./OperatorDashboard.module.scss";
-import LatestProblemFileViewer from "../../components/LatestProblemFileViewer/LatestProblemFileViewer";
+// import LatestProblemFileViewer from "../../components/LatestProblemFileViewer/LatestProblemFileViewer";
 const OperatorDashboard = () => {
   const navigate = useNavigate();
 
@@ -24,7 +24,7 @@ const OperatorDashboard = () => {
       <button onClick={handleLogout} className={styles.logoutButton}>
         Logout
       </button>
-      <LatestProblemFileViewer />
+      {/* <LatestProblemFileViewer /> */}
     </div>
   );
 };
