@@ -568,6 +568,59 @@ const ExportToExcel = () => {
         .map(([num, desc]) => [{ v: `${num}. ${desc}` }]),
     ];
 
+    //add Packed info
+    if (mode === "single") {
+      const POD_COL = 6; // колонка H
+      const POF_COL = 8; // колонка J
+
+      const packedTotalFormula = {
+        f: `${String.fromCharCode(65 + POD_COL)}1+${String.fromCharCode(
+          65 + POF_COL
+        )}1`,
+      };
+
+      const styleBlueHeader = {
+        font: { bold: true, color: { rgb: "FFFFFF" } },
+        fill: { fgColor: { rgb: "4F81BD" } },
+        alignment: { horizontal: "left", vertical: "center" },
+      };
+
+      const emptyTemplate = [
+        [
+          { v: "Packed total:", s: styleBlueHeader },
+          packedTotalFormula,
+          { v: "POD :", s: styleBlueHeader },
+          { v: 0 },
+          { v: "POF :", s: styleBlueHeader },
+          { v: 0 },
+        ],
+        [
+          { v: "Packing stations working:", s: styleBlueHeader },
+          { v: 0 },
+
+          { v: "PS1 :", s: styleBlueHeader },
+          { v: 0 },
+          { v: "PS2 :", s: styleBlueHeader },
+          { v: 0 },
+          { v: "PS3 :", s: styleBlueHeader },
+          { v: 0 },
+          { v: "PS4 :", s: styleBlueHeader },
+          { v: 0 },
+        ],
+        [
+          { v: "Packed BULK:", s: styleBlueHeader },
+          { v: 0 },
+          { v: "Orders:", s: styleBlueHeader },
+          { v: 0 },
+        ],
+      ];
+
+      // Вставляємо шаблон в d1
+      XLSX.utils.sheet_add_aoa(worksheet, emptyTemplate, { origin: "D1" });
+      worksheet["!cols"] = worksheet["!cols"] || [];
+      worksheet["!cols"][3] = { wch: 20 };
+    }
+
     XLSX.utils.sheet_add_aoa(worksheet, legend, { origin: -1 });
     worksheet["!cols"] = worksheet["!cols"] || [];
     worksheet["!cols"][0] = { wch: 23 };
