@@ -218,6 +218,7 @@ const ExportToExcel = () => {
             .join(", ");
 
           shiftRows.push(row);
+
           grandTotalQty += totalQuantity;
         });
       if (shiftRows.length > 0) {
@@ -237,38 +238,41 @@ const ExportToExcel = () => {
       ...knownTasks
         .filter((task) => totalTasks[task])
         .map((task) => [task, totalTasks[task]]),
+      ...(totalZlecenieQty > 0 ? [["ZLECENIE", totalZlecenieQty]] : []),
+      [],
       ...Object.entries(totalTasks)
         .filter(([task]) => !knownTasks.includes(task))
-        .map(([task, qty]) => [task.toUpperCase(), qty]) // ← тут магія
+        .map(([task, qty]) => [task.toUpperCase(), qty])
         .sort(([a], [b]) => a.localeCompare(b)),
     ];
 
     const allLeaders = Array.from(leaderNameSet).join(", ");
 
-    const zlecenieRow =
-      totalZlecenieQty > 0 ? [["ZLECENIE", totalZlecenieQty]] : [];
+    const defaultHeaderStyle = {
+      font: {
+        bold: true,
+        color: { rgb: "006100" },
+        name: "Arial",
+        sz: 11,
+      },
+      alignment: {
+        horizontal: "left",
+        vertical: "center",
+      },
+    };
 
     const headerLines = [
+      [{ v: "Shift Summary", s: defaultHeaderStyle }],
+      [{ v: `Date: ${selectedDate}`, s: defaultHeaderStyle }],
       [
         {
-          v: `Shift Summary\nDate: ${selectedDate}\n${
-            mode === "all" ? "All Shifts" : `Shift: ${currentShift}`
-          }\nLeader: ${allLeaders}\nTotal Quantity: ${grandTotalQty}`,
-          s: {
-            font: {
-              bold: true,
-              color: { rgb: "006100" },
-              name: "Arial",
-              sz: 11,
-            },
-            alignment: {
-              wrapText: true,
-              horizontal: "center",
-              vertical: "center",
-            },
-          },
+          v: mode === "all" ? "All Shifts" : `Shift: ${currentShift}`,
+          s: defaultHeaderStyle,
         },
       ],
+      [{ v: `Leader: ${allLeaders}`, s: defaultHeaderStyle }],
+      [{ v: `Total Quantity: ${grandTotalQty}`, s: defaultHeaderStyle }],
+      [],
       [
         {
           v: "Task summary:",
@@ -279,8 +283,7 @@ const ExportToExcel = () => {
           },
         },
       ],
-      ...sortedTasks.map(([task, qty]) => [task, qty]),
-      ...zlecenieRow,
+      ...sortedTasks.map(([task, qty]) => [{ v: task }, { v: qty, t: "n" }]),
       [
         {
           v: "Product summary:",
@@ -293,14 +296,39 @@ const ExportToExcel = () => {
       ],
       ...Object.entries(totalProducts)
         .filter(([, val]) => val > 0)
-        .map(([prod, qty]) => [prod, qty]),
+        .map(([prod, qty]) => [{ v: prod }, { v: qty, t: "n" }]),
       [],
     ];
     const headerRowCount = headerLines.length;
 
     const worksheet = XLSX.utils.json_to_sheet([]);
     XLSX.utils.sheet_add_aoa(worksheet, headerLines, { origin: "A1" });
+    // 🔽 Знайди куди вставити новий заголовок
+    const zlecSummaryStart = headerLines.findIndex(
+      (row) => row[0]?.v === "ZLECENIE"
+    );
+
+    if (zlecSummaryStart !== -1) {
+      XLSX.utils.sheet_add_aoa(
+        worksheet,
+        [
+          [
+            {
+              v: "Zlecenie numbers:",
+              s: {
+                font: { bold: true, color: { rgb: "FFFFFF" } },
+                fill: { fgColor: { rgb: "4F81BD" } },
+                alignment: { horizontal: "left", vertical: "center" },
+              },
+            },
+          ],
+        ],
+        { origin: `A${zlecSummaryStart + 2}` } // +2 щоб після ZLECENIE вставити
+      );
+    }
+
     const cleanedResult = result.filter((row) => !row.__emptyRow);
+    const headerKeys = Object.keys(result[0] || {});
     XLSX.utils.sheet_add_json(worksheet, cleanedResult, {
       origin: `A${headerRowCount + 1}`,
       skipHeader: false,
@@ -309,10 +337,10 @@ const ExportToExcel = () => {
       if (
         Array.isArray(row) &&
         row.length === 2 &&
-        typeof row[0] === "string" &&
-        (knownTasks.includes(row[0]) || row[0] === "ZLECENIE")
+        typeof row[0]?.v === "string" &&
+        (knownTasks.includes(row[0].v) || row[0].v === "ZLECENIE")
       ) {
-        const cell = XLSX.utils.encode_cell({ r: rowIndex, c: 0 }); // A-колонка
+        const cell = XLSX.utils.encode_cell({ r: rowIndex, c: 0 });
         if (worksheet[cell]) {
           worksheet[cell].s = {
             ...worksheet[cell].s,
@@ -321,7 +349,40 @@ const ExportToExcel = () => {
         }
       }
     });
-    const headerKeys = Object.keys(result[0] || {});
+    if (mode === "all") {
+      cleanedResult.forEach((row, index) => {
+        const shift = row.Shift;
+        const fillColors = {
+          first: { fgColor: { rgb: "D9EAD3" } }, // світло-зелений
+          second: { fgColor: { rgb: "D0E0E3" } }, // світло-блакитний
+          third: { fgColor: { rgb: "FCE5CD" } }, // світло-оранжевий
+        };
+
+        const fill = fillColors[shift];
+        if (!fill) return;
+
+        headerKeys.forEach((_, colIndex) => {
+          const cell = XLSX.utils.encode_cell({
+            r: headerRowCount + index + 1,
+            c: colIndex,
+          });
+
+          if (worksheet[cell]) {
+            worksheet[cell].s = {
+              ...worksheet[cell].s,
+              fill,
+              border: {
+                top: { style: "thin", color: { rgb: "CCCCCC" } },
+                bottom: { style: "thin", color: { rgb: "CCCCCC" } },
+                left: { style: "thin", color: { rgb: "CCCCCC" } },
+                right: { style: "thin", color: { rgb: "CCCCCC" } },
+              },
+            };
+          }
+        });
+      });
+    }
+
     const tableStartRow = headerRowCount;
     headerKeys.forEach((key, colIndex) => {
       const cellAddress = XLSX.utils.encode_cell({
@@ -376,23 +437,8 @@ const ExportToExcel = () => {
         wch: Math.max(columnWidths[colIndex]?.wch || 0, wch),
       };
     });
-    columnWidths[0] = { wpx: 100 };
-    worksheet["!cols"] = columnWidths;
 
-    worksheet["!merges"] = [
-      {
-        s: { r: 0, c: 0 },
-        e: { r: 0, c: headerKeys.length - 1 },
-      },
-      {
-        s: { r: 1, c: 0 },
-        e: { r: 1, c: headerKeys.length - 1 },
-      },
-      {
-        s: { r: sortedTasks.length + 3, c: 0 },
-        e: { r: sortedTasks.length + 3, c: headerKeys.length - 1 },
-      },
-    ];
+    worksheet["!cols"] = columnWidths;
 
     const styleBlueHeader = {
       font: { bold: true, color: { rgb: "FFFFFF" } },
@@ -400,21 +446,29 @@ const ExportToExcel = () => {
       alignment: { horizontal: "left", vertical: "center" },
     };
 
-    if (worksheet["A2"]) {
-      worksheet["A2"].s = styleBlueHeader;
+    // Знайди реальний рядок з "Product summary:"
+    const productSummaryIndex = headerLines.findIndex(
+      (row) => row[0]?.v === "Product summary:"
+    );
+
+    if (productSummaryIndex !== -1) {
+      const cell = XLSX.utils.encode_cell({ r: productSummaryIndex, c: 0 });
+      if (worksheet[cell]) {
+        worksheet[cell].s = styleBlueHeader;
+      }
     }
 
-    const productSummaryRow = `A${sortedTasks.length + 4}`;
-    if (worksheet[productSummaryRow]) {
-      worksheet[productSummaryRow].s = styleBlueHeader;
+    if (worksheet["A1"]) {
+      worksheet["A1"].s = {
+        ...(worksheet["A1"].s || {}),
+        alignment: {
+          ...(worksheet["A1"].s?.alignment || {}),
+          wrapText: true,
+          horizontal: "center",
+          vertical: "center",
+        },
+      };
     }
-
-    worksheet["A1"].s.alignment = {
-      ...worksheet["A1"].s.alignment,
-      wrapText: true,
-      horizontal: "center",
-      vertical: "center",
-    };
 
     Object.keys(worksheet).forEach((cell) => {
       if (cell[0] === "!") return;
@@ -496,15 +550,27 @@ const ExportToExcel = () => {
       }
     }
 
+    const legendHeaderStyle = {
+      font: { bold: true, color: { rgb: "FFFFFF" } },
+      fill: { fgColor: { rgb: "4F81BD" } },
+      alignment: {
+        horizontal: "left",
+        vertical: "center",
+        wrapText: true, // ← ВАЖЛИВО
+      },
+    };
+
     const legend = [
-      [],
-      ["Downtime reason list:"],
+      [{ v: "" }],
+      [{ v: "Downtime reason list:", s: legendHeaderStyle }],
       ...Array.from(downtimeReasonMap.entries())
         .sort((a, b) => a[0] - b[0])
-        .map(([num, desc]) => [`${num}. ${desc}`]),
+        .map(([num, desc]) => [{ v: `${num}. ${desc}` }]),
     ];
-    XLSX.utils.sheet_add_aoa(worksheet, legend, { origin: -1 });
 
+    XLSX.utils.sheet_add_aoa(worksheet, legend, { origin: -1 });
+    worksheet["!cols"] = worksheet["!cols"] || [];
+    worksheet["!cols"][0] = { wch: 23 };
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Shift Report");
 

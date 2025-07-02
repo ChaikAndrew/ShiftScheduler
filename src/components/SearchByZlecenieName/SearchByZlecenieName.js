@@ -26,9 +26,18 @@ function SearchByZlecenieName({ isModalOpen, setIsModalOpen }) {
   const [filteredEntries, setFilteredEntries] = useState([]);
   const [searchPerformed, setSearchPerformed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [startMonth, setStartMonth] = useState(1);
-  const [startYear, setStartYear] = useState(currentYear);
-  const [endMonth, setEndMonth] = useState(new Date().getMonth() + 1);
+
+  const currentMonth = new Date().getMonth() + 1;
+  const currentYear = new Date().getFullYear();
+
+  const [startMonth, setStartMonth] = useState(
+    currentMonth === 1 ? 12 : currentMonth - 1
+  );
+  const [startYear, setStartYear] = useState(
+    currentMonth === 1 ? currentYear - 1 : currentYear
+  );
+
+  const [endMonth, setEndMonth] = useState(currentMonth);
   const [endYear, setEndYear] = useState(currentYear);
 
   const closeModal = useCallback(() => {

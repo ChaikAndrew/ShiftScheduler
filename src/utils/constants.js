@@ -48,8 +48,20 @@ export const reasons = [
   { id: 22, description: "22.Operatywka" },
   { id: 23, description: "23.Zalewanie się palety sprayem" },
   { id: 24, description: "24.Przezbrojenie (zmiana temperatury pieca)" },
-  { id: 26, description: "25.Zbiorniki na odpady płynne są pełne(wymiana)" },
-  { id: 27, description: "26.Restart aplikacji" },
+  { id: 25, description: "25.Zbiorniki na odpady płynne są pełne (wymiana)" },
+  { id: 26, description: "26.Restart aplikacji" },
+  { id: 27, description: "27.Zawieszenie programu TBLog" },
+  { id: 28, description: "28.Ręczne wpisywanie numeru etykiety" },
+  { id: 29, description: "29.Wymiana głowic" },
+  { id: 30, description: "30.Zatkanie głowic" },
+  { id: 31, description: "31.Płukanie głowic" },
+  { id: 32, description: "32.Uszkodzenie mechaniczne, ponad 1 godzinę" },
+  { id: 33, description: "33.Akceptacja zlecenia" },
+  { id: 34, description: "34.Drukowanie sample" },
+  { id: 35, description: "35.Szkolenie operatora" },
+  { id: 36, description: "36.Praca nowego operatora" },
+  { id: 37, description: "37.Praca w parze z pomocnikiem produkcji" },
+  { id: 38, description: "38.Praca wykonywana przez UR" },
 ];
 
 //Список лідерів змін
