@@ -249,15 +249,15 @@ const ExportToExcel = () => {
     const allLeaders = Array.from(leaderNameSet).join(", ");
 
     const defaultHeaderStyle = {
-      font: {
-        bold: true,
-        color: { rgb: "006100" },
-        name: "Arial",
-        sz: 11,
-      },
-      alignment: {
-        horizontal: "left",
-        vertical: "center",
+      font: { bold: true, sz: 12 },
+
+      fill: { fgColor: { rgb: "D9EAD3" } },
+      alignment: { horizontal: "left", vertical: "center" },
+      border: {
+        top: { style: "thin", color: { rgb: "CCCCCC" } },
+        bottom: { style: "thin", color: { rgb: "CCCCCC" } },
+        left: { style: "thin", color: { rgb: "CCCCCC" } },
+        right: { style: "thin", color: { rgb: "CCCCCC" } },
       },
     };
 
@@ -272,6 +272,9 @@ const ExportToExcel = () => {
       ],
       [{ v: `Leader: ${allLeaders}`, s: defaultHeaderStyle }],
       [{ v: `Total Quantity: ${grandTotalQty}`, s: defaultHeaderStyle }],
+      ...(mode === "single"
+        ? [[{ v: "Absence:", s: defaultHeaderStyle }, { v: 0 }]]
+        : []),
       [],
       [
         {
@@ -441,11 +444,22 @@ const ExportToExcel = () => {
     worksheet["!cols"] = columnWidths;
 
     const styleBlueHeader = {
-      font: { bold: true, color: { rgb: "FFFFFF" } },
-      fill: { fgColor: { rgb: "4F81BD" } },
+      font: { bold: true },
+      fill: { fgColor: { rgb: "D9EAD3" } },
       alignment: { horizontal: "left", vertical: "center" },
+      border: {
+        top: { style: "thin", color: { rgb: "CCCCCC" } },
+        bottom: { style: "thin", color: { rgb: "CCCCCC" } },
+        left: { style: "thin", color: { rgb: "CCCCCC" } },
+        right: { style: "thin", color: { rgb: "CCCCCC" } },
+      },
     };
 
+    const styleRedHeader = {
+      font: { bold: true, color: { rgb: "FFFFFF" } },
+      fill: { fgColor: { rgb: "FF0000" } },
+      alignment: { horizontal: "left", vertical: "center" },
+    };
     // Знайди реальний рядок з "Product summary:"
     const productSummaryIndex = headerLines.findIndex(
       (row) => row[0]?.v === "Product summary:"
@@ -454,7 +468,6 @@ const ExportToExcel = () => {
     if (productSummaryIndex !== -1) {
       const cell = XLSX.utils.encode_cell({ r: productSummaryIndex, c: 0 });
       if (worksheet[cell]) {
-        worksheet[cell].s = styleBlueHeader;
       }
     }
 
@@ -579,12 +592,6 @@ const ExportToExcel = () => {
         )}1`,
       };
 
-      const styleBlueHeader = {
-        font: { bold: true, color: { rgb: "FFFFFF" } },
-        fill: { fgColor: { rgb: "4F81BD" } },
-        alignment: { horizontal: "left", vertical: "center" },
-      };
-
       const emptyTemplate = [
         [
           { v: "Packed total:", s: styleBlueHeader },
@@ -595,7 +602,7 @@ const ExportToExcel = () => {
           { v: 0 },
         ],
         [
-          { v: "Packing stations working:", s: styleBlueHeader },
+          { v: "PS working:", s: styleBlueHeader },
           { v: 0 },
 
           { v: "PS1 :", s: styleBlueHeader },
@@ -618,12 +625,62 @@ const ExportToExcel = () => {
       // Вставляємо шаблон в d1
       XLSX.utils.sheet_add_aoa(worksheet, emptyTemplate, { origin: "D1" });
       worksheet["!cols"] = worksheet["!cols"] || [];
-      worksheet["!cols"][3] = { wch: 20 };
     }
 
     XLSX.utils.sheet_add_aoa(worksheet, legend, { origin: -1 });
+
+    // 🔁 Після вставки legend — оновлюємо останній рядок
+    const rangeBackLog = XLSX.utils.decode_range(worksheet["!ref"]);
+    const insertStartRow = rangeBackLog.e.r + 2;
+
+    // 📊 Таблиця після легенди
+    const extraTableBackLog = [
+      [],
+      [
+        { v: "Backlog Total:", s: styleBlueHeader },
+        { t: "n", v: 0 },
+        { v: "Missing" },
+      ],
+      [
+        { v: "POF TBI:", s: styleBlueHeader },
+        { t: "n", v: 0 },
+        { t: "n", v: 0 },
+      ],
+      [
+        { v: "POD TBI:", s: styleBlueHeader },
+        { t: "n", v: 0 },
+        { t: "n", v: 0 },
+      ],
+      [
+        { v: "POD Other:", s: styleBlueHeader },
+        { f: `SUM(B${insertStartRow + 6}:ZZ${insertStartRow + 6})` }, // 👈 важливо: нижче на 2 рядки
+      ],
+      [
+        { v: "", s: styleBlueHeader },
+        { v: "Neomachi", s: styleBlueHeader },
+        { v: "Go Jungo", s: styleRedHeader },
+        { v: "Co hubo", s: styleBlueHeader },
+        { v: "IC", s: styleBlueHeader },
+        { v: "LAVY", s: styleBlueHeader },
+        { v: "UT", s: styleBlueHeader },
+        { v: "Printify", s: styleBlueHeader },
+        { v: "YAGO", s: styleBlueHeader },
+      ],
+      [
+        { v: "POD other details:", s: styleBlueHeader },
+        ...Array(8).fill({ t: "n", v: 0 }),
+      ],
+      [{ v: "Total:", s: styleBlueHeader }, ...Array(8).fill({ t: "n", v: 0 })],
+    ];
+
+    if (mode === "single") {
+      XLSX.utils.sheet_add_aoa(worksheet, extraTableBackLog, {
+        origin: `A${insertStartRow}`,
+      });
+    }
+
     worksheet["!cols"] = worksheet["!cols"] || [];
-    worksheet["!cols"][0] = { wch: 23 };
+    worksheet["!cols"][0] = { wch: 25 };
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Shift Report");
 
