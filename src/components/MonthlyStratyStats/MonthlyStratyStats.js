@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import s from "./MonthlyStratyStats.module.scss";
 import ets from "../EntryTable/EntryTable.module.scss";
 import { povodDescription } from "./povodDescription";
-import Tooltip from "@mui/material/Tooltip";
 
 const MonthlyStratyStats = () => {
   const now = new Date();
@@ -49,16 +48,23 @@ const MonthlyStratyStats = () => {
         let url = "";
         const encodedShift = encodeURIComponent(selectedShift);
 
+        const baseURL = "https://braki-api.vercel.app/api";
         const endpoint =
           mode === "month"
-            ? `http://localhost:4040/api/straties-filtered?year=${year}&month=${month}`
-            : `http://localhost:4040/api/straties-filtered?date=${date}&shift=${encodedShift}`;
+            ? `${baseURL}/straties-filtered?year=${year}&month=${month}`
+            : `${baseURL}/straties-filtered?date=${date}&shift=${encodedShift}`;
+
+        console.log("🌐 Fetching from:", endpoint); // 👉 URL перевірка
+
         const res = await fetch(endpoint);
         const data = await res.json();
+
+        console.log("✅ Fetched straty data:", data); // 👉 Дані перевірка
+
         setStraty(data);
         calculate(data);
       } catch (err) {
-        console.error("Error loading data:", err);
+        console.error("❌ Error loading data:", err);
       } finally {
         setLoading(false);
       }
@@ -227,7 +233,7 @@ const MonthlyStratyStats = () => {
               {Object.entries(povodStats)
                 .sort(([, a], [, b]) => b - a)
                 .map(([reason, count], index, array) => (
-                  <span className={ets.reasonDescription}>
+                  <span key={reason} className={ets.reasonDescription}>
                     {reason.toUpperCase()}:{" "}
                     <span className={index < 3 ? s.redCount : " "}>
                       {count}
