@@ -9,6 +9,8 @@ import {
   FiChevronRight,
   FiUser,
 } from "react-icons/fi";
+
+import { PiTShirtDuotone } from "react-icons/pi";
 import { VscPreview } from "react-icons/vsc";
 import { SlPrinter } from "react-icons/sl";
 import { GrGroup } from "react-icons/gr";
@@ -147,6 +149,17 @@ const NavBar = ({ isCollapsed, setIsCollapsed, setIsSearchModalOpen }) => {
           <FiSearch className={styles.icon} />
           <span className={styles.linkText}>Zlecenie Search</span>
         </NavLink>
+        {(role === "admin" || role === "leader") && (
+          <NavLink
+            to="/straty-statistics"
+            className={({ isActive }) =>
+              isActive ? `${styles.link} ${styles.active}` : styles.link
+            }
+          >
+            <PiTShirtDuotone className={styles.icon} />
+            <span className={styles.linkText}>Straty Statistics</span>
+          </NavLink>
+        )}
         {(role === "admin" || role === "leader") && (
           <NavLink
             to="/export-to-excel"

@@ -6,9 +6,8 @@
 
 .tooltip,
 .commentTooltip {
-  border: 1px solid black;
   visibility: hidden;
-  width: 350px; /* Ширина тултіпу */
+  width: 300px; /* Ширина тултіпу */
   background-color: #333; /* Колір фону */
   color: #bebebe;
   text-align: center;
@@ -22,7 +21,7 @@
   opacity: 0;
   transition: opacity 0.3s;
   white-space: normal;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.373);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.248);
 }
 
 .tooltip::after,
@@ -36,6 +35,7 @@
 .operatorName:hover .commentTooltip {
   visibility: visible;
   opacity: 1;
+  z-index: 100;
 }
 
 .comment {

@@ -12,6 +12,7 @@ import OperatorDashboard from "../src/pages/OperatorDashboard/OperatorDashboard"
 import LeaderDashboard from "../src/pages/LeaderDashboard/LeaderDashboard";
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
 import CustomDatePicker from "./components/CustomDatePicker/CustomDatePicker";
+import StratyStatistics from "./pages/StratyStatistics/StratyStatistics";
 
 import {
   machines,
@@ -749,6 +750,8 @@ function App() {
               </PrivateRoute>
             }
           />
+
+          <Route path="/straty-statistics" element={<StratyStatistics />} />
 
           <Route
             path="/export-to-excel"

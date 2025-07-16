@@ -11,6 +11,7 @@ import CustomDatePicker from "../CustomDatePicker/CustomDatePicker";
 import style from "./ExportToExcel.module.scss";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+
 const ExportToExcel = () => {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
@@ -306,6 +307,7 @@ const ExportToExcel = () => {
 
     const worksheet = XLSX.utils.json_to_sheet([]);
     XLSX.utils.sheet_add_aoa(worksheet, headerLines, { origin: "A1" });
+
     // 🔽 Знайди куди вставити новий заголовок
     const zlecSummaryStart = headerLines.findIndex(
       (row) => row[0]?.v === "ZLECENIE"
@@ -569,7 +571,7 @@ const ExportToExcel = () => {
       alignment: {
         horizontal: "left",
         vertical: "center",
-        wrapText: true, // ← ВАЖЛИВО
+        wrapText: true,
       },
     };
 
@@ -581,7 +583,7 @@ const ExportToExcel = () => {
         .map(([num, desc]) => [{ v: `${num}. ${desc}` }]),
     ];
 
-    //add Packed info
+    // Додаємо інформацію про Packed для single режиму
     if (mode === "single") {
       const POD_COL = 6; // колонка H
       const POF_COL = 8; // колонка J
@@ -622,18 +624,17 @@ const ExportToExcel = () => {
         ],
       ];
 
-      // Вставляємо шаблон в d1
       XLSX.utils.sheet_add_aoa(worksheet, emptyTemplate, { origin: "D1" });
       worksheet["!cols"] = worksheet["!cols"] || [];
     }
 
     XLSX.utils.sheet_add_aoa(worksheet, legend, { origin: -1 });
 
-    // 🔁 Після вставки legend — оновлюємо останній рядок
+    // Оновлення позиції для вставки таблиці Backlog після легенди
     const rangeBackLog = XLSX.utils.decode_range(worksheet["!ref"]);
     const insertStartRow = rangeBackLog.e.r + 2;
 
-    // 📊 Таблиця після легенди
+    // Таблиця Backlog після легенди
     const extraTableBackLog = [
       [],
       [
@@ -653,7 +654,8 @@ const ExportToExcel = () => {
       ],
       [
         { v: "POD Other:", s: styleBlueHeader },
-        { f: `SUM(B${insertStartRow + 6}:ZZ${insertStartRow + 6})` }, // 👈 важливо: нижче на 2 рядки
+        { f: `SUM(B${insertStartRow + 6}:ZZ${insertStartRow + 6})` },
+        { t: "n", v: 0 },
       ],
       [
         { v: "", s: styleBlueHeader },
@@ -681,6 +683,7 @@ const ExportToExcel = () => {
 
     worksheet["!cols"] = worksheet["!cols"] || [];
     worksheet["!cols"][0] = { wch: 25 };
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Shift Report");
 

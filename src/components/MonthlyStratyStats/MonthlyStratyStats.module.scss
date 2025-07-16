@@ -1,0 +1,24 @@
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 8px;
+    border: 1px solid #ccc;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f0f0f0;
+  }
+}
+
+.povodItem {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.redCount {
+  color: red;
+}
