@@ -55,7 +55,11 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
   // Статистика по лідерам
   const statistics =
     !loading && !error
-      ? getLeaderStatisticsForMonth(entries, leaders, selectedMonth)
+      ? getLeaderStatisticsForMonth(
+          entries,
+          leaders.map((l) => l.trim()),
+          selectedMonth
+        )
       : null;
 
   // Чи є хоч якісь дані
@@ -74,26 +78,28 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
 
   // Підсумки за місяць по кожному лідеру
   const monthlyTotals = statistics
-    ? leaders.map((leader) => {
-        const monthlyData = statistics[leader];
-        const total = monthlyData.reduce((sum, day) => sum + day.total, 0);
+    ? leaders
+        .map((l) => l.trim())
+        .map((leader) => {
+          const monthlyData = statistics[leader];
+          const total = monthlyData.reduce((sum, day) => sum + day.total, 0);
 
-        const taskSummary = monthlyData.reduce((acc, day) => {
-          tasks.forEach((task) => {
-            acc[task] += day.taskSummary[task] || 0;
-          });
-          return acc;
-        }, Object.fromEntries(tasks.map((task) => [task, 0])));
+          const taskSummary = monthlyData.reduce((acc, day) => {
+            tasks.forEach((task) => {
+              acc[task] += day.taskSummary[task] || 0;
+            });
+            return acc;
+          }, Object.fromEntries(tasks.map((task) => [task, 0])));
 
-        const productSummary = monthlyData.reduce((acc, day) => {
-          products.forEach((product) => {
-            acc[product] += day.productSummary[product] || 0;
-          });
-          return acc;
-        }, Object.fromEntries(products.map((product) => [product, 0])));
+          const productSummary = monthlyData.reduce((acc, day) => {
+            products.forEach((product) => {
+              acc[product] += day.productSummary[product] || 0;
+            });
+            return acc;
+          }, Object.fromEntries(products.map((product) => [product, 0])));
 
-        return { leader, total, taskSummary, productSummary };
-      })
+          return { leader, total, taskSummary, productSummary };
+        })
     : [];
 
   // Продукти, які мають хоча б одну одиницю
@@ -163,7 +169,10 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
             defaultOpen={false}
             tooltip="Monthly summary for each leader: total quantity produced, breakdown by task type (POD, POF, etc.), and product type."
           >
-            {renderMonthlySummary(statistics, leaders)}
+            {renderMonthlySummary(
+              statistics,
+              leaders.map((l) => l.trim())
+            )}
           </ToggleBlock>
 
           {/* Графік продуктів та завданнь */}
@@ -188,7 +197,11 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
             defaultOpen={false}
             tooltip="Table showing total quantity per day for each leader, along with the average on active days."
           >
-            {renderDailyStatistics(statistics, leaders, daysInMonth)}
+            {renderDailyStatistics(
+              statistics,
+              leaders.map((l) => l.trim()),
+              daysInMonth
+            )}
           </ToggleBlock>
 
           {/* Деталізація */}
@@ -199,7 +212,7 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
           >
             {renderDetailedDailyInfo(
               statistics,
-              leaders,
+              leaders.map((l) => l.trim()),
               daysInMonth,
               selectedMonth
             )}

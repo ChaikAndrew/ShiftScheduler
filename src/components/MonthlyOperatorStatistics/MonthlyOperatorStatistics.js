@@ -32,13 +32,15 @@ const MonthlyOperatorStatistics = ({ operators }) => {
   const getOperatorStatisticsForMonth = () => {
     const statistics = {};
 
-    operators.forEach((operator) => {
-      statistics[operator] = Array.from({ length: daysInMonth }, () => ({
-        total: 0,
-        taskSummary: Object.fromEntries(tasks.map((t) => [t, 0])),
-        productSummary: Object.fromEntries(products.map((p) => [p, 0])),
-      }));
-    });
+    operators
+      .map((op) => op.trim())
+      .forEach((operator) => {
+        statistics[operator] = Array.from({ length: daysInMonth }, () => ({
+          total: 0,
+          taskSummary: Object.fromEntries(tasks.map((t) => [t, 0])),
+          productSummary: Object.fromEntries(products.map((p) => [p, 0])),
+        }));
+      });
 
     const allEntries = Object.values(entries).flatMap((shiftEntries) =>
       Object.values(shiftEntries).flat()
@@ -54,34 +56,40 @@ const MonthlyOperatorStatistics = ({ operators }) => {
         );
       });
 
-      operators.forEach((operator) => {
-        const operatorEntries = dayEntries.filter(
-          (entry) => entry.operator === operator
-        );
+      operators
+        .map((op) => op.trim())
+        .forEach((operator) => {
+          const operatorEntries = dayEntries.filter(
+            (entry) => entry.operator?.trim() === operator
+          );
 
-        let taskSummary = Object.fromEntries(tasks.map((t) => [t, 0]));
-        let productSummary = Object.fromEntries(products.map((p) => [p, 0]));
-        let total = 0;
+          let taskSummary = Object.fromEntries(tasks.map((t) => [t, 0]));
+          let productSummary = Object.fromEntries(products.map((p) => [p, 0]));
+          let total = 0;
 
-        operatorEntries.forEach((entry) => {
-          const task = entry.task;
-          const quantity = parseInt(entry.quantity, 10) || 0;
+          operatorEntries.forEach((entry) => {
+            const task = entry.task;
+            const quantity = parseInt(entry.quantity, 10) || 0;
 
-          if (task in taskSummary) {
-            taskSummary[task] += quantity;
-          } else {
-            taskSummary["Zlecenie"] += quantity;
-          }
+            if (task in taskSummary) {
+              taskSummary[task] += quantity;
+            } else {
+              taskSummary["Zlecenie"] += quantity;
+            }
 
-          if (entry.product in productSummary) {
-            productSummary[entry.product] += quantity;
-          }
+            if (entry.product in productSummary) {
+              productSummary[entry.product] += quantity;
+            }
 
-          total += quantity;
+            total += quantity;
+          });
+
+          statistics[operator][day - 1] = {
+            total,
+            taskSummary,
+            productSummary,
+          };
         });
-
-        statistics[operator][day - 1] = { total, taskSummary, productSummary };
-      });
     }
 
     return statistics;
@@ -99,7 +107,7 @@ const MonthlyOperatorStatistics = ({ operators }) => {
     setSelectedMonth((prev) => ({ ...prev, year: newYear }));
   };
 
-  const sortedOperators = [...operators].sort();
+  const sortedOperators = operators.map((op) => op.trim()).sort();
 
   const sortedMonthlyTotals = sortedOperators
     .map((operator) => {
@@ -139,10 +147,11 @@ const MonthlyOperatorStatistics = ({ operators }) => {
   const operatorEfficiency = {};
 
   filteredEntries.forEach((entry) => {
-    const { operator, quantity, product } = entry;
+    const { quantity, product } = entry;
+    const operatorName = entry.operator?.trim();
 
-    if (!operatorEfficiency[operator]) {
-      operatorEfficiency[operator] = {
+    if (!operatorEfficiency[operatorName]) {
+      operatorEfficiency[operatorName] = {
         totalWorkHours: 0,
         totalProducts: 0,
         productDetails: {},
@@ -152,20 +161,21 @@ const MonthlyOperatorStatistics = ({ operators }) => {
     const workingTime = entry.workingTime || 0;
     const workHours = workingTime / 60;
 
-    operatorEfficiency[operator].totalWorkHours += workHours;
-    operatorEfficiency[operator].totalProducts += quantity;
+    operatorEfficiency[operatorName].totalWorkHours += workHours;
+    operatorEfficiency[operatorName].totalProducts += quantity;
 
     if (!product) return;
-    if (!operatorEfficiency[operator].productDetails[product]) {
-      operatorEfficiency[operator].productDetails[product] = {
+    if (!operatorEfficiency[operatorName].productDetails[product]) {
+      operatorEfficiency[operatorName].productDetails[product] = {
         total: 0,
         workHours: 0,
         speed: 0,
       };
     }
 
-    operatorEfficiency[operator].productDetails[product].total += quantity;
-    operatorEfficiency[operator].productDetails[product].workHours += workHours;
+    operatorEfficiency[operatorName].productDetails[product].total += quantity;
+    operatorEfficiency[operatorName].productDetails[product].workHours +=
+      workHours;
   });
 
   const formattedMonth = new Date(

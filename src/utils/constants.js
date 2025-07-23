@@ -2,7 +2,8 @@
 export const machines = ["dtg1", "dtg2", "dtg3", "dtg4", "dtg5", "dtg6"];
 
 //Типи задач, які оператор може виконувати
-export const tasks = ["POD", "POF", "Zlecenie", "Sample", "Test"];
+export const tasks = ["POD", "POF", "Zlecenie", "Test"];
+// export const tasks = ["POD", "POF", "Zlecenie", "Sample", "Test"];
 
 //Продукти, які можуть друкуватися
 export const products = [
@@ -65,7 +66,7 @@ export const reasons = [
 ];
 
 //Список лідерів змін
-export const leaders = ["Karina", "Michal", "Lyuda"];
+export const leaders = ["Karina", "Andrii", "Lyuda"];
 
 // Початкові часи для кожної зміни
 export const shiftStartTimes = {

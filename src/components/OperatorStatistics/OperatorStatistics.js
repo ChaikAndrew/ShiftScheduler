@@ -36,7 +36,8 @@ function OperatorStatistics({ tasks = [], products = [] }) {
 
   const handleViewTypeChange = (e) => setViewType(e.target.value);
 
-  const handleOperatorChange = (e) => setSelectedOperator(e.target.value);
+  const handleOperatorChange = (e) =>
+    setSelectedOperator(e.target.value.trim());
 
   useEffect(() => {
     const checkLocalhost = async () => {
@@ -111,7 +112,11 @@ function OperatorStatistics({ tasks = [], products = [] }) {
       )
     : [];
 
-  const summary = calculateSummary(filteredEntries, operatorsFromDB, products);
+  const summary = calculateSummary(
+    filteredEntries,
+    operatorsFromDB.map((op) => op.trim()),
+    products
+  );
 
   const totalTaskQuantity = Object.values(summary.taskSummary).reduce(
     (sum, quantity) => sum + quantity,
@@ -187,7 +192,7 @@ function OperatorStatistics({ tasks = [], products = [] }) {
           {[...operatorsFromDB]
             .sort((a, b) => a.localeCompare(b))
             .map((op) => (
-              <option key={op} value={op}>
+              <option key={op} value={op.trim()}>
                 {op}
               </option>
             ))}

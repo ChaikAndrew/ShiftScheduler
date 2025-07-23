@@ -81,7 +81,7 @@ const MachinesQuantityStats = ({ machines = [] }) => {
                 <th>POD</th>
                 <th>POF</th>
                 <th>Zlecenie</th>
-                <th>Sample</th>
+                {/* <th>Sample</th> */}
                 <th>Test</th>
                 <th>Total</th>
               </tr>
@@ -122,7 +122,7 @@ const MachinesQuantityStats = ({ machines = [] }) => {
                   <th>POD</th>
                   <th>POF</th>
                   <th>Zlecenie</th>
-                  <th>Sample</th>
+                  {/* <th>Sample</th> */}
                   <th>Test</th>
                   <th>Total</th>
                 </tr>
@@ -130,8 +130,8 @@ const MachinesQuantityStats = ({ machines = [] }) => {
               <tbody>
                 {statistics.map((stat) => {
                   const zlecenie =
-                    stat.totalQuantity -
-                    (stat.POD + stat.POF + stat.Sample + stat.Test);
+                    stat.totalQuantity - (stat.POD + stat.POF + stat.Test);
+                  //  (stat.POD + stat.POF + stat.Sample + stat.Test);
 
                   return (
                     <tr key={stat.machine}>
@@ -139,7 +139,7 @@ const MachinesQuantityStats = ({ machines = [] }) => {
                       <td>{stat.POD || ""}</td>
                       <td>{stat.POF || ""}</td>
                       <td>{zlecenie > 0 ? zlecenie : ""}</td>
-                      <td>{stat.Sample || ""}</td>
+                      {/* <td>{stat.Sample || ""}</td> */}
                       <td>{stat.Test || ""}</td>
                       <td>
                         <strong>{stat.totalQuantity || ""}</strong>

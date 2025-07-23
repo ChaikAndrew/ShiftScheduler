@@ -6,7 +6,7 @@ import ShiftButtons from "../../components/ShiftButtons/ShiftButtons";
 import { reasons } from "../../utils/constants";
 import useEntriesLoader from "../../hooks/useEntriesLoader";
 import { recalculateDowntime } from "../../utils/recalculateDowntime";
-
+import { povodDescription } from "../MonthlyStratyStats/povodDescription";
 import CustomDatePicker from "../CustomDatePicker/CustomDatePicker";
 import style from "./ExportToExcel.module.scss";
 import Skeleton from "react-loading-skeleton";
@@ -17,6 +17,77 @@ const ExportToExcel = () => {
     new Date().toISOString().split("T")[0]
   );
   const [currentShift, setCurrentShift] = useState(null);
+  const [stratySummary, setStratySummary] = useState({});
+  const [stratyMachines, setStratyMachines] = useState({});
+  const [stratyPovods, setStratyPovods] = useState({});
+
+  React.useEffect(() => {
+    const shiftMapToZMIANA = {
+      first: "1 ZMIANA",
+      second: "2 ZMIANA",
+      third: "3 ZMIANA",
+    };
+
+    const fetchStraty = async () => {
+      if (!selectedDate || !currentShift) return;
+      try {
+        const shiftZMIANA = shiftMapToZMIANA[currentShift];
+        const res = await fetch(
+          `https://braki-api.vercel.app/api/straties-filtered?date=${selectedDate}&shift=${encodeURIComponent(
+            shiftZMIANA
+          )}`
+        );
+        const data = await res.json();
+
+        const summary = {
+          POD: 0,
+          POF: 0,
+          ZLECENIE: 0,
+          BLUZA: 0,
+          TSHIRT: 0,
+          TOTAL: data.length,
+        };
+        const machines = {};
+        const povods = {};
+
+        data.forEach((item) => {
+          const m = item.number_dtg || "UNKNOWN";
+          const hurt = item.pof_pod_hurt;
+          const product = item.bluza_t_shirt
+            ?.toUpperCase()
+            .replace(/[^A-Z]/g, "");
+          const povod = item.povod;
+
+          summary[hurt] = (summary[hurt] || 0) + 1;
+          summary[product] = (summary[product] || 0) + 1;
+
+          if (!machines[m]) {
+            machines[m] = {
+              POD: 0,
+              POF: 0,
+              ZLECENIE: 0,
+              BLUZA: 0,
+              TSHIRT: 0,
+              TOTAL: 0,
+            };
+          }
+          machines[m][hurt] = (machines[m][hurt] || 0) + 1;
+          machines[m][product] = (machines[m][product] || 0) + 1;
+          machines[m].TOTAL++;
+
+          if (povod) povods[povod] = (povods[povod] || 0) + 1;
+        });
+
+        setStratySummary(summary);
+        setStratyMachines(machines);
+        setStratyPovods(povods);
+      } catch (err) {
+        console.error("Failed to fetch straty:", err);
+      }
+    };
+
+    fetchStraty();
+  }, [selectedDate, currentShift]);
 
   const selectedYear = new Date(selectedDate).getFullYear();
   const selectedMonth = new Date(selectedDate).getMonth() + 1;
@@ -74,7 +145,8 @@ const ExportToExcel = () => {
     const leaderNameSet = new Set();
     let grandTotalQty = 0;
     let totalZlecenieQty = 0;
-    const knownTasks = ["POD", "POF", "Sample", "Test"];
+    const knownTasks = ["POD", "POF", "Test"];
+    //  const knownTasks = ["POD", "POF", "Sample", "Test"];
     const allProductsSet = new Set();
 
     shiftsToExport.forEach((shift) => {
@@ -630,10 +702,182 @@ const ExportToExcel = () => {
 
     XLSX.utils.sheet_add_aoa(worksheet, legend, { origin: -1 });
 
+    // 📊 Додати straty summary (оновлений стиль)
+    // Підрахунок кількості надрукованого по машинах для Loss %
+    const quantitiesByMachine = {};
+    if (entries) {
+      Object.entries(entries).forEach(([shift, machines]) => {
+        Object.entries(machines).forEach(([machine, records]) => {
+          const machineKey = machine?.toUpperCase();
+          records.forEach((entry) => {
+            const quantity = entry.quantity || 0;
+            if (!quantitiesByMachine[machineKey]) {
+              quantitiesByMachine[machineKey] = 0;
+            }
+            quantitiesByMachine[machineKey] += quantity;
+          });
+        });
+      });
+    }
+
+    // Підрахунок totalLossesCount (T-shirt + Hoodie по всіх машинах)
+    const totalLossesCount = Object.values(stratyMachines).reduce(
+      (sum, m) => sum + (m.TSHIRT || 0) + (m.BLUZA || 0),
+      0
+    );
+    // Підрахунок totalQuantity (надруковано по всіх машинах)
+    const totalQuantity = Object.values(quantitiesByMachine).reduce(
+      (sum, q) => sum + q,
+      0
+    );
+    // Підрахунок відсотка втрат
+    const totalLossPercent =
+      totalQuantity > 0
+        ? ((totalLossesCount / totalQuantity) * 100).toFixed(1)
+        : "0";
+
+    const stratyTable = [
+      [],
+
+      [{ v: "Total records:", s: styleBlueHeader }],
+      [
+        {
+          v: "All Machines:",
+        },
+        {
+          v: stratySummary.TOTAL || 0,
+          t: "n",
+        },
+      ],
+      // Додаємо рядок з Loss % від totalQuantity
+      [
+        {
+          v: "Loss % from total quantity:",
+          s: {
+            font: { bold: true },
+          },
+        },
+        {
+          v: `${totalLossPercent}%`,
+          s:
+            totalLossPercent < 2
+              ? {
+                  font: { bold: true, color: { rgb: "00AA00" } },
+                  alignment: { horizontal: "right" },
+                }
+              : {
+                  font: { bold: true, color: { rgb: "FF0000" } },
+                  alignment: { horizontal: "right" },
+                },
+        },
+      ],
+      // Додаємо нові підсумкові рядки загальних втрат по футболках та худі
+      [
+        { v: "Total T-shirt losses:" },
+        {
+          v: Object.values(stratyMachines).reduce(
+            (sum, m) => sum + (m.TSHIRT || 0),
+            0
+          ),
+          t: "n",
+        },
+      ],
+      [
+        { v: "Total Hoodie losses:" },
+        {
+          v: Object.values(stratyMachines).reduce(
+            (sum, m) => sum + (m.BLUZA || 0),
+            0
+          ),
+          t: "n",
+        },
+      ],
+      [
+        { v: "Total € losses:" },
+        {
+          v: Object.values(stratyMachines).reduce((sum, m) => {
+            const hoodieCost = (m.BLUZA || 0) * 10;
+            const tshirtCost = (m.TSHIRT || 0) * 3.5;
+            return sum + hoodieCost + tshirtCost;
+          }, 0),
+          t: "n",
+        },
+      ],
+      [],
+      [
+        { v: "Machine", s: styleBlueHeader },
+        { v: "POD", s: styleBlueHeader },
+        { v: "POF", s: styleBlueHeader },
+        { v: "ZLECENIE", s: styleBlueHeader },
+        { v: "HOODIE", s: styleBlueHeader },
+        { v: "T-SHIRT", s: styleBlueHeader },
+        { v: "Hoodie(10 €)", s: styleBlueHeader },
+        { v: "T-shirt(3.5 €)", s: styleBlueHeader },
+        { v: "Total €", s: styleBlueHeader },
+        { v: "Loss %", s: styleBlueHeader },
+      ],
+      ...Object.entries(stratyMachines).map(([machine, data]) => {
+        const hoodieCost = (data.BLUZA || 0) * 10;
+        const tshirtCost = (data.TSHIRT || 0) * 3.5;
+        const totalCost = hoodieCost + tshirtCost;
+        // Новий розрахунок кількості надрукованого для машини через quantitiesByMachine
+        const machineKey = machine?.toUpperCase();
+        const totalQuantity = quantitiesByMachine[machineKey] || 0;
+        const totalLosses = (data.TSHIRT || 0) + (data.BLUZA || 0);
+        const lossPercent =
+          totalQuantity > 0
+            ? ((totalLosses / totalQuantity) * 100).toFixed(1) + "%"
+            : "0%";
+        return [
+          {
+            v: `${machine}:`,
+          },
+          { v: data.POD || 0, t: "n" },
+          { v: data.POF || 0, t: "n" },
+          { v: data.ZLECENIE || 0, t: "n" },
+          { v: data.BLUZA || 0, t: "n" },
+          { v: data.TSHIRT || 0, t: "n" },
+          { v: hoodieCost, t: "n" },
+          { v: tshirtCost, t: "n" },
+          { v: totalCost, t: "n" },
+          {
+            v: `${parseFloat(lossPercent).toFixed(2)}%`,
+            s: {
+              font: {
+                color: {
+                  rgb: parseFloat(lossPercent) < 2 ? "00AA00" : "FF0000",
+                },
+              },
+              alignment: { horizontal: "right" },
+            },
+          },
+        ];
+      }),
+      [],
+      [{ v: "Scrap (info)", s: styleBlueHeader }],
+      ...Object.entries(stratyPovods)
+        .sort((a, b) => b[1] - a[1]) // Sort from highest to lowest
+        .map(([reason, val]) => {
+          const desc = povodDescription[reason] || "";
+          return [
+            { v: `${val} pcs` }, // ➕ add unit label
+            {
+              v: `${reason}: ${desc}`,
+              s: { font: { color: { rgb: "000000" } } },
+            },
+          ];
+        }),
+    ];
+
+    worksheet["!cols"] = worksheet["!cols"] || [];
+    worksheet["!cols"][6] = { wch: 10 }; // колонка G — Hoodie
+    worksheet["!cols"][7] = { wch: 10 }; // колонка H — T-shirt
+    worksheet["!cols"][8] = { wch: 12 }; // колонка I — Total €
+
     // Оновлення позиції для вставки таблиці Backlog після легенди
     const rangeBackLog = XLSX.utils.decode_range(worksheet["!ref"]);
     const insertStartRow = rangeBackLog.e.r + 2;
-
+    const lastColLetter = XLSX.utils.encode_col(columnWidths.length - 1); // наприклад, "AA"
     // Таблиця Backlog після легенди
     const extraTableBackLog = [
       [],
@@ -654,7 +898,11 @@ const ExportToExcel = () => {
       ],
       [
         { v: "POD Other:", s: styleBlueHeader },
-        { f: `SUM(B${insertStartRow + 6}:ZZ${insertStartRow + 6})` },
+        {
+          f: `SUM(B${insertStartRow + 6}:${lastColLetter}${
+            insertStartRow + 6
+          })`,
+        },
         { t: "n", v: 0 },
       ],
       [
@@ -667,18 +915,21 @@ const ExportToExcel = () => {
         { v: "UT", s: styleBlueHeader },
         { v: "Printify", s: styleBlueHeader },
         { v: "YAGO", s: styleBlueHeader },
+        { v: "TDE", s: styleBlueHeader },
       ],
       [
         { v: "POD other details:", s: styleBlueHeader },
-        ...Array(8).fill({ t: "n", v: 0 }),
+        ...Array(9).fill({ t: "n", v: 0 }),
       ],
-      [{ v: "Total:", s: styleBlueHeader }, ...Array(8).fill({ t: "n", v: 0 })],
+      [{ v: "Total:", s: styleBlueHeader }, ...Array(9).fill({ t: "n", v: 0 })],
     ];
 
     if (mode === "single") {
       XLSX.utils.sheet_add_aoa(worksheet, extraTableBackLog, {
         origin: `A${insertStartRow}`,
       });
+      // Додаємо stratyTable одразу після Backlog
+      XLSX.utils.sheet_add_aoa(worksheet, stratyTable, { origin: -1 });
     }
 
     worksheet["!cols"] = worksheet["!cols"] || [];

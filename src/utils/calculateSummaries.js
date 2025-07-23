@@ -24,7 +24,7 @@ export function calculateSummary(entries, operators, products) {
     POD: 0,
     POF: 0,
     Zlecenie: 0,
-    Sample: 0,
+    // Sample: 0,
     Test: 0,
   };
 
@@ -36,8 +36,8 @@ export function calculateSummary(entries, operators, products) {
       taskSummary.POF += parseInt(entry.quantity, 10) || 0;
     } else if (task === "Test") {
       taskSummary.Test += parseInt(entry.quantity, 10) || 0;
-    } else if (task === "Sample") {
-      taskSummary.Sample += parseInt(entry.quantity, 10) || 0;
+      // } else if (task === "Sample") {
+      //   taskSummary.Sample += parseInt(entry.quantity, 10) || 0;
     } else {
       taskSummary.Zlecenie += parseInt(entry.quantity, 10) || 0;
     }
@@ -50,14 +50,14 @@ export function calculateSummary(entries, operators, products) {
         POD: 0,
         POF: 0,
         Zlecenie: 0,
-        Sample: 0,
+        // Sample: 0,
         Test: 0,
       },
       productSummary: {},
     };
 
     const operatorEntries = entries.filter(
-      (entry) => entry.operator === operator
+      (entry) => entry.operator?.trim() === operator.trim()
     );
 
     acc[operator].total = operatorEntries.reduce(
@@ -73,8 +73,8 @@ export function calculateSummary(entries, operators, products) {
         acc[operator].taskSummary.POF += parseInt(entry.quantity, 10) || 0;
       } else if (task === "Test") {
         acc[operator].taskSummary.Test += parseInt(entry.quantity, 10) || 0;
-      } else if (task === "Sample") {
-        acc[operator].taskSummary.Sample += parseInt(entry.quantity, 10) || 0;
+        // } else if (task === "Sample") {
+        //   acc[operator].taskSummary.Sample += parseInt(entry.quantity, 10) || 0;
       } else {
         acc[operator].taskSummary.Zlecenie += parseInt(entry.quantity, 10) || 0;
       }
@@ -137,7 +137,7 @@ export function calculateOverallSummary(
     POD: 0,
     POF: 0,
     Zlecenie: 0,
-    Sample: 0, // Додано Sample
+    // Sample: 0,
     Test: 0,
   };
 
@@ -149,8 +149,8 @@ export function calculateOverallSummary(
       overallTaskSummary.POF += parseInt(entry.quantity, 10) || 0;
     } else if (task === "Test") {
       overallTaskSummary.Test += parseInt(entry.quantity, 10) || 0;
-    } else if (task === "Sample") {
-      overallTaskSummary.Sample += parseInt(entry.quantity, 10) || 0;
+      // } else if (task === "Sample") {
+      //   overallTaskSummary.Sample += parseInt(entry.quantity, 10) || 0;
     } else {
       overallTaskSummary.Zlecenie += parseInt(entry.quantity, 10) || 0;
     }

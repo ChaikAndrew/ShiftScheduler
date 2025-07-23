@@ -21,11 +21,11 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
   const [newComment, setNewComment] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleDelete = (index, operator, task, quantity) => {
+  const handleDelete = (index, username, task, quantity, machine) => {
     const message =
       task && quantity > 0
-        ? `${operator}, are you sure you want to delete ${task} with a quantity of ${quantity}?`
-        : `${operator}, are you sure you want to delete this entry?`;
+        ? `${username}, are you sure you want to delete ${task} with a quantity of ${quantity} from ${machine}?`
+        : `${username}, are you sure you want to delete this entry from ${machine}?`;
 
     showConfirmDialog({
       title: "Delete Confirmation",
@@ -168,8 +168,9 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
                   </span>
                 </td>
                 <td>
-                  {["POD", "POF", "Sample", "Test"].includes(entry.task)
-                    ? entry.task
+                  {["POD", "POF", "Test"].includes(entry.task)
+                    ? // {["POD", "POF", "Sample", "Test"].includes(entry.task)
+                      entry.task
                     : entry.task?.toUpperCase()}
                 </td>
                 <td>{entry.product}</td>
@@ -201,9 +202,10 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
                     onClick={() =>
                       handleDelete(
                         filteredIndex,
-                        entry.operator,
+                        localStorage.getItem("username"),
                         entry.task,
-                        entry.quantity
+                        entry.quantity,
+                        entry.machine
                       )
                     }
                   >

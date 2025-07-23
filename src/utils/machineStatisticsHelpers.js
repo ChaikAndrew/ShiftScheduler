@@ -38,7 +38,8 @@ export const getMachineStatistics = (
     // Якщо записів для машини нема, пропускаємо
     if (!machineEntries.length) return null;
 
-    const taskSummary = { POD: 0, POF: 0, Zlecenie: 0, Sample: 0, Test: 0 };
+    const taskSummary = { POD: 0, POF: 0, Zlecenie: 0, Test: 0 };
+    //  const taskSummary = { POD: 0, POF: 0, Zlecenie: 0, Sample: 0, Test: 0 };
     let totalQuantity = 0;
     let workingTime = 0;
     let downtime = 0;

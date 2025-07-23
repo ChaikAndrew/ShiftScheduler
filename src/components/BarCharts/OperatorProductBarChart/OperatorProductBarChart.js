@@ -18,7 +18,7 @@ const OperatorProductBarChart = ({ data }) => {
     .filter((key) => data.some((item) => item[key] > 0));
 
   return (
-    <ResponsiveContainer width="90%" height={Math.max(data.length * 30, 180)}>
+    <ResponsiveContainer width="90%" height={Math.max(data.length * 40, 180)}>
       <BarChart
         layout="vertical"
         data={data}
@@ -28,8 +28,9 @@ const OperatorProductBarChart = ({ data }) => {
         <YAxis
           dataKey="operator"
           type="category"
+          width={120}
           tick={{ fontSize: 12 }}
-          tickFormatter={(name) => name.replace(" ", "\u00A0")} // ← вставляє нерозривний пробіл
+          tickFormatter={(name) => name.replace(" ", "\u00A0")}
         />
 
         <Tooltip />
