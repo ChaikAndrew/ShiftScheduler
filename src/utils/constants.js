@@ -1,5 +1,15 @@
 //Список доступних машин для вибору
-export const machines = ["dtg1", "dtg2", "dtg3", "dtg4", "dtg5", "dtg6"];
+export const machines = [
+  "dtg1",
+  "dtg2",
+  "dtg3",
+  "dtg4",
+  "dtg5",
+  "dtg6",
+  "dtg7",
+  "dtg8",
+  "dtg9",
+];
 
 //Типи задач, які оператор може виконувати
 export const tasks = ["POD", "POF", "Zlecenie", "Test"];
