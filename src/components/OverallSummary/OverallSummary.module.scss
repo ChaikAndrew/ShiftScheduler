@@ -128,3 +128,44 @@
   border-radius: 3px;
   padding: 10px;
 }
+
+/* OverallSummary.module.scss */
+.summaryTitle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 12px 20px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  font-family: "Inter", sans-serif;
+  max-width: fit-content;
+  margin: 20px auto 20px auto;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.highlight {
+  font-size: 20px;
+
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-left: 6px;
+
+  background: #eafaf1;
+  border-color: #cfeee0;
+  color: #1b5e20;
+  box-shadow: 0 6px 14px rgba(40, 167, 69, 0.12);
+}

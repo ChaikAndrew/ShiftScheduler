@@ -1,52 +1,109 @@
+/* ---- Palette & tokens ---- */
+:root {
+  --card-bg: #f6f5ff; /* пастельний фіолет */
+  --card-border: #a8a3ff; /* бордер/акцент */
+  --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  --title: #0f172a; /* чорний */
+  --muted: #6b7280; /* сірий для підписів */
+  --accent: #7c84f8; /* заголовки секцій */
+}
+
 .operatorsSummary {
   display: grid;
-  grid-template-columns: repeat(
-    auto-fit,
-    minmax(200px, 1fr)
-  ); /* Автоматичне підлаштування кількості колонок */
-  gap: 20px; /* Відступ між блоками */
-  padding: 20px;
-  border-radius: 10px;
-  justify-content: center; /* Центрує блоки по горизонталі */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 18px;
 }
 
+/* ---- Card ---- */
 .operatorSummary {
-  padding: 15px;
-  border: 1px solid #8884d8; /* Рамка з основним кольором */
-  border-radius: 8px;
-  background-color: #fff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тінь для кращого вигляду */
-  text-align: center; /* Центрує текст всередині блоку */
-  background-color: #8884d818;
+  position: relative;
+  padding: 18px 18px 22px;
+  border: 1px solid color-mix(in oklab, var(--card-border) 55%, white);
+  border-radius: 15px;
+  background: linear-gradient(180deg, #ffffff 0%, var(--card-bg) 100%);
+  box-shadow: var(--card-shadow);
+  text-align: center;
+
+  /* тонка верхня смужка-акцент */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--card-border),
+      transparent
+    );
+  }
 }
 
+/* ---- Header (operator name) ---- */
 .operatorName {
-  font-size: 1.3em;
-  font-weight: bold;
+  font-size: 1.25rem;
 
-  margin-bottom: 10px;
+  color: var(--title);
+  margin: 4px 0 14px;
+  letter-spacing: 0.3px;
 }
 
+/* ---- Section ---- */
 .summarySection {
-  margin-top: 15px;
-  padding-top: 10px;
-  border-top: 1px solid #e0e0e0;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid color-mix(in oklab, var(--card-border) 20%, #e5e7eb);
 }
 
 .sectionTitle {
-  font-size: 1.1em;
-  color: #8884d8;
-  margin-bottom: 5px;
+  font-size: 1.25rem;
+
+  color: var(--accent);
+  margin: 4px 0 10px;
+  letter-spacing: 0.4px;
 }
 
+/* ---- Totals & lists ---- */
 .total {
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 10px;
+  font-weight: 800;
+  color: #1f2937;
+  margin-bottom: 8px;
+  font-size: 1.05rem;
 }
 
 .summaryList {
-  list-style-type: none;
+  list-style: none;
   padding: 0;
   margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.summaryList li {
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+/* легке вицвітання підписів типу "POD", "Zlecenie" можна підкреслити */
+.summaryItem {
+  padding: 2px 0;
+}
+
+/* ---- Hover (ніжний ефект) ---- */
+.operatorSummary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 640px) {
+  .operatorName {
+    font-size: 1.35rem;
+  }
+  .sectionTitle {
+    font-size: 1.1rem;
+  }
 }

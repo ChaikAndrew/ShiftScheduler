@@ -171,7 +171,17 @@ const NavBar = ({ isCollapsed, setIsCollapsed, setIsSearchModalOpen }) => {
             <span className={styles.linkText}>Export to Excel</span>
           </NavLink>
         )}
-
+        {(role === "admin" || role === "leader") && (
+          <NavLink
+            to="/shift-daily-summary"
+            className={({ isActive }) =>
+              isActive ? `${styles.link} ${styles.active}` : styles.link
+            }
+          >
+            <FiCalendar className={styles.icon} />
+            <span className={styles.linkText}>Shift Daily Summary</span>
+          </NavLink>
+        )}
         <NavLink
           to={dashboardLink.path}
           className={({ isActive }) =>

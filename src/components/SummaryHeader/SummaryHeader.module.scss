@@ -1,10 +1,66 @@
-.titleMachineForDate {
+.summaryBar {
   width: 100%;
-  margin: 10px auto;
-
+  margin: 14px auto 18px; /* відступи зверху/знизу */
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  font-size: 1.5em;
-  text-align: center;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid #e6e6e9;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 6px 10px;
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.icon {
+  font-size: 16px;
+  opacity: 0.9;
+}
+.label {
+  color: #6b7280;
+} /* сіренький текст підпису */
+.value {
+  font-weight: 700;
+  color: #111827;
+}
+
+/* підсвічений бейдж для Total */
+.accent {
+  background: #eafaf1;
+  border-color: #cfeee0;
+  color: #1b5e20;
+  box-shadow: 0 6px 14px rgba(40, 167, 69, 0.12);
+}
+
+/* мобільчик: все стає в два ряди й центр */
+@media (max-width: 720px) {
+  .summaryBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .group {
+    justify-content: center;
+  }
+  .accent {
+    align-self: center;
+  }
 }

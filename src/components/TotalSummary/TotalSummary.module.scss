@@ -1,81 +1,75 @@
-.totalQuantityShift {
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.topRow {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.badge {
+  background: #f3f4f6;
+  padding: 6px 12px;
+  border-radius: 8px;
+
+  font-size: 18px;
+  animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+.cards {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* Відцентрування по горизонталі та вертикалі */
-  gap: 20px;
-  padding: 20px;
+  gap: 6px;
+  padding: 14px 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  min-width: 130px;
+  animation: fadeIn 0.8s ease-in-out forwards;
 }
 
-.totalQuantity,
-.totalWorkingTime,
-.totalDowntime,
-.totalQuantityShiftTitle {
-  align-items: center;
-  justify-content: center;
-  display: flex;
-  font-size: 1.5em;
-
-  opacity: 0; /* Початкове значення для анімації */
-  transform: translateY(20px); /* Початковий зсув для анімації */
-  animation: fadeIn 0.8s ease-in-out forwards; /* Анімація появи */
+.icon {
+  font-size: 22px;
 }
 
-.totalQuantityShiftTitle {
-  animation-delay: 0.2s;
+.label {
+  font-size: 12px;
+  color: #6b7280;
 }
 
-.totalQuantity {
-  font-size: 1.5em;
-  animation-delay: 0.4s; /* Затримка для анімації */
+.value {
+  font-size: 20px;
 }
 
-.totalWorkingTime {
-  animation-delay: 0.6s;
-}
-
-.totalDowntime {
-  animation-delay: 0.8s;
-}
-
-/* Анімація плавної появи */
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(20px); /* Початковий зсув вниз */
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0); /* Повернення на місце */
-  }
-}
-
-.workingTime,
-.downtimeTime,
-.shiftQuantity {
-  margin-left: 10px;
-  font-size: 1.8em;
-}
-
-.shiftQuantity {
+.total .value {
   color: #8884d8;
 }
-
-.workingTime {
+.work .value {
   color: #82ca9d;
 }
-
-.downtimeTime {
+.down .value {
   color: #dd6f6f;
 }
 
-.totalQuantityShiftTitle {
-  font-size: 2em;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-around;
-  margin-top: 20px;
-  // padding: 5px;
-  // border-bottom: 1px solid #8884d8;
+/* Анімація */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

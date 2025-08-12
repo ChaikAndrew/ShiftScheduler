@@ -46,7 +46,7 @@ function OverallSummary({ overallSummary }) {
           <>
             <h4 className={styles.title}>Overall Total Summary</h4>
             <p className={styles.value}>
-              Total Quantity:{" "}
+              Total Quantity:
               <span className={styles.highlight}>
                 {overallSummary.overallTotalQuantity}
               </span>

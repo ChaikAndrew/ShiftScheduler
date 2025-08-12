@@ -130,8 +130,8 @@ select {
     auto
   ); /* Два рядки, висота залежить від контенту */
   gap: 10px; /* Відстань між блоками */
-  padding: 10px; /* Відступи від країв контейнера */
-  border-radius: 5px;
+  padding: 20px; /* Відступи від країв контейнера */
+  border-radius: 12px;
   background-color: #f4f4f4;
 }
 
@@ -208,4 +208,32 @@ select {
 body.modal-open {
   overflow: hidden !important; /* Забороняємо прокрутку */
   height: 100vh;
+}
+
+.noDataLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin: 10px auto 6px;
+  border: 1px solid #e5e7eb;
+  background: #f8fafc;
+  color: #374151;
+  border-radius: 10px;
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+.noDataIcon {
+  font-size: 18px;
+  opacity: 0.8;
+}
+.noDataPill {
+  display: inline-block;
+  padding: 2px 8px;
+  margin: 0 2px;
+  border-radius: 999px;
+  background: #eef7ff;
+  border: 1px solid #d7e9ff;
+  color: #0b71d9;
+  font-weight: 700;
 }

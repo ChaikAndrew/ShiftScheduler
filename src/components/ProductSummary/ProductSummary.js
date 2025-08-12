@@ -30,7 +30,9 @@ function ProductSummary({ productSummary }) {
 
   return (
     <div className={styles.productSummary}>
-      <p className={styles.productSummaryTitle}>Product summary</p>
+      <p className={styles.productSummaryTitle}>
+        {"Product summary".toUpperCase()}
+      </p>
       <CustomActiveShapePieChart
         data={productData}
         colors={colors}

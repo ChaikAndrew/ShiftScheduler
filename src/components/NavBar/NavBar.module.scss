@@ -1,3 +1,4 @@
+/* ===== NavBar.module.scss ===== */
 .navbar {
   padding: 10px;
   display: flex;
@@ -11,20 +12,30 @@
   position: fixed;
   top: 0;
   left: 0;
-
-  transition: width 0.3s ease;
   z-index: 10;
+
+  /* ключ від "вилітів" під час анімації */
+  overflow: hidden;
+
+  /* лише ширина — решта всередині не смикається */
+  transition: width 0.3s ease;
 
   &.collapsed {
     width: 70px;
 
+    /* ховаємо текст м’яко, без display:none */
     .linkText {
-      display: none;
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+      pointer-events: none;
     }
-  }
 
-  .linkText {
-    font-size: 14px;
+    /* центруємо іконки, коли тексту нема */
+    .link {
+      justify-content: center;
+      gap: 0;
+    }
   }
 
   .logoContainer {
@@ -35,7 +46,7 @@
   }
 
   .collapseButton {
-    all: unset; /* Скидає всі успадковані стилі */
+    all: unset;
     background: none;
     border: none;
     color: inherit;
@@ -47,7 +58,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
 
     &:hover {
       color: #82ca9d;
@@ -64,9 +75,11 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
+
+    /* щоб нічого не вилазило під час звуження */
+    overflow: hidden;
   }
 
-  /* Стиль для посилань */
   .link {
     display: flex;
     align-items: center;
@@ -76,8 +89,13 @@
     font-size: 14px;
     padding: 10px;
     border-radius: 5px;
-    transition: background 0.2s, color 0.3s ease; /* Додаємо плавну анімацію */
-    cursor: pointer; /* Додаємо курсор pointer */
+    transition: background 0.2s, color 0.3s ease;
+    cursor: pointer;
+
+    /* не переносимо, зайве обрізаємо */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
     &:hover {
       background-color: #444;
@@ -94,6 +112,7 @@
 
     .linkText {
       font-size: 14px;
+      transition: opacity 0.2s ease;
     }
   }
 
@@ -115,7 +134,7 @@
   }
 
   .logoutButton {
-    all: unset; /* Скидає всі успадковані стилі */
+    all: unset;
     background: none;
     border: none;
     color: inherit;
@@ -127,8 +146,7 @@
     padding: 10px;
     margin-bottom: 10px;
     border-radius: 4px;
-
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
 
     &:hover {
       color: #82ca9d;
@@ -139,4 +157,14 @@
 
 .dashboardLink {
   margin-top: 30px;
+}
+
+/* Контейнер контенту для плавного зсуву */
+.mainContent {
+  margin-left: 250px;
+  transition: margin-left 0.3s ease;
+}
+
+.navbar.collapsed ~ .mainContent {
+  margin-left: 70px;
 }

@@ -13,6 +13,8 @@ import LeaderDashboard from "../src/pages/LeaderDashboard/LeaderDashboard";
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
 import CustomDatePicker from "./components/CustomDatePicker/CustomDatePicker";
 import StratyStatistics from "./pages/StratyStatistics/StratyStatistics";
+import { FiDatabase } from "react-icons/fi";
+import ShiftDailySummary from "./components/ShiftDailySummary/ShiftDailySummary";
 
 import {
   machines,
@@ -433,6 +435,7 @@ function App() {
   if (isCheckingToken) {
     return <div>Loading...</div>; // або твій кастомний спінер
   }
+
   return (
     <div className={`app-container ${isCollapsed ? "collapsed" : ""}`}>
       {isAuthenticated && location.pathname !== "/login" && (
@@ -575,10 +578,16 @@ function App() {
                       {/* NoDataMessage */}
                       {/* Заголовок, який відображається, якщо всі показники 0 */}
                       {!isDataAvailable && (
-                        <NoDataMessage
-                          selectedDate={selectedDate}
-                          currentShift={currentShift}
-                        />
+                        <div className="noDataLine">
+                          <FiDatabase className="noDataIcon" />
+                          <span>
+                            Data for <b>{selectedDate}</b>,{" "}
+                            <span className="noDataPill">
+                              {currentShift?.toUpperCase()} shift
+                            </span>{" "}
+                            is not available in the database
+                          </span>
+                        </div>
                       )}
 
                       {/* Контент, який відображається, якщо є хоча б один показник > 0
@@ -747,6 +756,18 @@ function App() {
             element={
               <PrivateRoute allowedRoles={["operator", "leader", "admin"]}>
                 <OperatorDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/shift-daily-summary"
+            element={
+              <PrivateRoute allowedRoles={["admin", "leader"]}>
+                <ShiftDailySummary
+                  entries={entries}
+                  selectedDate={selectedDate}
+                  onDateChange={(iso) => setSelectedDate(iso)} // ← додаємо
+                />
               </PrivateRoute>
             }
           />

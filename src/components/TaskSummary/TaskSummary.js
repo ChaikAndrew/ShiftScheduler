@@ -28,7 +28,7 @@ function TaskSummary({ taskSummary }) {
 
   return (
     <div className={styles.taskSummary}>
-      <p className={styles.taskSummaryTitle}>Task summary</p>
+      <p className={styles.taskSummaryTitle}>{"Task summary".toUpperCase()}</p>
       <CustomActiveShapePieChart
         data={taskData}
         colors={colors}
