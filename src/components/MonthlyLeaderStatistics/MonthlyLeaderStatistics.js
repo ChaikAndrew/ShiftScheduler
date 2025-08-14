@@ -17,26 +17,22 @@ import {
 } from "../../utils/monthlyLeaderHelpers";
 
 const MonthlyLeaderStatistics = ({ leaders }) => {
-  // Стан для обраного місяця та року
   const [selectedMonth, setSelectedMonth] = useState({
     year: new Date().getFullYear(),
     month: new Date().getMonth(),
   });
 
-  // Завантаження записів з бази
   const { entries, loading, error } = useEntriesLoader(
     selectedMonth.year,
     selectedMonth.month + 1
   );
 
-  // Кількість днів у місяці
   const daysInMonth = new Date(
     selectedMonth.year,
     selectedMonth.month + 1,
     0
   ).getDate();
 
-  // Зміна місяця
   const handleMonthChange = (e) => {
     setSelectedMonth((prev) => ({
       ...prev,
@@ -44,7 +40,6 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
     }));
   };
 
-  // Зміна року
   const handleYearChange = (e) => {
     setSelectedMonth((prev) => ({
       ...prev,
@@ -52,7 +47,6 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
     }));
   };
 
-  // Статистика по лідерам
   const statistics =
     !loading && !error
       ? getLeaderStatisticsForMonth(
@@ -62,7 +56,6 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
         )
       : null;
 
-  // Чи є хоч якісь дані
   const hasData =
     statistics &&
     Object.values(statistics).some((leaderData) =>
@@ -76,7 +69,6 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
 
   const reportTitle = `${formattedMonth} ${selectedMonth.year}`;
 
-  // Підсумки за місяць по кожному лідеру
   const monthlyTotals = statistics
     ? leaders
         .map((l) => l.trim())
@@ -102,12 +94,10 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
         })
     : [];
 
-  // Продукти, які мають хоча б одну одиницю
   const nonZeroProductKeys = products.filter((product) =>
     monthlyTotals.some(({ productSummary }) => productSummary[product] > 0)
   );
 
-  // Дані для графіка по продуктах
   const chartData = monthlyTotals.map(({ leader, productSummary }) => {
     const filteredSummary = Object.fromEntries(
       nonZeroProductKeys.map((key) => [key, productSummary[key]])
@@ -115,7 +105,6 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
     return { leader, ...filteredSummary };
   });
 
-  // Дані для графіка по типах завдань
   const taskChartData = monthlyTotals.map(({ leader, taskSummary }) => {
     const filteredTasks = Object.entries(taskSummary)
       .filter(([_, value]) => value > 0)
@@ -123,14 +112,25 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
     return { leader, ...filteredTasks };
   });
 
-  // Далі йде return з відображенням всього інтерфейсу...
   return (
     <div className={styles.container}>
-      <h2>Monthly Leader Statistics</h2>
+      {/* Topbar */}
+      <div className={styles.topbar}>
+        <h2 className={styles.pageTitle}>Monthly Leader Statistics</h2>
+        <div className={styles.pills}>
+          <span className={styles.pill}>
+            Month <strong>{formattedMonth}</strong>
+          </span>
+          <span className={styles.pill}>
+            Year <strong>{selectedMonth.year}</strong>
+          </span>
+        </div>
+      </div>
 
-      <div className={styles.selects}>
-        <label>
-          Select Month:
+      {/* Controls */}
+      <div className={styles.controls}>
+        <label className={styles.selectWrap}>
+          <span>Select Month</span>
           <select value={selectedMonth.month} onChange={handleMonthChange}>
             {Array.from({ length: 12 }, (_, i) => (
               <option key={i} value={i}>
@@ -140,8 +140,8 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
           </select>
         </label>
 
-        <label>
-          Select Year:
+        <label className={styles.selectWrap}>
+          <span>Select Year</span>
           <select value={selectedMonth.year} onChange={handleYearChange}>
             {Array.from({ length: 5 }, (_, i) => {
               const year = new Date().getFullYear() - 2 + i;
@@ -157,69 +157,90 @@ const MonthlyLeaderStatistics = ({ leaders }) => {
 
       {loading ? (
         <div className={styles.skeletonWrapper}>
-          <Skeleton height={30} count={8} />
+          <Skeleton height={36} width={260} style={{ marginBottom: 12 }} />
+          <Skeleton height={28} count={8} />
         </div>
       ) : error ? (
-        <p>Помилка при завантаженні: {error.message}</p>
+        <div className={styles.alertError}>
+          Помилка при завантаженні: {error.message}
+        </div>
       ) : hasData ? (
         <>
-          {/* Блок підсумку */}
           <ToggleBlock
             title={`Monthly Summary – ${reportTitle}`}
             defaultOpen={false}
             tooltip="Monthly summary for each leader: total quantity produced, breakdown by task type (POD, POF, etc.), and product type."
           >
-            {renderMonthlySummary(
-              statistics,
-              leaders.map((l) => l.trim())
-            )}
+            <div className={styles.section}>
+              {/* рендер з хелперів (не змінював) */}
+              {renderMonthlySummary(
+                statistics,
+                leaders.map((l) => l.trim())
+              )}
+            </div>
           </ToggleBlock>
 
-          {/* Графік продуктів та завданнь */}
           {(chartData.length > 0 || taskChartData.length > 0) && (
             <ToggleBlock
               title={`Charts (Products & Tasks) – ${reportTitle}`}
               defaultOpen={false}
               tooltip="Charts showing the distribution of tasks and products by leader for the selected month."
             >
-              {chartData.length > 0 && (
-                <LeaderProductBarChart data={chartData} />
-              )}
-              {taskChartData.length > 0 && (
-                <LeaderTaskBarChart data={taskChartData} />
-              )}
+              <div className={styles.section}>
+                {chartData.length > 0 && (
+                  <div className={styles.card}>
+                    <LeaderProductBarChart data={chartData} />
+                  </div>
+                )}
+                {taskChartData.length > 0 && (
+                  <div className={styles.card}>
+                    <LeaderTaskBarChart data={taskChartData} />
+                  </div>
+                )}
+              </div>
             </ToggleBlock>
           )}
 
-          {/* Щоденна таблиця */}
           <ToggleBlock
             title={`Daily Statistics – ${reportTitle}`}
             defaultOpen={false}
             tooltip="Table showing total quantity per day for each leader, along with the average on active days."
           >
-            {renderDailyStatistics(
-              statistics,
-              leaders.map((l) => l.trim()),
-              daysInMonth
-            )}
+            <div className={styles.section}>
+              {renderDailyStatistics(
+                statistics,
+                leaders.map((l) => l.trim()),
+                daysInMonth
+              )}
+            </div>
           </ToggleBlock>
 
-          {/* Деталізація */}
           <ToggleBlock
             title={`Detailed Daily Info – ${reportTitle}`}
             defaultOpen={false}
             tooltip="Detailed table showing tasks and products completed by each leader on each day of the selected month."
           >
-            {renderDetailedDailyInfo(
-              statistics,
-              leaders.map((l) => l.trim()),
-              daysInMonth,
-              selectedMonth
-            )}
+            <div className={styles.section}>
+              {renderDetailedDailyInfo(
+                statistics,
+                leaders.map((l) => l.trim()),
+                daysInMonth,
+                selectedMonth
+              )}
+            </div>
           </ToggleBlock>
         </>
       ) : (
-        <p>No data available for the selected month and leaders.</p>
+        <div className={styles.noDataMessage}>
+          <i className={styles.dbIcon} aria-hidden />
+          <span>
+            Data for{" "}
+            <strong>
+              {formattedMonth} {selectedMonth.year}
+            </strong>{" "}
+            is not available in the database.
+          </span>
+        </div>
       )}
     </div>
   );

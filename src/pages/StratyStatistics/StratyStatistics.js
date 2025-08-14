@@ -3,8 +3,7 @@ import MonthlyStratyStats from "../../components/MonthlyStratyStats/MonthlyStrat
 
 const StratyStatistics = () => {
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Statystyka Strat</h1>
+    <div>
       <MonthlyStratyStats year={2024} month={9} />
     </div>
   );

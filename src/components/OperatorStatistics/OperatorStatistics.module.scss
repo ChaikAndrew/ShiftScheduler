@@ -1,91 +1,152 @@
-/* OperatorStatistics.module.scss */
-
 .container {
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.topbar {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
 }
 
-.header {
-  text-align: center;
-
-  margin-bottom: 15px;
+.pageTitle {
+  font-size: 18px;
+  font-weight: 800;
+  color: #222;
 }
 
-.viewTypeSelection {
+.pill {
+  background: #e8f0ff;
+  color: #1e40af;
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.controls {
   display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: center;
+
+  label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-right: 8px;
+  }
 }
 
-.dateSelection {
+.viewType {
   display: flex;
-  justify-content: center;
-  margin-bottom: 15px;
+  gap: 16px;
+
+  input {
+    margin-right: 4px;
+  }
 }
 
-.dateInput,
-.monthInput {
-  padding: 5px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.datePicker {
+  input {
+    padding: 6px 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: white;
+  }
 }
 
-.operatorSelection {
-  all: unset;
-  text-align: center;
-  margin-bottom: 20px;
+.operatorSelect {
+  select {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: white;
+    font-size: 0.95rem;
+    min-width: 180px;
+  }
 }
 
-.operatorDropdown {
-  padding: 5px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.results {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
-.resultTables {
-  margin-top: 20px;
-}
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  flex: 1 1 300px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
-.tableContainer {
-  margin-bottom: 20px;
+  h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  text-align: left;
-  table-layout: fixed; /* Фіксує ширину колонок */
+
+  th {
+    text-align: left;
+    background: #f1f5f9;
+    padding: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  td {
+    padding: 2px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.9rem;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+    font-weight: 600;
+    background: #f9fafb;
+  }
 }
 
-.table th,
-.table td {
-  border: 1px solid #ddd;
-  padding: 5px;
-  text-align: center;
-  white-space: nowrap; /* Запобігає переносу тексту */
-  overflow: hidden;
-  text-overflow: ellipsis; /* Обрізає довгий текст */
+.noDataMessage {
+  padding: 12px;
+  background: #fff3cd;
+  color: #664d03;
+  border-radius: 8px;
+  flex: 1 1 100%;
 }
 
-/* Встановлення однакової ширини для кожного стовпця */
-.table th:nth-child(1),
-.table td:nth-child(1) {
-  width: 20%;
-} /* Task */
-.table th:nth-child(2),
-.table td:nth-child(2) {
-  width: 20%;
-} /* Quantity */
+.skeletonWrapper {
+  width: 100%;
+}
 
-.customMonthPicker {
-  padding: 5px;
-  text-align: center;
-  border-radius: 5px;
-  border: 1px solid rgb(177, 177, 177);
-  outline: none;
+.alertError {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.operatorSelection {
+  position: relative; // щоб працювало з z-index
+  z-index: 10; // піднімає селект над іншими елементами
+}
+
+.operatorDropdown {
+  position: relative;
+  z-index: 1000; // максимально піднімаємо
+  background: white;
+}
+
+/* Якщо select в контейнері з overflow, дозволяємо випасти */
+:global(.operatorSelection) {
+  overflow: visible !important;
 }

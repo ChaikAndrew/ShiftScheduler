@@ -45,21 +45,15 @@ const MonthlyStratyStats = () => {
       if (mode === "day" && !date) return;
       setLoading(true);
       try {
-        let url = "";
         const encodedShift = encodeURIComponent(selectedShift);
-
         const baseURL = "https://braki-api.vercel.app/api";
         const endpoint =
           mode === "month"
             ? `${baseURL}/straties-filtered?year=${year}&month=${month}`
             : `${baseURL}/straties-filtered?date=${date}&shift=${encodedShift}`;
 
-        console.log("🌐 Fetching from:", endpoint); // 👉 URL перевірка
-
         const res = await fetch(endpoint);
         const data = await res.json();
-
-        console.log("✅ Fetched straty data:", data); // 👉 Дані перевірка
 
         setStraty(data);
         calculate(data);
@@ -114,192 +108,248 @@ const MonthlyStratyStats = () => {
   };
 
   return (
-    <div>
-      <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
-        <select value={mode} onChange={(e) => setMode(e.target.value)}>
-          <option value="day">By day</option>
-          <option value="month">By month</option>
-        </select>
+    <div className={s.container}>
+      {/* Topbar summary pills */}
+      <div className={s.topbar}>
+        <div className={s.pills}>
+          <span className={s.pill}>
+            Mode <strong>{mode === "month" ? "Month" : "Day"}</strong>
+          </span>
+          <span className={s.pill}>
+            {mode === "month" ? "Period" : "Date"}{" "}
+            <strong>
+              {mode === "month" ? `${months[month - 1]} ${year}` : date}
+            </strong>
+          </span>
+          {mode === "day" && (
+            <span className={s.pill}>
+              Shift <strong>{selectedShift}</strong>
+            </span>
+          )}
+        </div>
+
+        <div className={s.badgesRight}>
+          <span className={s.totalBadge}>
+            Total records <strong>{totalLosses}</strong>
+          </span>
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div className={s.filters}>
+        <label className={s.selectWrap}>
+          <span>Mode</span>
+          <select value={mode} onChange={(e) => setMode(e.target.value)}>
+            <option value="day">By day</option>
+            <option value="month">By month</option>
+          </select>
+        </label>
 
         {mode === "month" && (
           <>
-            <select
-              value={month}
-              onChange={(e) => setMonth(parseInt(e.target.value))}
-            >
-              {months.map((name, index) => (
-                <option key={index} value={index + 1}>
-                  {name}
-                </option>
-              ))}
-            </select>
+            <label className={s.selectWrap}>
+              <span>Month</span>
+              <select
+                value={month}
+                onChange={(e) => setMonth(parseInt(e.target.value))}
+              >
+                {months.map((name, index) => (
+                  <option key={index} value={index + 1}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-            <select
-              value={year}
-              onChange={(e) => setYear(parseInt(e.target.value))}
-            >
-              {[2023, 2024, 2025].map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
+            <label className={s.selectWrap}>
+              <span>Year</span>
+              <select
+                value={year}
+                onChange={(e) => setYear(parseInt(e.target.value))}
+              >
+                {[2023, 2024, 2025].map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+            </label>
           </>
         )}
 
         {mode === "day" && (
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
-        )}
+          <>
+            <div className={s.inlineField}>
+              <input
+                className={s.inputDate}
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+            </div>
 
-        {mode === "day" && (
-          <select
-            value={selectedShift}
-            onChange={(e) => setSelectedShift(e.target.value)}
-          >
-            <option value="1 ZMIANA">Shift 1</option>
-            <option value="2 ZMIANA">Shift 2</option>
-            <option value="3 ZMIANA">Shift 3</option>
-          </select>
+            <label className={s.selectWrap}>
+              <span>Shift</span>
+              <select
+                value={selectedShift}
+                onChange={(e) => setSelectedShift(e.target.value)}
+              >
+                <option value="1 ZMIANA">Shift 1</option>
+                <option value="2 ZMIANA">Shift 2</option>
+                <option value="3 ZMIANA">Shift 3</option>
+              </select>
+            </label>
+          </>
         )}
       </div>
 
-      <h2>
-        Showing statistics for{" "}
-        {mode === "month" ? `${months[month - 1]} ${year}` : `${date}`}
-      </h2>
-      <p></p>
-
-      <table className={s.dataTable}>
-        <thead>
-          <tr>
-            <th>Total records:</th>
-            <th>POD</th>
-            <th>POF</th>
-            <th>ZLECENIE</th>
-            <th>BLUZA</th>
-            <th>T-SHIRT</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>
-              All Machines: <span className={s.redCount}>{totalLosses}</span>
-            </td>
-            <td>{totalAggregateValues.pod}</td>
-            <td>{totalAggregateValues.pof}</td>
-            <td>{totalAggregateValues.zlecenie}</td>
-            <td>{totalAggregateValues.bluza}</td>
-            <td>{totalAggregateValues.tshirt}</td>
-          </tr>
-        </tbody>
-
-        <thead>
-          <tr>
-            <th colSpan="6">Machines (DTG)</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Object.keys(machineStats)
-            .sort()
-            .map((machine) => (
-              <tr key={machine}>
-                <td colSpan="1">
-                  <strong>{machine}</strong>:{" "}
-                  <span className={s.redCount}>
-                    {machineStats[machine].TOTAL}
-                  </span>
-                </td>
-                <td colSpan="1">{machineStats[machine].POD}</td>
-                <td colSpan="1">{machineStats[machine].POF}</td>
-                <td colSpan="1">{machineStats[machine].ZLECENIE}</td>
-                <td colSpan="1">{machineStats[machine].BLUZA}</td>
-                <td colSpan="1">{machineStats[machine].TSHIRT}</td>
-              </tr>
-            ))}
-        </tbody>
-
-        <thead>
-          <tr>
-            <th colSpan="6">Loss reasons (POVOD)</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td colSpan="6">
-              {Object.entries(povodStats)
-                .sort(([, a], [, b]) => b - a)
-                .map(([reason, count], index, array) => (
-                  <span key={reason} className={ets.reasonDescription}>
-                    {reason.toUpperCase()}:{" "}
-                    <span className={index < 3 ? s.redCount : " "}>
-                      {count}
-                    </span>
-                    {index !== array.length - 1 && ", "}
-                    <div className={ets.tooltip}>
-                      {povodDescription[reason] || "Опис відсутній"}
-                    </div>
-                  </span>
-                ))}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      {mode === "day" && (
-        <>
-          <h3>All Loss Records</h3>
+      {/* Totals table */}
+      <div className={s.card}>
+        <div className={s.tableWrap}>
           <table className={s.dataTable}>
             <thead>
               <tr>
-                <th>ZMIANA</th>
-                <th>№ DTG</th>
-                <th>KOD KRESKOWY / NR ZLECENIA</th>
-                <th>POF / POD / HURT</th>
-                <th>BLUZA / T-SHIRT</th>
-                <th>MODEL</th>
-                <th>POVOD</th>
-                <th>GODZINA</th>
-                <th>DATA</th>
+                <th>Total records:</th>
+                <th>POD</th>
+                <th>POF</th>
+                <th>ZLECENIE</th>
+                <th>BLUZA</th>
+                <th>T-SHIRT</th>
               </tr>
             </thead>
             <tbody>
-              {[...straty]
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                .map((item, index) => {
-                  const time = new Date(item.createdAt).toLocaleTimeString(
-                    "pl-PL"
-                  );
-                  const day = new Date(item.createdAt).toLocaleDateString(
-                    "pl-PL"
-                  );
-                  return (
-                    <tr key={index}>
-                      <td>{item.zmiana}</td>
-                      <td>{item.number_dtg}</td>
-                      <td>{item.kod_kreskowy_nr_zlecenia}</td>
-                      <td>{item.pof_pod_hurt}</td>
-                      <td>{item.bluza_t_shirt}</td>
-                      <td>{item.model}</td>
-                      <td
-                        style={{ cursor: "pointer" }}
-                        className={ets.reasonDescription}
-                      >
-                        {item.povod}
-                        <div className={ets.tooltip}>
-                          {povodDescription[item.povod] || "Опис відсутній"}
-                        </div>
+              <tr>
+                <td>
+                  All Machines:{" "}
+                  <span className={s.redCount}>{totalLosses}</span>
+                </td>
+                <td>{totalAggregateValues.pod}</td>
+                <td>{totalAggregateValues.pof}</td>
+                <td>{totalAggregateValues.zlecenie}</td>
+                <td>{totalAggregateValues.bluza}</td>
+                <td>{totalAggregateValues.tshirt}</td>
+              </tr>
+            </tbody>
+
+            <thead>
+              <tr>
+                <th colSpan="6">Machines (DTG)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <tr>
+                  <td colSpan="6" className={s.loadingRow}>
+                    Loading…
+                  </td>
+                </tr>
+              ) : (
+                Object.keys(machineStats)
+                  .sort()
+                  .map((machine) => (
+                    <tr key={machine}>
+                      <td>
+                        <strong>{machine}</strong>:{" "}
+                        <span className={s.redCount}>
+                          {machineStats[machine].TOTAL}
+                        </span>
                       </td>
-                      <td>{time}</td>
-                      <td>{day}</td>
+                      <td>{machineStats[machine].POD}</td>
+                      <td>{machineStats[machine].POF}</td>
+                      <td>{machineStats[machine].ZLECENIE}</td>
+                      <td>{machineStats[machine].BLUZA}</td>
+                      <td>{machineStats[machine].TSHIRT}</td>
                     </tr>
-                  );
-                })}
+                  ))
+              )}
+            </tbody>
+
+            <thead>
+              <tr>
+                <th colSpan="6">Loss reasons (POVOD)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td colSpan="6">
+                  {Object.entries(povodStats)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([reason, count], index, array) => (
+                      <span key={reason} className={ets.reasonDescription}>
+                        {reason.toUpperCase()}:{" "}
+                        <span className={index < 3 ? s.redCount : " "}>
+                          {count}
+                        </span>
+                        {index !== array.length - 1 && ", "}
+                        <div className={ets.tooltip}>
+                          {povodDescription[reason] || "Опис відсутній"}
+                        </div>
+                      </span>
+                    ))}
+                </td>
+              </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {mode === "day" && (
+        <>
+          <h3 className={s.sectionTitle}>All Loss Records</h3>
+          <div className={s.card}>
+            <div className={s.tableWrap}>
+              <table className={s.dataTable}>
+                <thead>
+                  <tr>
+                    <th>ZMIANA</th>
+                    <th>№ DTG</th>
+                    <th>KOD KRESKOWY / NR ZLECENIA</th>
+                    <th>POF / POD / HURT</th>
+                    <th>BLUZA / T-SHIRT</th>
+                    <th>MODEL</th>
+                    <th>POVOD</th>
+                    <th>GODZINA</th>
+                    <th>DATA</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...straty]
+                    .sort(
+                      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                    )
+                    .map((item, index) => {
+                      const time = new Date(item.createdAt).toLocaleTimeString(
+                        "pl-PL"
+                      );
+                      const day = new Date(item.createdAt).toLocaleDateString(
+                        "pl-PL"
+                      );
+                      return (
+                        <tr key={index}>
+                          <td>{item.zmiana}</td>
+                          <td>{item.number_dtg}</td>
+                          <td>{item.kod_kreskowy_nr_zlecenia}</td>
+                          <td>{item.pof_pod_hurt}</td>
+                          <td>{item.bluza_t_shirt}</td>
+                          <td>{item.model}</td>
+                          <td
+                            className={ets.reasonDescription}
+                            style={{ cursor: "pointer" }}
+                          >
+                            {item.povod}
+                            <div className={ets.tooltip}>
+                              {povodDescription[item.povod] || "Опис відсутній"}
+                            </div>
+                          </td>
+                          <td>{time}</td>
+                          <td>{day}</td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </>
       )}
     </div>

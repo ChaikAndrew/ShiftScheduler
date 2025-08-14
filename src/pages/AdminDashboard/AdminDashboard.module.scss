@@ -1,147 +1,322 @@
-.dashboardContainer {
+/* ====== Layout ====== */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px;
+  display: grid;
+  gap: 16px;
+}
+
+/* ====== Topbar ====== */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: #111827;
+}
+.pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  background: #fafafa;
+  color: #333;
+  font-size: 13px;
+}
+.pill strong {
+  font-weight: 800;
+}
+
+/* ====== Cards / Columns ====== */
+.grid {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
-  font-family: "Arial", sans-serif;
-  background-color: #f7f7f7;
-  min-height: 100vh;
+  gap: 20px;
 }
 
-.roleSection {
-  margin: 20px 0;
-  padding: 20px;
+.card {
+  width: 100%;
   background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 1000px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
+.inner {
+  width: 90%;
+  margin-inline: auto;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid #eef0f2;
+}
 .roleTitle {
-  font-size: 1.4rem;
-
-  color: #333;
-  text-align: left;
-  margin-bottom: 15px;
+  margin: 0;
+  padding: 10px 12px; /* відступи зліва і зверху/знизу */
+  font-size: 18px;
+  font-weight: 800;
 }
 
-.userTable {
+.cardBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 10px 0;
+}
+
+/* ====== Tables ====== */
+.tableWrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-gutter: stable both-edges;
+}
+
+.table {
   width: 100%;
-  border-collapse: collapse;
+  table-layout: fixed; /* стабільні колонки для цих таблиць */
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
 }
 
-.userTable th,
-.userTable td {
-  border: 1px solid #e0e0e0;
-  color: #333;
-  padding: 5px;
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   text-align: left;
+  background: #f9fafb;
+  color: #111827;
+  padding: 10px;
+  border-bottom: 1px solid #eef0f2;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.table tbody td {
+  padding: 10px;
+  border-bottom: 1px solid #f2f3f5;
+  white-space: nowrap;
+}
+.table tbody tr:nth-child(odd) td {
+  background: #fff;
+}
+.table tbody tr:nth-child(even) td {
+  background: #fcfcfd;
 }
 
-.userTable th {
-  background-color: #bcbcbc;
-
-  text-transform: uppercase;
+.idCol {
+  width: 40%;
+}
+.nameCol {
+  width: 30%;
+}
+.roleCol {
+  width: 14%;
+}
+.actionsCol {
+  width: 16%;
+  text-align: right;
+  white-space: nowrap;
 }
 
-.userTable tr:hover {
-  background-color: #e6f7ffb5;
-  transition: background-color 0.3s ease;
+.actionsCell {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
+.roleBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #1e3a8a;
+  border: 1px solid #dbe3ff;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ====== Buttons ====== */
+.btn {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.02s ease, box-shadow 0.15s ease;
+}
+.btn:hover {
+  background: #fafafa;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btnSmall {
+  padding: 4px 8px;
+}
+
+.btnPrimary {
+  background: #e8f0ff;
+  color: #1e40af;
+  border-color: #cfe0ff;
+  font-weight: 700;
+}
+.btnPrimary:hover {
+  background: #dfeaff;
+}
+
+.btnDanger {
+  background: #fff5f5;
+  color: #8a1f1f;
+  border-color: #ffd6d6;
+  font-weight: 700;
+}
+.btnDanger:hover {
+  background: #ffe9e9;
+}
+
+.btnGhost {
+  background: #fff;
+}
+
+/* ====== Alerts ====== */
+.alertError {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #ffd6d6;
+  background: #fff5f5;
+  color: #8a1f1f;
+  font-size: 13px;
+}
+
+/* ====== Modal (shared) ====== */
 .modalOverlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.45);
+  display: grid;
+  place-items: center;
   z-index: 1000;
+  padding: 16px;
 }
-
-.modalContent {
+.modalCard {
+  width: 100%;
+  max-width: 520px;
   background: #fff;
-  padding: 30px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  animation: pop 0.12s ease-out;
+}
+@keyframes pop {
+  from {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.modalHeader {
+  padding: 12px;
+  border-bottom: 1px solid #eef0f2;
+}
+.modalBody {
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+.modalActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 12px;
+  border-top: 1px solid #eef0f2;
+}
+
+/* ====== Inputs ====== */
+.input {
+  width: 100%;
+  padding: 8px 10px;
   border-radius: 10px;
-  width: 500px;
-  max-width: 100%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  font-size: 13px;
+}
+.input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: #93c5fd;
 }
 
-.modalContent h2 {
-  font-size: 1.6rem;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-button {
-  border: none;
-
-  cursor: pointer;
-  font-size: 1rem;
-  color: #333;
-  border: none;
-  background-color: inherit;
-  position: relative;
-  font: inherit;
-
-  transition: background-color 0.4s ease, color 0.4s ease;
-}
-
-// button::after {
-//   content: "";
-//   position: absolute;
-//   bottom: -3px;
-//   left: 50%;
-//   width: 0;
-//   height: 2px;
-//   background-color: #ffc658;
-//   transition: width 0.4s ease, left 0.4s ease;
-//   transform-origin: center;
-// }
-
-// button:hover::after {
-//   width: 100%;
-//   left: 0;
-// }
-
-button:disabled {
-  background-color: #ccc;
-  color: #666;
-  cursor: not-allowed;
-}
-
-.addButton {
-  color: #333;
-  border: none;
-  background-color: inherit;
-  margin-top: 5px;
-  padding: 5px 10px;
-  font-size: 1.2rem;
-
-  transition: background-color 0.3s ease;
-}
-
-.modalActions button:first-child {
-  background-color: #28a745;
-  color: white;
-
-  &:hover {
-    background-color: #218838;
+/* ====== Responsive tweaks ====== */
+@media (max-width: 900px) {
+  .idCol {
+    width: 48%;
+  }
+  .nameCol {
+    width: 28%;
+  }
+  .roleCol {
+    width: 12%;
+  }
+  .actionsCol {
+    width: 12%;
+  }
+  .table thead th,
+  .table tbody td {
+    padding: 8px;
   }
 }
-
-.modalActions button:last-child {
-  background-color: #dc3545;
-  color: white;
-
-  &:hover {
-    background-color: #c82333;
+@media (max-width: 640px) {
+  .card {
+    width: 100%;
   }
+  .inner {
+    width: 100%;
+  } /* по всій ширині на мобі */
 }

@@ -1,25 +1,163 @@
-.dashboardContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background-color: #f5f5f5;
-  padding: 20px;
-  box-sizing: border-box;
+/* ====== Layout ====== */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px;
+  display: grid;
+  gap: 16px;
+  background: #f6f7f9;
 }
 
-.logoutButton {
-  background-color: #ff4d4f;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  font-size: 1rem;
-  border-radius: 5px;
+/* ====== Topbar ====== */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: #111827;
+}
+.pills {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  background: #fafafa;
+  color: #333;
+  font-size: 13px;
+}
+.pill strong {
+  font-weight: 800;
+}
+
+/* ====== Cards ====== */
+.card {
+  width: 90%;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid #eef0f2;
+}
+.roleTitle {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #111827;
+}
+.cardBody {
+  padding: 12px 14px;
+}
+.note {
+  margin: 0;
+  color: #374151;
+  font-size: 14px;
+}
+
+/* ====== Buttons ====== */
+.btn {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 13px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.02s ease;
+}
+.btn:hover {
+  background: #fafafa;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btnDanger {
+  background: #fff5f5;
+  color: #8a1f1f;
+  border-color: #ffd6d6;
+  font-weight: 700;
+}
+.btnDanger:hover {
+  background: #ffe9e9;
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 640px) {
+  .card {
+    width: 100%;
+  }
+  .title {
+    font-size: 18px;
+  }
+}
+
+/* Кнопка Logout */
+.btnLogout {
+  background: #fff5f5;
+  color: #b91c1c; /* насичений червоний */
+  border-color: #fecaca;
+  font-weight: 700;
+  border: 1px solid #fecaca;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.02s ease;
 
   &:hover {
-    background-color: #e33e3e;
+    background: #fee2e2;
   }
+
+  &:active {
+    transform: translateY(1px);
+  }
+}
+/* Контейнер для привітання та кнопки */
+.welcomeCard {
+  width: 60%;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+  padding: 14px;
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.welcomeText {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
 }

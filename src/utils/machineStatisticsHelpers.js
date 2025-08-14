@@ -13,7 +13,8 @@
  * - workingTime: загальний робочий час
  * - downtime: загальний час простою
  * - downtimeReasons: об'єкт з причинами простою та їх тривалістю
- * - POD, POF, Zlecenie, Sample, Test: кількість кожного типу завдань
+ * - POD, POF, Zlecenie, Test: кількість кожного типу завдань
+ * - products: { [productName]: summedQuantity }
  */
 export const getMachineStatistics = (
   entries,
@@ -39,11 +40,11 @@ export const getMachineStatistics = (
     if (!machineEntries.length) return null;
 
     const taskSummary = { POD: 0, POF: 0, Zlecenie: 0, Test: 0 };
-    //  const taskSummary = { POD: 0, POF: 0, Zlecenie: 0, Sample: 0, Test: 0 };
     let totalQuantity = 0;
     let workingTime = 0;
     let downtime = 0;
     const downtimeReasons = {};
+    const products = {}; // 👈 Агрегація продуктів (не впливає на існуючу логіку)
 
     machineEntries.forEach((entry) => {
       const task = entry.task;
@@ -51,6 +52,10 @@ export const getMachineStatistics = (
       const entryWorkingTime = parseInt(entry.workingTime, 10) || 0;
       const entryDowntime = parseInt(entry.downtime, 10) || 0;
       const reasonDescription = entry.reason || "Unknown";
+
+      // 👇 збір продуктів
+      const prod = (entry.product ?? "").toString().trim();
+      if (prod) products[prod] = (products[prod] || 0) + quantity;
 
       if (task in taskSummary) {
         taskSummary[task] += quantity;
@@ -75,6 +80,7 @@ export const getMachineStatistics = (
       workingTime,
       downtime,
       downtimeReasons,
+      products, // 👈 додано
       ...taskSummary,
     };
   });

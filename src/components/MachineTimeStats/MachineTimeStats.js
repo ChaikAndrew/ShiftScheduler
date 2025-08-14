@@ -7,6 +7,9 @@ import "react-loading-skeleton/dist/skeleton.css";
 import CustomDatePicker from "../CustomDatePicker/CustomDatePicker";
 
 import style from "./MachineTimeStats.module.scss";
+
+const SHIFT_LABEL = { first: "First", second: "Second", third: "Third" };
+
 const MachineTimeStats = ({ machines = [] }) => {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
@@ -58,55 +61,127 @@ const MachineTimeStats = ({ machines = [] }) => {
     return "Unknown";
   }, [enrichedEntries, selectedShift, selectedDate]);
 
+  const totalWorking = useMemo(
+    () => (statistics || []).reduce((sum, s) => sum + (s.workingTime || 0), 0),
+    [statistics]
+  );
+  const totalDowntime = useMemo(
+    () => (statistics || []).reduce((sum, s) => sum + (s.downtime || 0), 0),
+    [statistics]
+  );
+
+  const noData =
+    !loading &&
+    !error &&
+    selectedDate &&
+    selectedShift &&
+    (!statistics.length || (totalWorking === 0 && totalDowntime === 0));
+
   const formatTime = (minutes) => {
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
+    const h = Math.floor((minutes || 0) / 60);
+    const m = (minutes || 0) % 60;
     return `${h}h ${m}m`;
   };
 
   return (
     <div className={style.container}>
-      <h2>Machine Time Stats</h2>
+      {/* Top bar pills */}
+      <div className={style.topbar}>
+        <div className={style.pills}>
+          <span className={style.pill}>
+            Date <strong>{selectedDate}</strong>
+          </span>
+          <span className={style.pill}>
+            Shift{" "}
+            <strong>{selectedShift ? SHIFT_LABEL[selectedShift] : "—"}</strong>
+          </span>
+          <span className={style.pill}>
+            Leader <strong>{leader}</strong>
+          </span>
+        </div>
 
-      <div>
-        <div style={{ marginBottom: "1rem" }}>
+        <div className={style.badgesRight}>
+          <span className={`${style.totalBadge} ${style.badgeWorking}`}>
+            Working <strong>{formatTime(totalWorking)}</strong>
+          </span>
+          <span className={`${style.totalBadge} ${style.badgeDowntime}`}>
+            Downtime <strong>{formatTime(totalDowntime)}</strong>
+          </span>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className={style.filters}>
+        <div className={style.inlineField}>
           <CustomDatePicker
             selectedDate={selectedDate}
             onDateChange={setSelectedDate}
           />
         </div>
 
-        <label>
-          Select Shift:
+        <label className={style.selectWrap}>
+          <span>Shift</span>
           <select
             value={selectedShift}
             onChange={(e) => setSelectedShift(e.target.value)}
           >
-            <option value="">Select Shift</option>
-            <option value="first">1st Shift</option>
-            <option value="second">2nd Shift</option>
-            <option value="third">3rd Shift</option>
+            <option value="">Select</option>
+            <option value="first">1st</option>
+            <option value="second">2nd</option>
+            <option value="third">3rd</option>
           </select>
         </label>
       </div>
 
       {loading ? (
-        <div>
-          <Skeleton height={40} width={250} style={{ margin: "1rem 0" }} />
-          <Skeleton height={30} count={5} />
+        <div className={style.card}>
+          <div className={style.tableWrap}>
+            <table className={style.table}>
+              <thead>
+                <tr>
+                  <th>Machine</th>
+                  <th>Working Time</th>
+                  <th>Downtime</th>
+                  <th>Downtime Reasons</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...Array(5)].map((_, idx) => (
+                  <tr key={idx}>
+                    <td>
+                      <Skeleton height={18} />
+                    </td>
+                    <td>
+                      <Skeleton height={18} />
+                    </td>
+                    <td>
+                      <Skeleton height={18} />
+                    </td>
+                    <td>
+                      <Skeleton height={18} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : error ? (
-        <p>Помилка: {error.message}</p>
+        <div className={style.alertError}>Помилка: {error.message}</div>
       ) : !selectedDate || !selectedShift ? (
-        <p>Select a date and shift to view statistics. </p>
+        <div className={style.alertInfo}>
+          Select a date and shift to view statistics.
+        </div>
+      ) : noData ? (
+        <div className={style.alertNote}>
+          Data for <strong>{selectedDate}</strong>,{" "}
+          <strong>{SHIFT_LABEL[selectedShift]} shift</strong> is not available
+          in the database.
+        </div>
       ) : (
-        <>
-          <p>
-            <strong>Shift Leader:</strong> {leader}
-          </p>
-
-          {statistics.length > 0 ? (
-            <table>
+        <div className={style.card}>
+          <div className={style.tableWrap}>
+            <table className={style.table}>
               <thead>
                 <tr>
                   <th>Machine</th>
@@ -118,26 +193,31 @@ const MachineTimeStats = ({ machines = [] }) => {
               <tbody>
                 {statistics.map((stat) => (
                   <tr key={stat.machine}>
-                    <td>{stat.machine}</td>
+                    <td className={style.machineCell}>{stat.machine}</td>
                     <td>{formatTime(stat.workingTime)}</td>
-                    <td>{formatTime(stat.downtime)}</td>
+                    <td className={style.downtimeCell}>
+                      {formatTime(stat.downtime)}
+                    </td>
                     <td>
-                      {Object.entries(stat.downtimeReasons).map(
-                        ([reason, time]) => (
-                          <div key={reason}>
-                            {reason}: {formatTime(time)}
-                          </div>
-                        )
-                      )}
+                      <div className={style.reasonsWrap}>
+                        {Object.entries(stat.downtimeReasons).map(
+                          ([reason, time]) => (
+                            <span key={reason} className={style.reasonPill}>
+                              <span className={style.reasonText}>{reason}</span>
+                              <span className={style.reasonTime}>
+                                {formatTime(time)}
+                              </span>
+                            </span>
+                          )
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          ) : (
-            <p>No data found for this date and shift.</p>
-          )}
-        </>
+          </div>
+        </div>
       )}
     </div>
   );

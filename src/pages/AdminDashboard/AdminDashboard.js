@@ -28,9 +28,7 @@ const AdminDashboard = () => {
     const fetchUsers = async (url) => {
       try {
         const response = await axios.get(`${url}/auth/users`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           timeout: 5000,
         });
         setUsers(response.data);
@@ -54,14 +52,12 @@ const AdminDashboard = () => {
         clearTimeout(timeout);
 
         if (response.ok) {
-          console.log("Localhost available, switching to localhost.");
           setBaseUrl("http://localhost:4040");
           fetchUsers("http://localhost:4040");
         } else {
           fetchUsers(baseUrl);
         }
       } catch {
-        console.log("Localhost not available, using Vercel.");
         fetchUsers(baseUrl);
       }
     };
@@ -80,9 +76,7 @@ const AdminDashboard = () => {
     }
     try {
       await axios.post(`${baseUrl}/auth/register`, newUser, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         timeout: 5000,
       });
       setNewUser({
@@ -111,21 +105,15 @@ const AdminDashboard = () => {
       alert("Passwords do not match.");
       return;
     }
-
     const updateData = {
       username: editingUser.username,
       role: editingUser.role,
     };
-
-    if (editPassword) {
-      updateData.password = editPassword;
-    }
+    if (editPassword) updateData.password = editPassword;
 
     try {
       await axios.put(`${baseUrl}/auth/update/${editingUser._id}`, updateData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         timeout: 5000,
       });
       setIsEditing(false);
@@ -140,9 +128,7 @@ const AdminDashboard = () => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
       await axios.delete(`${baseUrl}/auth/delete/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         timeout: 5000,
       });
       window.location.reload();
@@ -154,67 +140,123 @@ const AdminDashboard = () => {
 
   const renderModal = (title, content, onClose, onSave) => (
     <div className={styles.modalOverlay}>
-      <div className={styles.modalContent}>
-        <h2>{title}</h2>
-        {content}
+      <div className={styles.modalCard}>
+        <div className={styles.modalHeader}>
+          <h2>{title}</h2>
+        </div>
+        <div className={styles.modalBody}>{content}</div>
         <div className={styles.modalActions}>
-          <button onClick={onSave}>Save</button>
-          <button onClick={onClose}>Cancel</button>
+          <button
+            className={`${styles.btn} ${styles.btnPrimary}`}
+            onClick={onSave}
+          >
+            Save
+          </button>
+          <button
+            className={`${styles.btn} ${styles.btnGhost}`}
+            onClick={onClose}
+          >
+            Cancel
+          </button>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className={styles.dashboardContainer}>
-      <h1>Admin Dashboard</h1>
-      <OperatorManager baseUrl={baseUrl} />
-      {error && <p className={styles.errorMessage}>{error}</p>}
-
-      <button onClick={() => setIsAdding(true)} className={styles.addButton}>
-        Add User to Login System
-      </button>
-
-      {["admin", "leader", "operator"].map((role) => (
-        <div key={role} className={styles.roleSection}>
-          <h3 className={styles.roleTitle}>
-            {role.charAt(0).toUpperCase() + role.slice(1)}s
-          </h3>
-          <table className={styles.userTable}>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Role</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users
-                .filter((user) => user.role === role)
-                .map((user) => (
-                  <tr key={user._id}>
-                    <td>{user._id}</td>
-                    <td>{user.username}</td>
-                    <td>{user.role}</td>
-                    <td>
-                      <button onClick={() => handleEditUser(user)}>Edit</button>
-                      <button onClick={() => handleDeleteUser(user._id)}>
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+    <div className={styles.container}>
+      {/* Topbar */}
+      <div className={styles.topbar}>
+        <h1 className={styles.title}>Admin Dashboard</h1>
+        <div className={styles.pills}>
+          <span className={styles.pill}>
+            Users <strong>{users.length}</strong>
+          </span>
+          <span className={styles.pill}>
+            API{" "}
+            <strong>
+              {baseUrl.includes("localhost") ? "Local" : "Vercel"}
+            </strong>
+          </span>
         </div>
-      ))}
+      </div>
 
+      {error && <div className={styles.alertError}>{error}</div>}
+
+      {/* Operator manager block */}
+      <div className={styles.card}>
+        <div className={`${styles.cardHeader} ${styles.inner}`}>
+          <button
+            className={`${styles.btn} ${styles.btnPrimary}`}
+            onClick={() => setIsAdding(true)}
+          >
+            + Add User to Login System
+          </button>
+        </div>
+        <div className={`${styles.cardBody} ${styles.inner}`}>
+          <OperatorManager baseUrl={baseUrl} />
+        </div>
+      </div>
+
+      {/* Users by role */}
+      <div className={styles.grid}>
+        {["admin", "leader", "operator"].map((role) => (
+          <div key={role} className={styles.card}>
+            <div className={styles.cardHeader}>
+              <h3 className={styles.roleTitle}>
+                {role.charAt(0).toUpperCase() + role.slice(1)}s
+              </h3>
+            </div>
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users
+                    .filter((user) => user.role === role)
+                    .map((user) => (
+                      <tr key={user._id}>
+                        <td className={styles.mono}>{user._id}</td>
+                        <td>{user.username}</td>
+                        <td>
+                          <span className={styles.roleBadge}>{user.role}</span>
+                        </td>
+                        <td className={styles.actionsCell}>
+                          <button
+                            className={`${styles.btn} ${styles.btnSmall}`}
+                            onClick={() => handleEditUser(user)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`}
+                            onClick={() => handleDeleteUser(user._id)}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Modals */}
       {isAdding &&
         renderModal(
           "Add New User",
           <>
             <input
+              className={styles.input}
               type="text"
               placeholder="Username"
               value={newUser.username}
@@ -223,6 +265,7 @@ const AdminDashboard = () => {
               }
             />
             <input
+              className={styles.input}
               type="password"
               placeholder="Password"
               value={newUser.password}
@@ -231,6 +274,7 @@ const AdminDashboard = () => {
               }
             />
             <input
+              className={styles.input}
               type="password"
               placeholder="Confirm Password"
               value={newUser.confirmPassword}
@@ -239,6 +283,7 @@ const AdminDashboard = () => {
               }
             />
             <select
+              className={styles.input}
               value={newUser.role}
               onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
             >
@@ -256,6 +301,7 @@ const AdminDashboard = () => {
           "Edit User",
           <>
             <input
+              className={styles.input}
               type="text"
               value={editingUser.username}
               onChange={(e) =>
@@ -263,18 +309,21 @@ const AdminDashboard = () => {
               }
             />
             <input
+              className={styles.input}
               type="password"
               placeholder="New Password (optional)"
               value={editPassword}
               onChange={(e) => setEditPassword(e.target.value)}
             />
             <input
+              className={styles.input}
               type="password"
               placeholder="Confirm New Password"
               value={editConfirmPassword}
               onChange={(e) => setEditConfirmPassword(e.target.value)}
             />
             <select
+              className={styles.input}
               value={editingUser.role}
               onChange={(e) =>
                 setEditingUser({ ...editingUser, role: e.target.value })

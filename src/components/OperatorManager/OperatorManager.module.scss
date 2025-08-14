@@ -1,51 +1,240 @@
-.dashboardContainer {
+/* ====== Layout ====== */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px;
+  display: grid;
+  gap: 16px;
+}
+
+/* Картка на всю ширину, звуження робимо всередині */
+.card {
+  width: 100%;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+/* Внутрішній звужений контейнер для рівного центру на 90% */
+.inner {
+  width: 90%;
+  margin-inline: auto;
+}
+
+.cardHeader {
+  display: flex;
   align-items: center;
-  padding: 20px;
-  font-family: "Arial", sans-serif;
-  background-color: #f7f7f7;
-  width: 100%;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 0; /* без бокових падінгів, вони у .inner */
+  border-bottom: 1px solid #eef0f2;
 }
-
-.roleSection {
-  margin: 20px 0;
-  padding: 20px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 1000px;
-}
-
 .roleTitle {
-  font-size: 1.4rem;
-
-  color: #333;
-  text-align: left;
-  margin-bottom: 15px;
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #111827;
 }
 
-.userTable {
+.cardBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 10px 0; /* також без бокових */
+}
+
+/* ====== Table ====== */
+.tableWrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto; /* скролиться лише таблиця */
+  scrollbar-gutter: stable both-edges; /* щоб скролбар не зсував ширину */
+}
+
+.table {
   width: 100%;
-  border-collapse: collapse;
+  table-layout: auto; /* ширини задаємо через <colgroup> у JSX */
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
 }
 
-.userTable th,
-.userTable td {
-  border: 1px solid #e0e0e0;
-  color: #333;
-  padding: 5px;
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   text-align: left;
+  background: #f9fafb;
+  color: #111827;
+  padding: 10px;
+  border-bottom: 1px solid #eef0f2;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
-.userTable th {
-  background-color: #bcbcbc;
-
-  text-transform: uppercase;
+.table tbody td {
+  padding: 10px;
+  border-bottom: 1px solid #f2f3f5;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
-.userTable tr:hover {
-  background-color: #e6f7ffb5;
-  transition: background-color 0.3s ease;
+.table tbody tr:nth-child(odd) td {
+  background: #fff;
+}
+.table tbody tr:nth-child(even) td {
+  background: #fcfcfd;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Праве вирівнювання для колонки дій */
+.actionsCol {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ====== Buttons ====== */
+.btn {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, transform 0.02s ease, box-shadow 0.15s ease;
+}
+.btn:hover {
+  background: #fafafa;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btnSmall {
+  padding: 4px 8px;
+}
+
+.btnPrimary {
+  background: #e8f0ff;
+  color: #1e40af;
+  border-color: #cfe0ff;
+  font-weight: 700;
+}
+.btnPrimary:hover {
+  background: #dfeaff;
+}
+
+.btnDanger {
+  background: #fff5f5;
+  color: #8a1f1f;
+  border-color: #ffd6d6;
+  font-weight: 700;
+}
+.btnDanger:hover {
+  background: #ffe9e9;
+}
+
+.btnGhost {
+  background: #fff;
+}
+
+/* ====== Inputs ====== */
+.input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  font-size: 13px;
+}
+.input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: #93c5fd;
+}
+
+/* ====== Modal ====== */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+  padding: 16px;
+}
+.modalCard {
+  width: 100%;
+  max-width: 520px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  animation: pop 0.12s ease-out;
+}
+@keyframes pop {
+  from {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.modalHeader {
+  padding: 12px;
+  border-bottom: 1px solid #eef0f2;
+}
+.modalBody {
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+}
+.modalActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 12px;
+  border-top: 1px solid #eef0f2;
+}
+
+/* ====== Responsive tweaks ====== */
+@media (max-width: 640px) {
+  .inner {
+    width: 100%;
+  }
+  .table thead th,
+  .table tbody td {
+    padding: 8px;
+  }
+}
+
+/* клітинка з діями: кнопки справа і з відступами */
+.actionsCol {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px; /* відстань між кнопками */
+  white-space: nowrap; /* щоб не переносились */
+}
+
+/* трішки щільніше на мобільних */
+@media (max-width: 640px) {
+  .actionsCol {
+    gap: 6px;
+  }
 }

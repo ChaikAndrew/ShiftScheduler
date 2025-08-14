@@ -145,7 +145,6 @@ const MonthlyOperatorStatistics = ({ operators }) => {
     });
 
   const operatorEfficiency = {};
-
   filteredEntries.forEach((entry) => {
     const { quantity, product } = entry;
     const operatorName = entry.operator?.trim();
@@ -201,10 +200,23 @@ const MonthlyOperatorStatistics = ({ operators }) => {
 
   return (
     <div className={style.container}>
-      <h2 className={style.pageTitle}>Monthly Operator Statistics</h2>
-      <div className={style.selection}>
-        <label>
-          Month:
+      {/* Topbar */}
+      <div className={style.topbar}>
+        <h2 className={style.pageTitle}>Monthly Operator Statistics</h2>
+        <div className={style.pills}>
+          <span className={style.pill}>
+            Month <strong>{formattedMonth}</strong>
+          </span>
+          <span className={style.pill}>
+            Year <strong>{selectedMonth.year}</strong>
+          </span>
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div className={style.controls}>
+        <label className={style.selectWrap}>
+          <span>Month</span>
           <select value={selectedMonth.month} onChange={handleMonthChange}>
             {Array.from({ length: 12 }, (_, i) => (
               <option key={i} value={i}>
@@ -214,8 +226,8 @@ const MonthlyOperatorStatistics = ({ operators }) => {
           </select>
         </label>
 
-        <label>
-          Year:
+        <label className={style.selectWrap}>
+          <span>Year</span>
           <select value={selectedMonth.year} onChange={handleYearChange}>
             {Array.from({ length: 5 }, (_, i) => (
               <option key={i} value={currentYear - 2 + i}>
@@ -228,11 +240,11 @@ const MonthlyOperatorStatistics = ({ operators }) => {
 
       {loading ? (
         <div className={style.skeletonWrapper}>
-          <Skeleton height={40} width={250} style={{ marginBottom: "1rem" }} />
-          <Skeleton height={30} count={8} />
+          <Skeleton height={36} width={260} style={{ marginBottom: 12 }} />
+          <Skeleton height={28} count={8} />
         </div>
       ) : error ? (
-        <p>Error: {error.message}</p>
+        <div className={style.alertError}>Error: {error.message}</div>
       ) : isDataAvailable ? (
         <>
           <ToggleBlock
@@ -244,28 +256,34 @@ const MonthlyOperatorStatistics = ({ operators }) => {
               <h3 className={style.title}>
                 Monthly Task Summary – {reportTitle}
               </h3>
-              <table className={style.table}>
-                <thead>
-                  <tr>
-                    <th>Operator</th>
-                    <th>Total</th>
-                    {tasks.map((task) => (
-                      <th key={task}>{task}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedMonthlyTotals.map((total) => (
-                    <tr key={total.operator}>
-                      <td>{total.operator}</td>
-                      <td>{total.total}</td>
-                      {tasks.map((task) => (
-                        <td key={task}>{total.taskSummary[task] || ""}</td>
+              <div className={style.card}>
+                <div className={style.tableWrap}>
+                  <table className={style.table}>
+                    <thead>
+                      <tr>
+                        <th>Operator</th>
+                        <th>Total</th>
+                        {tasks.map((task) => (
+                          <th key={task}>{task}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedMonthlyTotals.map((total) => (
+                        <tr key={total.operator}>
+                          <td className={style.operatorCell}>
+                            {total.operator}
+                          </td>
+                          <td className={style.totalCell}>{total.total}</td>
+                          {tasks.map((task) => (
+                            <td key={task}>{total.taskSummary[task] || ""}</td>
+                          ))}
+                        </tr>
                       ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
             <OperatorTaskBarChart data={taskChartData} />
           </ToggleBlock>
@@ -279,28 +297,34 @@ const MonthlyOperatorStatistics = ({ operators }) => {
               <h3 className={style.title}>
                 Monthly Product Summary – {reportTitle}
               </h3>
-              <table className={style.table}>
-                <thead>
-                  <tr>
-                    <th>Operator</th>
-                    {products.map((product) => (
-                      <th key={product}>{product}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedMonthlyTotals.map((total) => (
-                    <tr key={total.operator}>
-                      <td>{total.operator}</td>
-                      {products.map((product) => (
-                        <td key={product}>
-                          {total.productSummary[product] || ""}
-                        </td>
+              <div className={style.card}>
+                <div className={style.tableWrap}>
+                  <table className={style.table}>
+                    <thead>
+                      <tr>
+                        <th>Operator</th>
+                        {products.map((product) => (
+                          <th key={product}>{product}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sortedMonthlyTotals.map((total) => (
+                        <tr key={total.operator}>
+                          <td className={style.operatorCell}>
+                            {total.operator}
+                          </td>
+                          {products.map((product) => (
+                            <td key={product}>
+                              {total.productSummary[product] || ""}
+                            </td>
+                          ))}
+                        </tr>
                       ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
             <OperatorProductBarChart data={productChartData} />
           </ToggleBlock>
@@ -310,44 +334,49 @@ const MonthlyOperatorStatistics = ({ operators }) => {
             defaultOpen={false}
             tooltip="Table showing daily totals and average per day for each operator."
           >
-            {/* таблиця 1 */}
             <div className={style.section}>
               <h3 className={style.title}>
                 Daily Operator Statistics – {reportTitle}
               </h3>
-              <table className={style.table}>
-                <thead>
-                  <tr>
-                    <th>Operator</th>
-                    <th>Average per Day</th>
-                    {Array.from({ length: daysInMonth }, (_, i) => (
-                      <th key={i}>{i + 1}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedMonthlyTotals.map((total) => {
-                    const daysWithRecords = monthlyStatistics[
-                      total.operator
-                    ].filter((data) => data.total > 0).length;
-                    const averagePerDay =
-                      daysWithRecords > 0
-                        ? Math.round(total.total / daysWithRecords)
-                        : "0";
-                    return (
-                      <tr key={total.operator}>
-                        <td className={style.operatorCell}>{total.operator}</td>
-                        <td>{averagePerDay}</td>
-                        {monthlyStatistics[total.operator].map(
-                          (data, index) => (
-                            <td key={index}>{data.total || ""}</td>
-                          )
-                        )}
+              <div className={style.card}>
+                <div className={style.tableWrap}>
+                  <table className={style.table}>
+                    <thead>
+                      <tr>
+                        <th>Operator</th>
+                        <th>Average per Day</th>
+                        {Array.from({ length: daysInMonth }, (_, i) => (
+                          <th key={i}>{i + 1}</th>
+                        ))}
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                    </thead>
+                    <tbody>
+                      {sortedMonthlyTotals.map((total) => {
+                        const daysWithRecords = monthlyStatistics[
+                          total.operator
+                        ].filter((data) => data.total > 0).length;
+                        const averagePerDay =
+                          daysWithRecords > 0
+                            ? Math.round(total.total / daysWithRecords)
+                            : "0";
+                        return (
+                          <tr key={total.operator}>
+                            <td className={style.operatorCell}>
+                              {total.operator}
+                            </td>
+                            <td>{averagePerDay}</td>
+                            {monthlyStatistics[total.operator].map(
+                              (data, index) => (
+                                <td key={index}>{data.total || ""}</td>
+                              )
+                            )}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </ToggleBlock>
 
@@ -360,36 +389,42 @@ const MonthlyOperatorStatistics = ({ operators }) => {
               <h3 className={style.title}>
                 Operator Work Efficiency – {reportTitle}
               </h3>
-              <table className={style.table}>
-                <thead>
-                  <tr>
-                    <th>Operator</th>
-                    <th>Work Hours</th>
-                    <th>Total Products</th>
-                    <th>Average Speed (units/hr)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(operatorEfficiency).map(
-                    ([operator, data]) => (
-                      <tr key={operator}>
-                        <td>{operator}</td>
-                        <td>
-                          {formatTime(Math.round(data.totalWorkHours * 60))}
-                        </td>
-                        <td>{data.totalProducts}</td>
-                        <td>
-                          {data.totalWorkHours > 0
-                            ? Math.round(
-                                data.totalProducts / data.totalWorkHours
-                              )
-                            : "-"}
-                        </td>
+              <div className={style.card}>
+                <div className={style.tableWrap}>
+                  <table className={style.table}>
+                    <thead>
+                      <tr>
+                        <th>Operator</th>
+                        <th>Work Hours</th>
+                        <th>Total Products</th>
+                        <th>Average Speed (units/hr)</th>
                       </tr>
-                    )
-                  )}
-                </tbody>
-              </table>
+                    </thead>
+                    <tbody>
+                      {Object.entries(operatorEfficiency).map(
+                        ([operator, data]) => (
+                          <tr key={operator}>
+                            <td className={style.operatorCell}>{operator}</td>
+                            <td>
+                              {formatTime(Math.round(data.totalWorkHours * 60))}
+                            </td>
+                            <td className={style.totalCell}>
+                              {data.totalProducts}
+                            </td>
+                            <td>
+                              {data.totalWorkHours > 0
+                                ? Math.round(
+                                    data.totalProducts / data.totalWorkHours
+                                  )
+                                : "-"}
+                            </td>
+                          </tr>
+                        )
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </ToggleBlock>
 
@@ -402,46 +437,62 @@ const MonthlyOperatorStatistics = ({ operators }) => {
               <h3 className={style.title}>
                 Detailed Product Breakdown – {reportTitle}
               </h3>
-              <table className={style.table}>
-                <thead>
-                  <tr>
-                    <th>Operator</th>
-                    <th>Product</th>
-                    <th>Total</th>
-                    <th>Speed (units/hr)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(operatorEfficiency).map(
-                    ([operator, data]) => {
-                      const productDetails = Object.entries(
-                        data.productDetails
-                      ).filter(([_, val]) => val.total > 0);
+              <div className={style.card}>
+                <div className={style.tableWrap}>
+                  <table className={style.table}>
+                    <thead>
+                      <tr>
+                        <th>Operator</th>
+                        <th>Product</th>
+                        <th>Total</th>
+                        <th>Speed (units/hr)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(operatorEfficiency).map(
+                        ([operator, data]) => {
+                          const productDetails = Object.entries(
+                            data.productDetails
+                          ).filter(([_, val]) => val.total > 0);
 
-                      return productDetails.map(([product, val], index) => (
-                        <tr key={`${operator}-${product}`}>
-                          {index === 0 && (
-                            <td rowSpan={productDetails.length}>{operator}</td>
-                          )}
-                          <td>{product}</td>
-                          <td>{val.total}</td>
-                          <td>
-                            {val.workHours > 0
-                              ? Math.round(val.total / val.workHours)
-                              : "-"}
-                          </td>
-                        </tr>
-                      ));
-                    }
-                  )}
-                </tbody>
-              </table>
+                          return productDetails.map(([product, val], index) => (
+                            <tr key={`${operator}-${product}`}>
+                              {index === 0 && (
+                                <td
+                                  rowSpan={productDetails.length}
+                                  className={style.operatorCell}
+                                >
+                                  {operator}
+                                </td>
+                              )}
+                              <td>{product}</td>
+                              <td className={style.totalCell}>{val.total}</td>
+                              <td>
+                                {val.workHours > 0
+                                  ? Math.round(val.total / val.workHours)
+                                  : "-"}
+                              </td>
+                            </tr>
+                          ));
+                        }
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </ToggleBlock>
         </>
       ) : (
         <div className={style.noDataMessage}>
-          <p>No data available for this month.</p>
+          <i className={style.dbIcon} aria-hidden />
+          <span>
+            Data for{" "}
+            <strong>
+              {formattedMonth} {selectedMonth.year}
+            </strong>{" "}
+            is not available in the database.
+          </span>
         </div>
       )}
     </div>

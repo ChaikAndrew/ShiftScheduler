@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { calculateSummary } from "../../utils/calculateSummaries";
 import useEntriesLoader from "../../hooks/useEntriesLoader";
-import style from "./OperatorStatistics.module.scss";
+import styles from "./OperatorStatistics.module.scss";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import CustomDatePicker from "../CustomDatePicker/CustomDatePicker";
@@ -35,7 +35,6 @@ function OperatorStatistics({ tasks = [], products = [] }) {
   );
 
   const handleViewTypeChange = (e) => setViewType(e.target.value);
-
   const handleOperatorChange = (e) =>
     setSelectedOperator(e.target.value.trim());
 
@@ -48,14 +47,11 @@ function OperatorStatistics({ tasks = [], products = [] }) {
           signal: controller.signal,
         });
         clearTimeout(timeout);
-        if (res.ok) {
-          setBaseUrl("http://localhost:4040");
-        }
+        if (res.ok) setBaseUrl("http://localhost:4040");
       } catch {
         console.log("🌍 Використовується продакшн API");
       }
     };
-
     checkLocalhost();
   }, []);
 
@@ -68,30 +64,25 @@ function OperatorStatistics({ tasks = [], products = [] }) {
           },
         });
         const data = await res.json();
-        const operatorNames = data.map((op) => op.name.trim());
-        setOperatorsFromDB(operatorNames);
+        setOperatorsFromDB(data.map((op) => op.name.trim()));
       } catch (err) {
         console.error("❌ Не вдалося отримати операторів:", err);
       }
     };
-
-    if (baseUrl) {
-      fetchOperators();
-    }
+    if (baseUrl) fetchOperators();
   }, [baseUrl]);
 
   useEffect(() => {
     if (viewType === "month" && !selectedMonth) {
       const now = new Date();
-      const formattedMonth = `${now.getFullYear()}-${String(
-        now.getMonth() + 1
-      ).padStart(2, "0")}`;
-      setSelectedMonth(formattedMonth);
+      setSelectedMonth(
+        `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+      );
     }
   }, [viewType, selectedMonth]);
 
   const filteredEntries = entries
-    ? Object.entries(entries).flatMap(([shift, machines]) =>
+    ? Object.entries(entries).flatMap(([_, machines]) =>
         Object.values(machines || {}).flatMap((machineEntries) =>
           Array.isArray(machineEntries)
             ? machineEntries.filter((entry) => {
@@ -119,106 +110,104 @@ function OperatorStatistics({ tasks = [], products = [] }) {
   );
 
   const totalTaskQuantity = Object.values(summary.taskSummary).reduce(
-    (sum, quantity) => sum + quantity,
+    (sum, q) => sum + q,
     0
   );
   const totalProductQuantity = Object.values(summary.productSummary).reduce(
-    (sum, quantity) => sum + quantity,
+    (sum, q) => sum + q,
     0
   );
 
   return (
-    <div className={style.container}>
-      <h2 className={style.header}>Operator Statistics</h2>
-
-      {/* View Type */}
-      <div className={style.viewTypeSelection}>
-        <label>
-          <input
-            type="radio"
-            value="day"
-            checked={viewType === "day"}
-            onChange={handleViewTypeChange}
-          />
-          By Date
-        </label>
-        <label>
-          <input
-            type="radio"
-            value="month"
-            checked={viewType === "month"}
-            onChange={handleViewTypeChange}
-          />
-          By Month
-        </label>
-      </div>
-
-      {/* Date / Month Input */}
-      <div className={style.dateSelection}>
-        {viewType === "day" ? (
-          <CustomDatePicker
-            selectedDate={selectedDate}
-            onDateChange={setSelectedDate}
-          />
-        ) : (
-          <DatePicker
-            selected={
-              selectedMonth ? new Date(`${selectedMonth}-01`) : new Date()
-            }
-            onChange={(date) => {
-              if (!date) return;
-              const formatted = `${date.getFullYear()}-${String(
-                date.getMonth() + 1
-              ).padStart(2, "0")}`;
-              setSelectedMonth(formatted);
-            }}
-            dateFormat="MM/yyyy"
-            showMonthYearPicker
-            showFullMonthYearPicker
-            className={style.customMonthPicker}
-          />
+    <div className={styles.container}>
+      {/* Topbar */}
+      <div className={styles.topbar}>
+        <h2 className={styles.pageTitle}>Operator Statistics</h2>
+        {selectedOperator && (
+          <span className={styles.pill}>
+            Operator: <strong>{selectedOperator}</strong>
+          </span>
         )}
       </div>
 
-      {/* Operator Dropdown */}
-      <div className={style.operatorSelection}>
-        <h3>Select Operator</h3>
-        <select
-          value={selectedOperator}
-          onChange={handleOperatorChange}
-          className={style.operatorDropdown}
-        >
-          <option value="">-- Select Operator --</option>
-          {[...operatorsFromDB]
-            .sort((a, b) => a.localeCompare(b))
-            .map((op) => (
-              <option key={op} value={op.trim()}>
-                {op}
-              </option>
-            ))}
-        </select>
+      {/* Controls */}
+      <div className={styles.controls}>
+        <div className={styles.viewType}>
+          <label>
+            <input
+              type="radio"
+              value="day"
+              checked={viewType === "day"}
+              onChange={handleViewTypeChange}
+            />
+            By Date
+          </label>
+          <label>
+            <input
+              type="radio"
+              value="month"
+              checked={viewType === "month"}
+              onChange={handleViewTypeChange}
+            />
+            By Month
+          </label>
+        </div>
+
+        <div className={styles.datePicker}>
+          {viewType === "day" ? (
+            <CustomDatePicker
+              selectedDate={selectedDate}
+              onDateChange={setSelectedDate}
+            />
+          ) : (
+            <DatePicker
+              selected={
+                selectedMonth ? new Date(`${selectedMonth}-01`) : new Date()
+              }
+              onChange={(date) => {
+                if (!date) return;
+                setSelectedMonth(
+                  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+                    2,
+                    "0"
+                  )}`
+                );
+              }}
+              dateFormat="MM/yyyy"
+              showMonthYearPicker
+              className={styles.customMonthPicker}
+            />
+          )}
+        </div>
+
+        <div className={styles.operatorSelect}>
+          <select value={selectedOperator} onChange={handleOperatorChange}>
+            <option value="">-- Select Operator --</option>
+            {[...operatorsFromDB]
+              .sort((a, b) => a.localeCompare(b))
+              .map((op) => (
+                <option key={op} value={op.trim()}>
+                  {op}
+                </option>
+              ))}
+          </select>
+        </div>
       </div>
 
       {/* Results */}
-      <div className={style.resultTables}>
-        <h3>Results</h3>
+      <div className={styles.results}>
         {loading ? (
-          <div className={style.skeletonWrapper}>
-            <Skeleton
-              height={40}
-              width={250}
-              style={{ marginBottom: "1rem" }}
-            />
-            <Skeleton height={30} count={8} />
+          <div className={styles.skeletonWrapper}>
+            <Skeleton height={36} width={240} style={{ marginBottom: 12 }} />
+            <Skeleton height={28} count={8} />
           </div>
         ) : error ? (
-          <p className={style.error}>❌ Error: {error.message}</p>
+          <div className={styles.alertError}>❌ Error: {error.message}</div>
         ) : selectedOperator ? (
           <>
-            {/* Tasks */}
-            <div className={style.tableContainer}>
+            <div className={styles.card}>
               <h4>Task Summary</h4>
-              <table className={style.table}>
+              <table className={styles.table}>
                 <thead>
                   <tr>
                     <th>Task</th>
@@ -227,11 +216,11 @@ function OperatorStatistics({ tasks = [], products = [] }) {
                 </thead>
                 <tbody>
                   {Object.entries(summary.taskSummary)
-                    .filter(([, quantity]) => quantity > 0)
-                    .map(([task, quantity]) => (
+                    .filter(([, q]) => q > 0)
+                    .map(([task, q]) => (
                       <tr key={task}>
                         <td>{task}</td>
-                        <td>{quantity}</td>
+                        <td>{q}</td>
                       </tr>
                     ))}
                   <tr>
@@ -246,10 +235,9 @@ function OperatorStatistics({ tasks = [], products = [] }) {
               </table>
             </div>
 
-            {/* Products */}
-            <div className={style.tableContainer}>
+            <div className={styles.card}>
               <h4>Product Summary</h4>
-              <table className={style.table}>
+              <table className={styles.table}>
                 <thead>
                   <tr>
                     <th>Product</th>
@@ -258,11 +246,11 @@ function OperatorStatistics({ tasks = [], products = [] }) {
                 </thead>
                 <tbody>
                   {Object.entries(summary.productSummary)
-                    .filter(([, quantity]) => quantity > 0)
-                    .map(([product, quantity]) => (
+                    .filter(([, q]) => q > 0)
+                    .map(([product, q]) => (
                       <tr key={product}>
                         <td>{product}</td>
-                        <td>{quantity}</td>
+                        <td>{q}</td>
                       </tr>
                     ))}
                   <tr>
@@ -278,9 +266,9 @@ function OperatorStatistics({ tasks = [], products = [] }) {
             </div>
           </>
         ) : (
-          <p className={style.emptyMessage}>
+          <div className={styles.noDataMessage}>
             Select an operator to view statistics
-          </p>
+          </div>
         )}
       </div>
     </div>

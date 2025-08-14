@@ -48,7 +48,7 @@ import TotalSummary from "./components/TotalSummary/TotalSummary";
 import ProductSummary from "./components/ProductSummary/ProductSummary";
 import OperatorSummary from "./components/OperatorSummary/OperatorSummary";
 import TaskSummary from "./components/TaskSummary/TaskSummary";
-import NoDataMessage from "./components/NoDataMessage/NoDataMessage";
+
 import SummaryHeader from "./components/SummaryHeader/SummaryHeader";
 import EntryTable from "./components/EntryTable/EntryTable";
 
@@ -88,26 +88,26 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   // Функція поза useEffect
-  const fetchData = useCallback(async () => {
-    const token = localStorage.getItem("token");
-    if (!selectedDate) return;
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-    const dt = DateTime.fromISO(selectedDate);
-    const year = dt.year;
-    const month = dt.month;
+  const fetchData = useCallback(async () => {
+    if (!isAuthenticated || !token || !selectedDate) return; // ⛔️ гейт
 
     try {
-      const response = await getEntriesByMonth(year, month, token);
-      const dbEntries = response.data;
+      const dt = DateTime.fromISO(selectedDate);
+      const { data: dbEntries } = await getEntriesByMonth(
+        dt.year,
+        dt.month,
+        token
+      );
 
       const grouped = { first: {}, second: {}, third: {} };
-      dbEntries.forEach((entry) => {
+      for (const entry of dbEntries) {
         const { shift, machine } = entry;
-        if (!grouped[shift][machine]) {
-          grouped[shift][machine] = [];
-        }
+        if (!grouped[shift][machine]) grouped[shift][machine] = [];
         grouped[shift][machine].push(entry);
-      });
+      }
 
       let fullyRecalculated = { ...grouped };
       for (const shift in grouped) {
@@ -119,12 +119,16 @@ function App() {
           );
         }
       }
-
       setEntries(fullyRecalculated);
     } catch (err) {
+      if (err?.code === "NO_TOKEN") return; // тихо проходимо
       console.error("❌ Не вдалося завантажити записи за місяць:", err.message);
     }
-  }, [selectedDate]); // ← залежність
+  }, [isAuthenticated, token, selectedDate]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   // А тепер useEffect виглядає ок:
   useEffect(() => {
@@ -141,16 +145,16 @@ function App() {
           const expirationDate = new Date(decoded.exp * 1000).toLocaleString();
 
           if (decoded.exp * 1000 < Date.now()) {
-            console.warn("⏰ Токен протермінований");
+            console.warn("⏰ Token expired");
             localStorage.removeItem("token");
             setIsAuthenticated(false);
             navigate("/login");
           } else {
-            console.log("✅ Токен чинний до:", expirationDate);
+            console.log("✅ Token valid until:", expirationDate);
             setIsAuthenticated(true);
           }
         } catch (err) {
-          console.error("❌ Помилка токена:", err);
+          console.error("❌ Token error:", err);
           localStorage.removeItem("token");
           setIsAuthenticated(false);
           navigate("/login");

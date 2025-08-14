@@ -1,24 +1,148 @@
+.container {
+  display: grid;
+  gap: 16px;
+}
+
+/* ===== Topbar pills ===== */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+}
+.pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  background: #fafafa;
+  color: #333;
+  font-size: 13px;
+}
+.pill strong {
+  margin-left: 6px;
+  font-weight: 700;
+}
+
+.badgesRight {
+  display: inline-flex;
+  gap: 8px;
+}
+.totalBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  background: #f8fbff;
+  border: 1px solid #d9e8ff;
+  color: #26436b;
+}
+.totalBadge strong {
+  font-weight: 800;
+}
+
+/* ===== Controls ===== */
+.filters {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.inlineField {
+  display: inline-flex;
+}
+.inputDate {
+  padding: 6px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 13px;
+}
+.selectWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 13px;
+}
+.selectWrap select {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+}
+
+/* ===== Card + Table ===== */
+.card {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+.tableWrap {
+  width: 100%;
+  overflow: auto;
+}
+
 .dataTable {
   width: 100%;
-  border-collapse: collapse;
-
-  th,
-  td {
-    padding: 8px;
-    border: 1px solid #ccc;
-    text-align: left;
-  }
-
-  th {
-    background-color: #f0f0f0;
-  }
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+.dataTable thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  text-align: left;
+  background: #f9fafb;
+  color: #111827;
+  padding: 10px;
+  border-bottom: 1px solid #eef0f2;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.dataTable tbody td {
+  padding: 2px;
+  border-bottom: 1px solid #f2f3f5;
+  white-space: nowrap;
 }
 
-.povodItem {
-  margin-right: 8px;
-  cursor: pointer;
+.dataTable tbody tr:nth-child(odd) td {
+  background: #ffffff;
+}
+.dataTable tbody tr:nth-child(even) td {
+  background: #fcfcfd;
 }
 
+.sectionTitle {
+  margin: 8px 0;
+}
+
+/* accents */
 .redCount {
-  color: red;
+  color: #b91c1c;
+  font-weight: 800;
+}
+.loadingRow {
+  text-align: center;
+  color: #6b7280;
+  padding: 14px;
 }

@@ -6,7 +6,7 @@ import ShiftButtons from "../../components/ShiftButtons/ShiftButtons";
 import { reasons } from "../../utils/constants";
 import useEntriesLoader from "../../hooks/useEntriesLoader";
 import { recalculateDowntime } from "../../utils/recalculateDowntime";
-import { povodDescription } from "../MonthlyStratyStats/povodDescription";
+// import { povodDescription } from "../MonthlyStratyStats/povodDescription";
 import CustomDatePicker from "../CustomDatePicker/CustomDatePicker";
 import style from "./ExportToExcel.module.scss";
 import Skeleton from "react-loading-skeleton";
@@ -19,7 +19,7 @@ const ExportToExcel = () => {
   const [currentShift, setCurrentShift] = useState(null);
   const [stratySummary, setStratySummary] = useState({});
   const [stratyMachines, setStratyMachines] = useState({});
-  const [stratyPovods, setStratyPovods] = useState({});
+  // const [stratyPovods, setStratyPovods] = useState({});
 
   React.useEffect(() => {
     const shiftMapToZMIANA = {
@@ -80,7 +80,7 @@ const ExportToExcel = () => {
 
         setStratySummary(summary);
         setStratyMachines(machines);
-        setStratyPovods(povods);
+        // setStratyPovods(povods);
       } catch (err) {
         console.error("Failed to fetch straty:", err);
       }
@@ -313,10 +313,10 @@ const ExportToExcel = () => {
         .map((task) => [task, totalTasks[task]]),
       ...(totalZlecenieQty > 0 ? [["ZLECENIE", totalZlecenieQty]] : []),
       [],
-      ...Object.entries(totalTasks)
-        .filter(([task]) => !knownTasks.includes(task))
-        .map(([task, qty]) => [task.toUpperCase(), qty])
-        .sort(([a], [b]) => a.localeCompare(b)),
+      // ...Object.entries(totalTasks)
+      //   .filter(([task]) => !knownTasks.includes(task))
+      //   .map(([task, qty]) => [task.toUpperCase(), qty])
+      //   .sort(([a], [b]) => a.localeCompare(b)),
     ];
 
     const allLeaders = Array.from(leaderNameSet).join(", ");
@@ -380,29 +380,28 @@ const ExportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet([]);
     XLSX.utils.sheet_add_aoa(worksheet, headerLines, { origin: "A1" });
 
-    // 🔽 Знайди куди вставити новий заголовок
-    const zlecSummaryStart = headerLines.findIndex(
-      (row) => row[0]?.v === "ZLECENIE"
-    );
+    // const zlecSummaryStart = headerLines.findIndex(
+    //   (row) => row[0]?.v === "ZLECENIE"
+    // );
 
-    if (zlecSummaryStart !== -1) {
-      XLSX.utils.sheet_add_aoa(
-        worksheet,
-        [
-          [
-            {
-              v: "Zlecenie numbers:",
-              s: {
-                font: { bold: true, color: { rgb: "FFFFFF" } },
-                fill: { fgColor: { rgb: "4F81BD" } },
-                alignment: { horizontal: "left", vertical: "center" },
-              },
-            },
-          ],
-        ],
-        { origin: `A${zlecSummaryStart + 2}` } // +2 щоб після ZLECENIE вставити
-      );
-    }
+    // if (zlecSummaryStart !== -1) {
+    //   XLSX.utils.sheet_add_aoa(
+    //     worksheet,
+    //     [
+    //       [
+    //         {
+    //           v: "Zlecenie numbers:",
+    //           s: {
+    //             font: { bold: true, color: { rgb: "FFFFFF" } },
+    //             fill: { fgColor: { rgb: "4F81BD" } },
+    //             alignment: { horizontal: "left", vertical: "center" },
+    //           },
+    //         },
+    //       ],
+    //     ],
+    //     { origin: `A${zlecSummaryStart + 2}` } // +2 щоб після ZLECENIE вставити
+    //   );
+    // }
 
     const cleanedResult = result.filter((row) => !row.__emptyRow);
     const headerKeys = Object.keys(result[0] || {});
@@ -637,23 +636,23 @@ const ExportToExcel = () => {
       }
     }
 
-    const legendHeaderStyle = {
-      font: { bold: true, color: { rgb: "FFFFFF" } },
-      fill: { fgColor: { rgb: "4F81BD" } },
-      alignment: {
-        horizontal: "left",
-        vertical: "center",
-        wrapText: true,
-      },
-    };
+    // const legendHeaderStyle = {
+    //   font: { bold: true, color: { rgb: "FFFFFF" } },
+    //   fill: { fgColor: { rgb: "4F81BD" } },
+    //   alignment: {
+    //     horizontal: "left",
+    //     vertical: "center",
+    //     wrapText: true,
+    //   },
+    // };
 
-    const legend = [
-      [{ v: "" }],
-      [{ v: "Downtime reason list:", s: legendHeaderStyle }],
-      ...Array.from(downtimeReasonMap.entries())
-        .sort((a, b) => a[0] - b[0])
-        .map(([num, desc]) => [{ v: `${num}. ${desc}` }]),
-    ];
+    // const legend = [
+    //   [{ v: "" }],
+    //   [{ v: "Downtime reason list:", s: legendHeaderStyle }],
+    //   ...Array.from(downtimeReasonMap.entries())
+    //     .sort((a, b) => a[0] - b[0])
+    //     .map(([num, desc]) => [{ v: `${num}. ${desc}` }]),
+    // ];
 
     // Додаємо інформацію про Packed для single режиму
     if (mode === "single") {
@@ -700,7 +699,7 @@ const ExportToExcel = () => {
       worksheet["!cols"] = worksheet["!cols"] || [];
     }
 
-    XLSX.utils.sheet_add_aoa(worksheet, legend, { origin: -1 });
+    // XLSX.utils.sheet_add_aoa(worksheet, legend, { origin: -1 });
 
     // 📊 Додати straty summary (оновлений стиль)
     // Підрахунок кількості надрукованого по машинах для Loss %
@@ -854,19 +853,19 @@ const ExportToExcel = () => {
         ];
       }),
       [],
-      [{ v: "Scrap (info)", s: styleBlueHeader }],
-      ...Object.entries(stratyPovods)
-        .sort((a, b) => b[1] - a[1]) // Sort from highest to lowest
-        .map(([reason, val]) => {
-          const desc = povodDescription[reason] || "";
-          return [
-            { v: `${val} pcs` }, // ➕ add unit label
-            {
-              v: `${reason}: ${desc}`,
-              s: { font: { color: { rgb: "000000" } } },
-            },
-          ];
-        }),
+      // [{ v: "Scrap (info)", s: styleBlueHeader }],
+      // ...Object.entries(stratyPovods)
+      //   .sort((a, b) => b[1] - a[1]) // Sort from highest to lowest
+      //   .map(([reason, val]) => {
+      //     const desc = povodDescription[reason] || "";
+      //     return [
+      //       { v: `${val} pcs` }, // ➕ add unit label
+      //       {
+      //         v: `${reason}: ${desc}`,
+      //         s: { font: { color: { rgb: "000000" } } },
+      //       },
+      //     ];
+      //   }),
     ];
 
     worksheet["!cols"] = worksheet["!cols"] || [];
@@ -889,7 +888,6 @@ const ExportToExcel = () => {
       [
         { v: "POF TBI:", s: styleBlueHeader },
         { t: "n", v: 0 },
-        { t: "n", v: 0 },
       ],
       [
         { v: "POD TBI:", s: styleBlueHeader },
@@ -903,7 +901,6 @@ const ExportToExcel = () => {
             insertStartRow + 6
           })`,
         },
-        { t: "n", v: 0 },
       ],
       [
         { v: "", s: styleBlueHeader },

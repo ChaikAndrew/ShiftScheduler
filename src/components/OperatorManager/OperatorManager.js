@@ -7,6 +7,7 @@ const OperatorManager = () => {
   const [newName, setNewName] = useState("");
   const [editId, setEditId] = useState(null);
   const [editName, setEditName] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
   const [baseUrl, setBaseUrl] = useState(
     "https://shift-scheduler-server.vercel.app"
   );
@@ -59,6 +60,7 @@ const OperatorManager = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setNewName("");
+      setIsAdding(false);
       fetchOperators();
     } catch (err) {
       console.error("❌ Не вдалося додати оператора:", err.message);
@@ -93,75 +95,139 @@ const OperatorManager = () => {
     }
   };
 
+  const renderModal = (title, content, onClose, onSave) => (
+    <div className={styles.modalOverlay}>
+      <div className={styles.modalCard}>
+        <div className={styles.modalHeader}>
+          <h2 className={styles.roleTitle}>{title}</h2>
+        </div>
+        <div className={styles.modalBody}>{content}</div>
+        <div className={styles.modalActions}>
+          <button
+            className={`${styles.btn} ${styles.btnPrimary}`}
+            onClick={onSave}
+          >
+            Save
+          </button>
+          <button
+            className={`${styles.btn} ${styles.btnGhost}`}
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className={styles.dashboardContainer}>
-      <h2 className={styles.roleTitle}>Add new operator</h2>
-
-      <div className={styles.addOperatorForm}>
-        <input
-          type="text"
-          placeholder="Name Surname"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-        />
-        <button className={styles.addButton} onClick={addOperator}>
-          Add
-        </button>
+    <div className={styles.container}>
+      <div className={styles.card}>
+        <div className={`${styles.cardHeader} ${styles.inner}`}>
+          <div className={styles.cardHeader}>
+            <h3 className={styles.roleTitle}>Operators</h3>
+            <button
+              className={`${styles.btn} ${styles.btnPrimary}`}
+              onClick={() => setIsAdding(true)}
+            >
+              + Add New Operator
+            </button>
+          </div>
+        </div>
+        <div className={`${styles.cardHeader} ${styles.inner}`}>
+          {" "}
+          <div className={styles.cardBody}>
+            <div className={styles.tableWrap}>
+              <table className={styles.table}>
+                <colgroup>
+                  <col style={{ width: "42%" }} />
+                  <col style={{ width: "38%" }} />
+                  <col style={{ width: "20%" }} />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name, Surname</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...operators]
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((op) => (
+                      <tr key={op._id}>
+                        <td className={styles.mono}>{op._id}</td>
+                        <td>
+                          {editId === op._id ? (
+                            <input
+                              className={styles.input}
+                              value={editName}
+                              onChange={(e) => setEditName(e.target.value)}
+                            />
+                          ) : (
+                            op.name
+                          )}
+                        </td>
+                        <td className={styles.actionsCol}>
+                          {editId === op._id ? (
+                            <>
+                              <button
+                                className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSmall}`}
+                                onClick={updateOperator}
+                              >
+                                Save
+                              </button>
+                              <button
+                                className={`${styles.btn} ${styles.btnGhost} ${styles.btnSmall}`}
+                                onClick={() => setEditId(null)}
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                className={`${styles.btn} ${styles.btnSmall}`}
+                                onClick={() => {
+                                  setEditId(op._id);
+                                  setEditName(op.name);
+                                }}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                className={`${styles.btn} ${styles.btnDanger} ${styles.btnSmall}`}
+                                onClick={() => deleteOperator(op._id)}
+                              >
+                                Delete
+                              </button>
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className={styles.roleSection}>
-        <h3>Operators</h3>
-        <table className={styles.userTable}>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name, Surname</th>
-              <th>Дії</th>
-            </tr>
-          </thead>
-          <tbody>
-            {[...operators]
-              .sort((a, b) => a.name.localeCompare(b.name))
-              .map((op) => (
-                <tr key={op._id}>
-                  <td>{op._id}</td>
-                  <td>
-                    {editId === op._id ? (
-                      <input
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                      />
-                    ) : (
-                      op.name
-                    )}
-                  </td>
-                  <td>
-                    {editId === op._id ? (
-                      <>
-                        <button onClick={updateOperator}>Save</button>
-                        <button onClick={() => setEditId(null)}>❌</button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => {
-                            setEditId(op._id);
-                            setEditName(op.name);
-                          }}
-                        >
-                          Edit
-                        </button>
-                        <button onClick={() => deleteOperator(op._id)}>
-                          Delete
-                        </button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
+      {isAdding &&
+        renderModal(
+          "Add New Operator",
+          <>
+            <input
+              className={styles.input}
+              type="text"
+              placeholder="Name Surname"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+            />
+          </>,
+          () => setIsAdding(false),
+          addOperator
+        )}
     </div>
   );
 };

@@ -101,7 +101,9 @@
   visibility: visible;
   opacity: 1;
 }
-.edit {
+.edit,
+.delete {
+  background-color: transparent;
   margin-right: 5px;
 }
 
@@ -115,7 +117,7 @@
   color: #82ca9d;
 
   &:hover {
-    color: #2ccd6a;
+    color: #03973c;
   }
 }
 
@@ -123,6 +125,6 @@
   color: #dd6f70;
 
   &:hover {
-    color: #d50205;
+    color: #e40004;
   }
 }

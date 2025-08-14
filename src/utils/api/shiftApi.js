@@ -1,113 +1,94 @@
 import axios from "axios";
 
-let API_BASE = "https://shift-scheduler-server.vercel.app/shifts";
+const REMOTE = "https://shift-scheduler-server.vercel.app/shifts";
+const LOCAL_ROOT = "http://localhost:4040";
+let API_BASE = REMOTE;
 
-//Перевірка на доступний локальний сервер, якщо так — перемикає API на localhost.
-const checkLocalhost = async () => {
+// --- 1) Пінг локалки один раз (кешуємо в sessionStorage) ---
+async function checkLocalhost() {
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 1000);
-
-    const response = await fetch("http://localhost:4040", {
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-
-    if (response.ok) {
-      console.log("Localhost detected. Switching API base.");
-      API_BASE = "http://localhost:4040/shifts";
+    const cached = sessionStorage.getItem("apiBase");
+    if (cached) {
+      API_BASE = cached;
+      return;
     }
-  } catch (err) {
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 800);
+    const res = await fetch(LOCAL_ROOT, { signal: controller.signal });
+    clearTimeout(t);
+    if (res.ok) {
+      API_BASE = `${LOCAL_ROOT}/shifts`;
+      console.log("Localhost detected. Switching API base.");
+    } else {
+      API_BASE = REMOTE;
+      console.log("Using remote API.");
+    }
+    sessionStorage.setItem("apiBase", API_BASE);
+  } catch {
+    API_BASE = REMOTE;
+    sessionStorage.setItem("apiBase", API_BASE);
     console.log("Using remote API.");
   }
-};
-
-// Викликається автоматично при імпорті
+}
 checkLocalhost();
 
-/**
- * Зберігає новий запис у базу даних.
- * @param {Object} entryData - Дані запису.
- * @param {string} token - JWT токен користувача.
- * @returns {Promise} - Результат запиту.
- */
-export const saveEntryToDB = async (entryData, token) => {
-  return axios.post(`${API_BASE}/add`, entryData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+// --- 2) Єдиний axios‑інстанс + перехоплювач 401 ---
+const api = axios.create({ baseURL: API_BASE });
+api.interceptors.response.use(
+  (r) => r,
+  (err) => {
+    if (err?.response?.status === 401) {
+      const e = new Error("Unauthorized");
+      e.code = 401;
+      return Promise.reject(e);
+    }
+    return Promise.reject(err);
+  }
+);
+
+// --- 3) Хелпер: без токена не фетчимо (кидаємо NO_TOKEN) ---
+function requireToken(token) {
+  if (!token) {
+    const e = new Error("NO_TOKEN");
+    e.code = "NO_TOKEN";
+    throw e;
+  }
+}
+const auth = (token) => ({ headers: { Authorization: `Bearer ${token}` } });
+
+// --- 4) Експорти ---
+export const saveEntryToDB = (entryData, token) => {
+  requireToken(token);
+  return api.post(`/add`, entryData, auth(token));
 };
 
-/**
- * Оновлює існуючий запис у базі даних за ID.
- * @param {string} id - ID запису.
- * @param {Object} entryData - Оновлені дані.
- * @param {string} token - JWT токен користувача.
- * @returns {Promise} - Результат запиту.
- */
-export const updateEntryInDB = async (id, entryData, token) => {
-  return axios.put(`${API_BASE}/update/${id}`, entryData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const updateEntryInDB = (id, entryData, token) => {
+  requireToken(token);
+  return api.put(`/update/${id}`, entryData, auth(token));
 };
 
-/**
- * Видаляє запис з бази даних за ID.
- * @param {string} id - ID запису.
- * @param {string} token - JWT токен користувача.
- * @returns {Promise} - Результат запиту.
- */
-export const deleteEntryFromDB = async (id, token) => {
-  return axios.delete(`${API_BASE}/delete/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const deleteEntryFromDB = (id, token) => {
+  requireToken(token);
+  return api.delete(`/delete/${id}`, auth(token));
 };
 
-/**
- * Отримує всі записи з бази даних.
- * @param {string} token - JWT токен користувача.
- * @returns {Promise} - Масив записів.
- */
-export const getEntriesFromDB = async (token) => {
-  return axios.get(`${API_BASE}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const getEntriesFromDB = (token) => {
+  requireToken(token);
+  return api.get(`/`, auth(token));
 };
 
-/**
- * Отримує записи за конкретний місяць.
- * @param {number} year - Наприклад, 2025
- * @param {number} month - Наприклад, 6 (червень)
- * @param {string} token - JWT токен
- * @returns {Promise} - Масив записів
- */
-export const getEntriesByMonth = async (year, month, token) => {
-  return axios.get(`${API_BASE}/month/${year}/${month}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+export const getEntriesByMonth = (year, month, token) => {
+  requireToken(token);
+  return api.get(`/month/${year}/${month}`, auth(token));
 };
 
-export async function getEntriesByMonthRange(
+export function getEntriesByMonthRange(
   { startMonth, startYear, endMonth, endYear },
   token
 ) {
-  try {
-    const response = await axios.get(`${API_BASE}/range`, {
-      headers: { Authorization: `Bearer ${token}` },
-      params: { startMonth, startYear, endMonth, endYear },
-    });
-    return response;
-  } catch (error) {
-    console.error("❌ Error fetching entries by month range:", error.message);
-    throw error;
-  }
+  requireToken(token);
+  return api.get(`/range`, {
+    ...auth(token),
+    params: { startMonth, startYear, endMonth, endYear },
+  });
 }
