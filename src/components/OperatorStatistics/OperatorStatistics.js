@@ -49,7 +49,7 @@ function OperatorStatistics({ tasks = [], products = [] }) {
         clearTimeout(timeout);
         if (res.ok) setBaseUrl("http://localhost:4040");
       } catch {
-        console.log("🌍 Використовується продакшн API");
+        console.log("🌍 Using production API");
       }
     };
     checkLocalhost();

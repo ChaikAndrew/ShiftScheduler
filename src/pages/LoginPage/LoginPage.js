@@ -87,7 +87,7 @@ const LoginPage = () => {
           navigate("/admin-dashboard");
           break;
         case "operator":
-          navigate("/operator-dashboard");
+          navigate("/shift-scheduler");
           break;
         case "leader":
           navigate("/leader-dashboard");

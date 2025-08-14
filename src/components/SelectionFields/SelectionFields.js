@@ -34,7 +34,7 @@ const SelectionFields = ({
           setBaseUrl("http://localhost:4040");
         }
       } catch {
-        console.log("🌍 Використовується продакшн API");
+        console.log("🌍 Using production API");
       }
     };
 

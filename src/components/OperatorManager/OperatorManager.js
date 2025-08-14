@@ -40,7 +40,7 @@ const OperatorManager = () => {
           console.log("✅ Використовується localhost");
         }
       } catch {
-        console.log("🌍 Використовується продакшн");
+        console.log("🌍 Using production API");
       }
     };
 
