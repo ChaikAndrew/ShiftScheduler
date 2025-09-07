@@ -96,7 +96,10 @@ export default function ShiftDailySummary({
       {SHIFTS.map((sh) => (
         <div key={sh} className={s.card}>
           <div className={s.header}>
-            <span className={s.shiftBadge}>{sh.toUpperCase()}</span>
+            <span className={s.shiftBadge}>
+              {sh.toUpperCase()} —{" "}
+              <time dateTime={selectedDate}>{selectedDate}</time>
+            </span>
             <span className={s.totalBadge}>
               Total <strong>{detailed[sh].total}</strong>
             </span>
@@ -111,9 +114,9 @@ export default function ShiftDailySummary({
                   <thead>
                     <tr>
                       <th>Product</th>
-                      <th className={s.num}>Σ</th>
-                      <th className={`${s.num} ${s.mono}`}>Losses</th>
-                      <th className={`${s.num} ${s.mono}`}>OK</th>
+                      <th className={s.num}>Total</th>
+                      <th className={`${s.num} ${s.mono}`}>Defects</th>
+                      <th className={`${s.num} ${s.mono}`}>Good</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -144,9 +147,9 @@ export default function ShiftDailySummary({
                   <thead>
                     <tr>
                       <th>Task</th>
-                      <th className={s.num}>Σ</th>
-                      <th className={`${s.num} ${s.mono}`}>Losses</th>
-                      <th className={`${s.num} ${s.mono}`}>OK</th>
+                      <th className={s.num}>Total</th>
+                      <th className={`${s.num} ${s.mono}`}>Defects</th>
+                      <th className={`${s.num} ${s.mono}`}>Good</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -180,7 +183,10 @@ export default function ShiftDailySummary({
       {/* TOTAL CARD */}
       <div className={`${s.card} ${s.cardTotal}`}>
         <div className={s.header}>
-          <span className={s.shiftBadge}>TOTAL FOR THE DAY</span>
+          <span className={s.shiftBadge}>
+            TOTAL FOR THE DAY —{" "}
+            <time dateTime={selectedDate}>{selectedDate}</time>
+          </span>
           <span className={s.totalBadge}>
             <strong>{detailed.total.total}</strong>
           </span>
@@ -195,9 +201,9 @@ export default function ShiftDailySummary({
                 <thead>
                   <tr>
                     <th>Product</th>
-                    <th className={s.num}>Σ</th>
-                    <th className={`${s.num} ${s.mono}`}>Losses</th>
-                    <th className={`${s.num} ${s.mono}`}>OK</th>
+                    <th className={s.num}>Total</th>
+                    <th className={`${s.num} ${s.mono}`}>Defects</th>
+                    <th className={`${s.num} ${s.mono}`}>Good</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -228,9 +234,9 @@ export default function ShiftDailySummary({
                 <thead>
                   <tr>
                     <th>Task</th>
-                    <th className={s.num}>Σ</th>
-                    <th className={`${s.num} ${s.mono}`}>Losses</th>
-                    <th className={`${s.num} ${s.mono}`}>OK</th>
+                    <th className={s.num}>Total</th>
+                    <th className={`${s.num} ${s.mono}`}>Defects</th>
+                    <th className={`${s.num} ${s.mono}`}>Good</th>
                   </tr>
                 </thead>
                 <tbody>

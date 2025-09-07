@@ -703,20 +703,23 @@ const ExportToExcel = () => {
 
     // 📊 Додати straty summary (оновлений стиль)
     // Підрахунок кількості надрукованого по машинах для Loss %
+    // Хелпер для однакового ключа машини
+    const normMachine = (m) => m?.toUpperCase().replace(/\s+/g, " ").trim();
     const quantitiesByMachine = {};
-    if (entries) {
-      Object.entries(entries).forEach(([shift, machines]) => {
-        Object.entries(machines).forEach(([machine, records]) => {
-          const machineKey = machine?.toUpperCase();
-          records.forEach((entry) => {
-            const quantity = entry.quantity || 0;
-            if (!quantitiesByMachine[machineKey]) {
-              quantitiesByMachine[machineKey] = 0;
-            }
-            quantitiesByMachine[machineKey] += quantity;
-          });
-        });
-      });
+
+    const shiftsForLoss =
+      mode === "all" ? ["first", "second", "third"] : [currentShift];
+
+    for (const shift of shiftsForLoss) {
+      const machines = entries[shift] || {};
+      for (const [machine, records] of Object.entries(machines)) {
+        const key = normMachine(machine);
+        for (const entry of records) {
+          if (!entry.date?.startsWith(selectedDate)) continue; // фільтр за датою
+          quantitiesByMachine[key] =
+            (quantitiesByMachine[key] || 0) + (entry.quantity || 0);
+        }
+      }
     }
 
     // Підрахунок totalLossesCount (T-shirt + Hoodie по всіх машинах)
@@ -820,7 +823,7 @@ const ExportToExcel = () => {
         const tshirtCost = (data.TSHIRT || 0) * 3.5;
         const totalCost = hoodieCost + tshirtCost;
         // Новий розрахунок кількості надрукованого для машини через quantitiesByMachine
-        const machineKey = machine?.toUpperCase();
+        const machineKey = normMachine(machine);
         const totalQuantity = quantitiesByMachine[machineKey] || 0;
         const totalLosses = (data.TSHIRT || 0) + (data.BLUZA || 0);
         const lossPercent =
@@ -897,9 +900,11 @@ const ExportToExcel = () => {
       [
         { v: "POD Other:", s: styleBlueHeader },
         {
-          f: `SUM(B${insertStartRow + 6}:${lastColLetter}${
-            insertStartRow + 6
-          })`,
+          f:
+            `SUM(B${insertStartRow + 6}:${lastColLetter}${
+              insertStartRow + 6
+            },` +
+            `B${insertStartRow + 9}:${lastColLetter}${insertStartRow + 9})`,
         },
       ],
       [
@@ -919,12 +924,28 @@ const ExportToExcel = () => {
         ...Array(9).fill({ t: "n", v: 0 }),
       ],
       [{ v: "Total:", s: styleBlueHeader }, ...Array(9).fill({ t: "n", v: 0 })],
-    ];
+
+      // Trevco — заголовок в одному рядку з брендами (без порожнього рядка)
+      [
+        { v: "Trevco", s: styleBlueHeader },
+        { v: "EMP", s: styleBlueHeader },
+        { v: "Amazon ES", s: styleBlueHeader },
+        { v: "Amazon IT", s: styleBlueHeader },
+        { v: "Amazon DE", s: styleBlueHeader },
+        { v: "Zalando Cr.", s: styleBlueHeader },
+        { v: "Privalia", s: styleBlueHeader },
+        { v: "Amazon FR", s: styleBlueHeader },
+        { v: "Zalando PL", s: styleBlueHeader },
+      ],
+      [{ v: "", s: styleBlueHeader }, ...Array(8).fill({ t: "n", v: 0 })],
+      [{ v: "Total:", s: styleBlueHeader }, ...Array(8).fill({ t: "n", v: 0 })],
+    ]; // <— оце закриття масиву і крапка з комою були відсутні
 
     if (mode === "single") {
       XLSX.utils.sheet_add_aoa(worksheet, extraTableBackLog, {
         origin: `A${insertStartRow}`,
       });
+
       // Додаємо stratyTable одразу після Backlog
       XLSX.utils.sheet_add_aoa(worksheet, stratyTable, { origin: -1 });
     }
