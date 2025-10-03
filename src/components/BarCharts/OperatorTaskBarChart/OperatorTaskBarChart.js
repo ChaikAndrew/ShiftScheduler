@@ -11,7 +11,7 @@ import {
 import { chartColors } from "../../../utils/colors";
 
 const OperatorTaskBarChart = ({ data }) => {
-  if (!data || data.length === 0) return <p>Немає даних для графіка.</p>;
+  if (!data || data.length === 0) return <p>There is no data for the chart.</p>;
 
   const taskKeys = Object.keys(data[0])
     .filter((key) => key !== "operator")

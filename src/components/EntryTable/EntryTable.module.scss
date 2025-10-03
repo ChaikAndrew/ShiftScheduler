@@ -88,6 +88,7 @@
   padding: 10px 15px;
   font-size: 16px;
 }
+
 .operatorCell {
   position: relative;
 }
@@ -101,30 +102,195 @@
   visibility: visible;
   opacity: 1;
 }
+
+/* 🔹 Кнопки редагування та видалення */
 .edit,
 .delete {
-  background-color: transparent;
-  margin-right: 5px;
+  border: none;
+  background: transparent;
+  border-radius: 5px;
+  margin: 1px;
+  padding: 6px 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-right: 6px;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.08);
+}
+
+.edit:hover {
+  background: #e6f7ef; /* м’ятний ховер */
+  transform: scale(1.1);
+}
+
+.delete:hover {
+  background: #fdeaea; /* червоний ховер */
+  transform: scale(1.1);
 }
 
 .icon {
   cursor: pointer;
-  font-size: 1.1rem;
-  transition: color 0.2s;
+  font-size: 1.2rem;
+  transition: color 0.3s;
 }
 
 .edit .icon {
-  color: #82ca9d;
-
-  &:hover {
-    color: #03973c;
-  }
+  color: #25a56a;
 }
 
 .delete .icon {
-  color: #dd6f70;
+  color: #e63946;
+}
 
-  &:hover {
-    color: #e40004;
+.edit:hover .icon {
+  color: #03973c;
+}
+
+.delete:hover .icon {
+  color: #c70000;
+}
+
+/* лівий акцент без зсуву верстки */
+.hasDowntime td:first-child {
+  box-shadow: inset 4px 0 0 #f50b0b92; /* amber-500 */
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+/* Highlight rows that have **no** downtime (green) */
+
+.noDowntime td:first-child {
+  box-shadow: inset 4px 0 0 #10b981; /* green accent */
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+/* Клітинка Task отримує кольорові смуги зліва/справа через CSS-змінну */
+.taskCell {
+  position: relative;
+
+  /* запас під смуги, щоб не чіпати верстку */
+}
+
+.taskCell::before,
+.taskCell::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--task-accent, transparent);
+  pointer-events: none;
+}
+
+/* ліва смуга */
+.taskCell::before {
+  left: 0;
+}
+/* права смуга */
+.taskCell::after {
+  right: 0;
+}
+
+/* бейдж усередині клітинки (необов’язково, але виглядає охайно) */
+.taskBadge {
+  display: inline-block;
+  letter-spacing: 0.02em;
+}
+
+/* 🔹 Task колонка з повним акцентом */
+.task--pod {
+  --task-accent: rgba(255, 157, 0, 0.482);
+  box-shadow: inset 4px 0 0 var(--task-accent),
+    inset -4px 0 0 var(--task-accent);
+  background-color: rgba(255, 157, 0, 0.158);
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.task--pof {
+  --task-accent: rgba(130, 202, 158, 0.592);
+  box-shadow: inset 4px 0 0 var(--task-accent),
+    inset -4px 0 0 var(--task-accent);
+  background-color: rgba(0, 255, 98, 0.158);
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.task--test {
+  --task-accent: rgba(204, 255, 0, 0.537);
+  box-shadow: inset 4px 0 0 var(--task-accent),
+    inset -4px 0 0 var(--task-accent);
+  background-color: rgba(207, 237, 87, 0.155);
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.task--zlecenie {
+  --task-accent: rgba(0, 174, 255, 0.535);
+  box-shadow: inset 4px 0 0 var(--task-accent),
+    inset -4px 0 0 var(--task-accent);
+  background-color: rgba(0, 174, 255, 0.126);
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+/* Вимикаємо псевдо-смуги, щоб не дублювались з box-shadow */
+.task--pod::before,
+.task--pod::after,
+.task--pof::before,
+.task--pof::after,
+.task--test::before,
+.task--test::after,
+.task--zlecenie::before,
+.task--zlecenie::after {
+  display: none;
+}
+.downtimeCell {
+  position: relative;
+}
+
+.downtime--has {
+  --down-accent: #f50b0b61; /* червоно-оранжевий як для простою */
+  box-shadow: inset 4px 0 0 var(--down-accent),
+    inset -4px 0 0 var(--down-accent);
+  border-radius: 4px;
+  background-color: rgba(245, 11, 11, 0.038);
+}
+
+.reasonIcon {
+  position: absolute;
+  top: -6px;
+  right: -12px;
+  background: #e0f2fe; /* світло-блакитний */
+  color: #0284c7; /* насичений блакитний */
+  border-radius: 50%;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  /* іконка */
+  svg {
+    font-size: 1.2rem; /* збільшений розмір тільки для svg */
   }
+}
+
+.tooltip {
+  font-size: 0.9rem; /* фіксуємо розмір тултіпа, незалежно від іконки */
+}
+
+.reasonDescription {
+  position: relative; /* щоб іконка позиціонувалась відносно числа */
 }

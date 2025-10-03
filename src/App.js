@@ -15,6 +15,7 @@ import CustomDatePicker from "./components/CustomDatePicker/CustomDatePicker";
 import StratyStatistics from "./pages/StratyStatistics/StratyStatistics";
 import { FiDatabase } from "react-icons/fi";
 import ShiftDailySummary from "./components/ShiftDailySummary/ShiftDailySummary";
+// import { showToast } from "./components/ToastNotification/ToastNotification";
 
 import {
   machines,
@@ -69,7 +70,7 @@ import { getEntriesByMonth } from "../src/utils/api/shiftApi";
 import { recalculateDowntime } from "./utils/recalculateDowntime";
 
 import { FaArrowUp } from "react-icons/fa";
-
+// import { shiftStartTimes, shiftEndTimes } from "./utils/constants";
 // Додамо AdminDashboard і OperatorDashboard пізніше
 
 function App() {
@@ -280,6 +281,125 @@ function App() {
       },
     });
   };
+  // const handleEndShift = async () => {
+  //   const token = localStorage.getItem("token");
+
+  //   // Basic required selections
+  //   if (
+  //     !currentShift ||
+  //     !selectedMachine ||
+  //     !selectedLeader ||
+  //     !selectedOperator
+  //   ) {
+  //     showToast(
+  //       "Please select shift, machine, leader and operator.",
+  //       "warning"
+  //     );
+  //     return;
+  //   }
+  //   if (!form.reason) {
+  //     showToast(
+  //       "Please select a downtime reason before closing the shift.",
+  //       "warning"
+  //     );
+  //     return;
+  //   }
+
+  //   // Entries for the current date
+  //   const list = (entries[currentShift]?.[selectedMachine] || [])
+  //     .filter(
+  //       (e) =>
+  //         DateTime.fromISO(e.startTime, { zone: "utc" }).toISODate() ===
+  //         selectedDate
+  //     )
+  //     .sort((a, b) => new Date(a.endTime) - new Date(b.endTime));
+
+  //   // From what moment we count downtime
+  //   const lastEndISO = list.length
+  //     ? list[list.length - 1].endTime
+  //     : DateTime.fromISO(`${selectedDate}T${shiftStartTimes[currentShift]}`, {
+  //         zone: "utc",
+  //       }).toISO();
+
+  //   const lastEnd = DateTime.fromISO(lastEndISO, { zone: "utc" });
+
+  //   // End of shift boundary
+  //   let shiftEnd = DateTime.fromISO(
+  //     `${selectedDate}T${shiftEndTimes[currentShift]}`,
+  //     { zone: "utc" }
+  //   );
+  //   if (
+  //     currentShift === "third" &&
+  //     (lastEnd.hour >= 22 || shiftEnd <= lastEnd)
+  //   ) {
+  //     shiftEnd = shiftEnd.plus({ days: 1 }); // 06:00 next day
+  //   }
+
+  //   if (shiftEnd <= lastEnd) {
+  //     showToast("No downtime left until the end of the shift.", "info");
+  //     return;
+  //   }
+
+  //   // Build “end of shift” payload — pure downtime block
+  //   const endForm = {
+  //     startTime: lastEnd.toFormat("HH:mm"),
+  //     endTime: shiftEnd.toFormat("HH:mm"),
+  //     task: "",
+  //     customTaskName: "",
+  //     product: "",
+  //     color: "",
+  //     reason: form.reason,
+  //     quantity: 0,
+  //     comment: form.comment || "",
+  //     meta: { downtimeOnly: true }, // mark as downtime-only
+  //   };
+
+  //   await handleSaveEntryToDB({
+  //     form: endForm,
+  //     currentShift,
+  //     selectedDate,
+  //     selectedLeader,
+  //     selectedMachine,
+  //     selectedOperator,
+  //     setForm,
+  //     editingIndex: null,
+  //     editingEntryId: null,
+  //     token,
+  //     isEndShift: true,
+  //     onSuccess: async () => {
+  //       try {
+  //         const dt = DateTime.fromISO(selectedDate);
+  //         const { data: dbEntries } = await getEntriesByMonth(
+  //           dt.year,
+  //           dt.month,
+  //           token
+  //         );
+
+  //         const grouped = { first: {}, second: {}, third: {} };
+  //         for (const e of dbEntries) {
+  //           const { shift, machine } = e;
+  //           if (!grouped[shift][machine]) grouped[shift][machine] = [];
+  //           grouped[shift][machine].push(e);
+  //         }
+
+  //         let fullyRecalculated = { ...grouped };
+  //         for (const machine in grouped[currentShift]) {
+  //           fullyRecalculated = recalculateDowntime(
+  //             fullyRecalculated,
+  //             currentShift,
+  //             machine
+  //           );
+  //         }
+
+  //         setEntries(fullyRecalculated);
+  //         setRefreshKey((k) => k + 1);
+  //         showToast("Shift closed. Downtime has been added.", "success");
+  //       } catch (err) {
+  //         console.error("❌ Error after End Shift update:", err.message);
+  //       }
+  //     },
+  //   });
+  // };
   const filteredEntries = filterEntries(
     entries,
     currentShift,
@@ -464,9 +584,8 @@ function App() {
               <PrivateRoute allowedRoles={["operator", "admin", "leader"]}>
                 <div>
                   {/* Заголовок та кнопки вибору зміни */}
-
                   <div className="header-main-input">
-                    <h2>Shift Scheduler</h2>
+                    <h2 className="pageTitle">Shift Scheduler</h2>
                     {/* DateSelector */}
                     {/* Компонент вибору дати */}
                     <CustomDatePicker
@@ -519,16 +638,18 @@ function App() {
                       colors={colors}
                       reasons={reasons}
                       onSaveEntry={onSaveEntry}
+                      // onEndShift={handleEndShift}
                       editingIndex={editingIndex}
                       selectedLeader={selectedLeader}
                       selectedMachine={selectedMachine}
                       selectedOperator={selectedOperator}
                       disabled={!isSelectionComplete}
-                      currentShift={currentShift} /// Додаємо проп для блокування форми
-                      className={editingIndex !== null ? "editing-form" : ""} // Додаємо клас
+                      currentShift={currentShift}
+                      // 🆕 додано:
+                      setEditingIndex={setEditingIndex}
+                      setEditingEntryId={setEditingEntryId}
                     />
                   </div>
-
                   {/* Відображення помилок */}
                   {error && <p style={{ color: "red" }}>{error}</p>}
                   {/* SummaryHeader */}
@@ -540,7 +661,10 @@ function App() {
                     selectedDate={selectedDate}
                     currentShift={currentShift}
                     selectedMachine={selectedMachine}
+                    taskSummary={summary.taskSummary} // 🆕 передаємо з calculateSummary
+                    productSummary={summary.productSummary} // 🆕 передаємо з calculateSummary
                   />
+
                   {/* Відображення записів */}
                   {filteredEntries.length > 0 && (
                     <EntryTable
@@ -573,9 +697,7 @@ function App() {
                       onUpdateEntry={handleUpdateEntryComment} // 🆕 ⬅️ Ось це
                     />
                   )}
-
                   {/* Додаємо компонент пошуку */}
-
                   {/* Підсумки */}
                   <div className="summary">
                     <div className="all-summary-statistics">
@@ -658,7 +780,6 @@ function App() {
                       </div>
                     )}
                   </div>
-
                   {showUpButton && (
                     <button
                       className="btn-up"

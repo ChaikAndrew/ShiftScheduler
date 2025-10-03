@@ -1,41 +1,88 @@
-.addEntry {
-  position: relative; /* Додаємо відносне позиціонування */
-  color: #333;
-  border: none;
-  background-color: #a2a2a2;
-  cursor: pointer;
-  font-size: 16px;
-  padding: 2px 20px;
-  transition: background-color 0.3s, color 0.3s;
-  outline: none;
-  overflow: visible; /* Дозволяє показувати анімацію поза межами кнопки */
-}
-
-.addEntry:hover,
-.addEntry:focus {
-  background-color: #333;
-  color: #82ca9d;
-}
-
-// .addEntry::after {
-//   content: "";
-//   position: absolute;
-//   bottom: -4px; /* Лінія під кнопкою */
-//   left: 50%;
-//   width: 0;
-//   height: 3px;
-//   background-color: #ffaa00;
-//   transition: width 0.3s ease, left 0.3s ease;
-//   transform-origin: center;
-// }
-
-// .addEntry:hover::after {
-//   width: 100%; /* Підкреслення по всій ширині при наведенні */
-//   left: 0;
-// }
-
 .formRow {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px; // або скільки хочеш простору
+  gap: 6px;
+}
+
+/* ряд з кнопками */
+.buttonsRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* БАЗОВА КНОПКА */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 30px;
+  padding: 0 16px;
+
+  border-radius: 5px;
+  border: 1px solid #e5e7eb; /* slate-200 */
+  background: #ffffff;
+  color: #0f172a; /* slate-900 */
+
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease,
+    border-color 120ms ease;
+  box-shadow: 0 1px 1px rgba(16, 24, 40, 0.03), 0 1px 2px rgba(16, 24, 40, 0.04);
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(16, 24, 40, 0.08),
+    0 2px 4px rgba(16, 24, 40, 0.06);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(16, 24, 40, 0.08), 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ВАРІАНТИ */
+.ghost {
+  /* Add Entry */
+  background: #f8fafc; /* slate-50 */
+  border-color: #e2e8f0; /* slate-200 */
+}
+.ghost:hover:not(:disabled) {
+  background: #f1f5f9; /* slate-100 */
+  border-color: #cbd5e1; /* slate-300 */
+}
+
+.primary {
+  /* End Shift */
+  background: linear-gradient(180deg, #10b981 0%, #0ea66a 100%); /* emerald */
+  border-color: #10b981;
+  color: #ffffff;
+}
+.primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #0fb07b 0%, #0a9a62 100%);
+  border-color: #0fb07b;
+}
+
+/* МОБІЛЬНА АДАПТАЦІЯ */
+@media (max-width: 768px) {
+  .btn {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 10px;
+  }
+  .buttonsRow {
+    gap: 8px;
+  }
+}
+
+/* (опційно) щоб не ламати старі місця, де використовувалась .addEntry */
+.addEntry {
+  @extend .btn;
+  @extend .ghost;
 }

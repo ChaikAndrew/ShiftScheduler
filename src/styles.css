@@ -64,35 +64,100 @@ table {
 
 /* Чередування кольорів для рядків таблиці */
 
-/* Стилі для кнопок */
+/* ===== Кнопки (оновлено) ===== */
+
+/* Базовий ресет для всіх <button> */
 button {
-  padding: 5px 12px;
   border: none;
-
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: inherit;
   cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.3s;
 }
 
+/* Уніфікований стиль кнопок */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb; /* slate-200 */
+  background: #ffffff;
+  color: #0f172a; /* slate-900 */
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease,
+    border-color 120ms ease, color 120ms ease;
+  box-shadow: 0 1px 1px rgba(16, 24, 40, 0.03), 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(16, 24, 40, 0.08),
+    0 2px 4px rgba(16, 24, 40, 0.06);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(16, 24, 40, 0.08), 0 1px 3px rgba(16, 24, 40, 0.06);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Світлий варіант (використай для “Show/Hide Summary”) */
+.btn-ghost {
+  background: #f8fafc; /* slate-50 */
+  border-color: #e2e8f0; /* slate-200 */
+  color: #0f172a;
+}
+.btn-ghost:hover:not(:disabled) {
+  background: #f1f5f9; /* slate-100 */
+  border-color: #cbd5e1; /* slate-300 */
+}
+
+/* Акцентний варіант (для важливих дій) */
+.btn-primary {
+  background: linear-gradient(180deg, #10b981 0%, #0ea66a 100%);
+  border-color: #10b981;
+  color: #ffffff;
+}
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #0fb07b 0%, #0a9a62 100%);
+  border-color: #0fb07b;
+}
+
+/* Кнопка Show/Hide Summary — тепер на базі нового стилю */
 .btn-summary {
-  z-index: 1;
-  position: relative;
-  color: #333;
-  border: none;
-  background-color: #a2a2a2;
-  cursor: pointer;
-  font-size: 16px;
+  /* робимо сумісною зі спільним стилем без зміни HTML */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 0 16px;
   margin: 10px;
-  padding: 2px 20px;
-  transition: background-color 0.3s, color 0.3s;
-  outline: none;
-  overflow: visible; /* Дозволяє показувати анімацію поза межами кнопки */
-}
+  border-radius: 5px;
+  border: 1px solid #e2e8f0; /* як у .btn-ghost */
+  background: #f8fafc;
+  color: #0f172a;
 
-.btn-summary:hover,
-.btn-summary:focus {
-  background-color: #333;
-  color: #82ca9d;
+  letter-spacing: 0.2px;
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease,
+    border-color 120ms ease, color 120ms ease;
+  box-shadow: 0 1px 1px rgba(16, 24, 40, 0.03), 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+.btn-summary:hover:not(:disabled),
+.btn-summary:focus:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(16, 24, 40, 0.08),
+    0 2px 4px rgba(16, 24, 40, 0.06);
 }
 
 /* Стиль для селекту та інпутів */
@@ -101,7 +166,7 @@ input[type="time"],
 select {
   padding: 2px;
   border: 1px solid #cccccc91;
-  border-radius: 4px;
+  border-radius: 5px;
   font-size: 14px;
   text-align: center;
 }
@@ -138,7 +203,7 @@ select {
 .input-quantity,
 .zlecenie-input {
   width: 50px;
-  height: 27px;
+
   padding: 2px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -161,31 +226,41 @@ select {
   margin: auto;
 }
 
+/* Кнопка прокрутки вгору залишена як була */
 .btn-up {
   z-index: 10;
   position: fixed;
   bottom: 60px;
   right: 30px;
-  width: 40px;
-  height: 40px;
-  color: #333;
-  border: none;
-  background-color: #bbbbbbd9;
-  cursor: pointer;
-
-  transition: background-color 0.3s, color 0.3s;
-  outline: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #0f172a;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 18px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s, color 0.3s, transform 0.2s;
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease,
+    border-color 120ms ease, color 120ms ease;
+  box-shadow: 0 1px 1px rgba(16, 24, 40, 0.03), 0 1px 2px rgba(16, 24, 40, 0.04);
 }
 
-.btn-up:hover {
-  background-color: #333;
-  color: #82ca9d;
-  transform: scale(1.1);
+.btn-up:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0b71d9; /* трохи акценту */
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 14px rgba(16, 24, 40, 0.08),
+    0 2px 4px rgba(16, 24, 40, 0.06);
+}
+
+.btn-up:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 3px 8px rgba(16, 24, 40, 0.08), 0 1px 3px rgba(16, 24, 40, 0.06);
 }
 
 .app-container {
@@ -236,4 +311,45 @@ body.modal-open {
   border: 1px solid #d7e9ff;
   color: #0b71d9;
   font-weight: 700;
+}
+
+.pageTitle {
+  font-size: 28px;
+
+  letter-spacing: -0.01em;
+
+  text-align: center;
+
+  background: linear-gradient(
+    270deg,
+    #000000,
+    #054932,
+    #784d02,
+    #4a1010,
+    #432d76,
+    #000000,
+    #007083,
+    #486e0d,
+    #6366f1,
+    #0c655b
+  );
+  background-size: 600% 600%;
+  animation: gradientShift 50s ease infinite;
+
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }

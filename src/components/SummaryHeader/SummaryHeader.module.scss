@@ -1,66 +1,177 @@
-.summaryBar {
+:root {
+  --fs: 14px;
+  --lh: 1.1;
+  --radius: 12px;
+  --gap: 10px;
+
+  --c-text: #111827;
+  --c-muted: #6b7280;
+  --c-border: #e7e7ee;
+  --c-bg: #ffffff;
+
+  --c-work: #166534;
+  --c-work-brd: #c8e8d3;
+  --c-down: #b91c1c;
+  --c-down-brd: #f5c7c7;
+
+  --c-accent: #14532d;
+  --c-accent-bg: #eafaf1;
+  --c-accent-brd: #cfeee0;
+}
+
+/* ==== КОНТЕЙНЕР ==== */
+.wrap {
   width: 100%;
-  margin: 14px auto 18px; /* відступи зверху/знизу */
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  margin: 14px auto 18px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   gap: 12px;
-  padding: 10px 14px;
-  background: #fff;
-  border: 1px solid #e6e6e9;
-  border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-}
-
-.group {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
   align-items: center;
+
+  padding: 12px 14px;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+
+  font-size: var(--fs);
+  line-height: var(--lh);
+  color: var(--c-text);
+  font-variant-numeric: tabular-nums;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 }
 
-.item {
+/* ==== ЛІВА ГРУПА ==== */
+.left {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+}
+.pill {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: 6px;
   padding: 6px 10px;
   background: #fafafa;
-  border: 1px solid #eee;
+  border: 1px solid #efefef;
   border-radius: 10px;
-  font-size: 14px;
-  line-height: 1;
+  font-weight: 500;
+  min-height: 32px;
 }
 
+/* ==== ЦЕНТР ==== */
+.center {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.pillGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: #fafafa;
+  border: 1px solid #efefef;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  min-height: 28px;
+}
+
+/* Акцент тільки для Total */
+.accent {
+  background: var(--c-accent-bg);
+  border-color: var(--c-accent-brd);
+  color: var(--c-accent);
+  font-weight: 700;
+}
+
+/* Бейджі */
+.badge {
+  padding: 2px 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--c-text);
+  background: #fff;
+}
+
+/* Total група трохи підсвічена */
+.groupTotal .badge.total {
+  border-color: #cfeee0;
+  background: #f4fbf7;
+}
+
+/* ==== ПРАВА ГРУПА ==== */
+.right {
+  display: inline-flex;
+  gap: 10px;
+  justify-self: end;
+
+  @media (max-width: 900px) {
+    justify-self: start;
+  }
+}
+.metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  background: #fbfbfb;
+  font-weight: 700;
+  min-height: 32px;
+}
+.metric + .metric {
+  margin-left: 4px;
+}
+
+/* стани */
+.work {
+  color: var(--c-work);
+  border-color: var(--c-work-brd);
+  background: #f3fbf6;
+}
+.down {
+  color: var(--c-down);
+  border-color: var(--c-down-brd);
+  background: #fff6f6;
+}
+
+/* ==== ТЕКСТ ==== */
 .icon {
   font-size: 16px;
   opacity: 0.9;
+  flex: 0 0 auto;
 }
 .label {
-  color: #6b7280;
-} /* сіренький текст підпису */
+  color: var(--c-muted);
+  margin-right: 2px;
+  font-weight: 600;
+}
 .value {
-  font-weight: 700;
-  color: #111827;
+  color: var(--c-text);
+  font-weight: 800;
+  letter-spacing: 0.2px;
 }
-
-/* підсвічений бейдж для Total */
+/* Акцент тільки для Total */
 .accent {
-  background: #eafaf1;
-  border-color: #cfeee0;
-  color: #1b5e20;
-  box-shadow: 0 6px 14px rgba(40, 167, 69, 0.12);
-}
-
-/* мобільчик: все стає в два ряди й центр */
-@media (max-width: 720px) {
-  .summaryBar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .group {
-    justify-content: center;
-  }
-  .accent {
-    align-self: center;
-  }
+  background: var(--c-accent-bg);
+  border-color: var(--c-accent-brd);
+  color: var(--c-accent);
+  font-weight: 700;
 }

@@ -59,6 +59,23 @@ export default function ShiftDailySummary({
     return Object.fromEntries(products.map((p) => [p, sum(p)]));
   }, [stratyByProduct]);
 
+  // сума дефектів за кожну зміну (беремо з таблиці продуктів)
+  const lossesPerShift = useMemo(() => {
+    const sum = (obj = {}) =>
+      Object.values(obj).reduce((a, b) => a + (b || 0), 0);
+    return {
+      first: sum(stratyByProduct.first),
+      second: sum(stratyByProduct.second),
+      third: sum(stratyByProduct.third),
+    };
+  }, [stratyByProduct]);
+
+  // сума дефектів за день (по всіх змінах)
+  const lossesTotalDay = useMemo(
+    () => Object.values(stratyByProductTotal).reduce((a, b) => a + (b || 0), 0),
+    [stratyByProductTotal]
+  );
+
   const stratyByTaskTotal = useMemo(
     () => ({
       POD:
@@ -100,9 +117,15 @@ export default function ShiftDailySummary({
               {sh.toUpperCase()} —{" "}
               <time dateTime={selectedDate}>{selectedDate}</time>
             </span>
-            <span className={s.totalBadge}>
-              Total <strong>{detailed[sh].total}</strong>
-            </span>
+
+            <div className={s.badgesRight}>
+              <span className={s.totalBadge}>
+                Total <strong>{detailed[sh].total}</strong>
+              </span>
+              <span className={`${s.totalBadge} ${s.lossBadge}`}>
+                Defects <strong>{lossesPerShift[sh] || 0}</strong>
+              </span>
+            </div>
           </div>
 
           <div className={s.grid}>
@@ -187,9 +210,15 @@ export default function ShiftDailySummary({
             TOTAL FOR THE DAY —{" "}
             <time dateTime={selectedDate}>{selectedDate}</time>
           </span>
-          <span className={s.totalBadge}>
-            <strong>{detailed.total.total}</strong>
-          </span>
+
+          <div className={s.badgesRight}>
+            <span className={s.totalBadge}>
+              Total <strong>{detailed.total.total}</strong>
+            </span>
+            <span className={`${s.totalBadge} ${s.lossBadge}`}>
+              Defects <strong>{lossesTotalDay}</strong>
+            </span>
+          </div>
         </div>
 
         <div className={s.grid}>

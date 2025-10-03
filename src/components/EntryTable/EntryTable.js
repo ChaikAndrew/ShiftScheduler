@@ -9,11 +9,42 @@ import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { updateEntryInDB } from "../../utils/api/shiftApi";
 import { FcComments } from "react-icons/fc";
+import { AiOutlineInfoCircle } from "react-icons/ai";
 
-// 🔥 Функція для правильної обробки нічної зміни
+/* 🔸 Downtime колонка — виділяємо, коли є простій */
+const taskAccentClass = (taskRaw) => {
+  const task = (taskRaw || "").toString().trim().toUpperCase();
+  if (!task) return "";
+  if (task === "POD") return style.accentPod;
+  if (task === "POF") return style.accentPof;
+  if (task === "TEST") return style.accentTest;
+  if (task === "ZLECENIE") return style.accentZlec;
+  return "";
+};
+
+// Правильна обробка нічної зміни для сортування
 const parseDateTimeForThirdShift = (isoStr) => {
   const dt = DateTime.fromISO(isoStr, { zone: "utc" });
   return dt.hour < 6 ? dt.plus({ days: 1 }) : dt;
+};
+
+// Чи є простій (> 0 хв). Підтримка чисел та рядка "HH:MM".
+const hasDowntimeValue = (downtime) => {
+  if (typeof downtime === "number") return downtime > 0;
+  if (typeof downtime === "string") return downtime !== "00:00";
+  return false;
+};
+
+// Визначення типу завдання для бейджів
+const getTaskType = (task) => {
+  const t = String(task || "")
+    .trim()
+    .toUpperCase();
+  if (!t) return "";
+  if (t === "POD") return "pod";
+  if (t === "POF") return "pof";
+  if (t === "TEST") return "test";
+  return "zlecenie";
 };
 
 function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
@@ -62,7 +93,6 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
       setIsModalOpen(false);
       setCommentId(null);
       setNewComment("");
-
       if (onUpdateEntry) onUpdateEntry(updatedEntry);
     } catch (err) {
       showToast("Failed to save comment", "error");
@@ -75,32 +105,22 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
     setNewComment("");
   };
 
-  // Закриття модалки по клавіші Escape або кліку по фону
+  // Закриття модалки по Escape
   useEffect(() => {
     const handleEscapeKey = (e) => {
-      if (e.key === "Escape") {
-        handleCloseModal();
-      }
+      if (e.key === "Escape") handleCloseModal();
     };
-
-    // Додаємо обробник події для клавіші Escape
     document.addEventListener("keydown", handleEscapeKey);
-
-    // Очищаємо обробник події при розмонтуванні компонента
-    return () => {
-      document.removeEventListener("keydown", handleEscapeKey);
-    };
+    return () => document.removeEventListener("keydown", handleEscapeKey);
   }, []);
 
   const handleOverlayClick = (e) => {
-    if (e.target === e.currentTarget) {
-      handleCloseModal();
-    }
+    if (e.target === e.currentTarget) handleCloseModal();
   };
 
   return (
     <>
-      <table>
+      <table className={style.table}>
         <thead>
           <tr>
             <th>Shift</th>
@@ -113,107 +133,151 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
             <th>Task</th>
             <th>Product</th>
             <th>Color</th>
-            <th>Reason</th>
             <th>Quantity</th>
             <th>Working Time</th>
             <th>Downtime</th>
+            <th>Reason</th>
             <th>Actions</th>
           </tr>
         </thead>
+
         <tbody>
           {[...entries]
             .sort((a, b) => {
-              const timeA =
+              const timeA = (
                 a.shift === "third"
                   ? parseDateTimeForThirdShift(a.startTime)
-                  : DateTime.fromISO(a.startTime, { zone: "utc" });
+                  : DateTime.fromISO(a.startTime, { zone: "utc" })
+              ).toMillis();
 
-              const timeB =
+              const timeB = (
                 b.shift === "third"
                   ? parseDateTimeForThirdShift(b.startTime)
-                  : DateTime.fromISO(b.startTime, { zone: "utc" });
+                  : DateTime.fromISO(b.startTime, { zone: "utc" })
+              ).toMillis();
 
               return timeA - timeB;
             })
-            .map((entry, filteredIndex) => (
-              <tr key={filteredIndex}>
-                <td>{entry.shift}</td>
-                <td>{entry.displayDate}</td>
-                <td>
-                  {DateTime.fromISO(entry.startTime, { zone: "utc" }).toFormat(
-                    "HH:mm"
-                  )}
-                </td>
-                <td>
-                  {DateTime.fromISO(entry.endTime, { zone: "utc" }).toFormat(
-                    "HH:mm"
-                  )}
-                </td>
-                <td>{entry.leader}</td>
-                <td>{entry.machine}</td>
-                <td className={style.operatorCell}>
-                  <span
-                    className={style.operatorName}
-                    onClick={() => handleAddComment(entry)}
+            .map((entry, filteredIndex) => {
+              const rowHasDowntime = hasDowntimeValue(entry.downtime);
+              const taskType = getTaskType(entry.task);
+              const reason = reasons.find(
+                (r) => r.description === entry.reason
+              );
+
+              return (
+                <tr
+                  key={filteredIndex}
+                  className={[
+                    rowHasDowntime ? style.hasDowntime : style.noDowntime,
+                    taskAccentClass(entry.task),
+                    style.row,
+                  ].join(" ")}
+                >
+                  <td>{entry.shift}</td>
+                  <td>{entry.displayDate}</td>
+
+                  <td>
+                    {DateTime.fromISO(entry.startTime, {
+                      zone: "utc",
+                    }).toFormat("HH:mm")}
+                  </td>
+
+                  <td>
+                    {DateTime.fromISO(entry.endTime, { zone: "utc" }).toFormat(
+                      "HH:mm"
+                    )}
+                  </td>
+
+                  <td>{entry.leader}</td>
+                  <td>{entry.machine}</td>
+
+                  <td className={style.operatorCell}>
+                    <span
+                      className={style.operatorName}
+                      onClick={() => handleAddComment(entry)}
+                    >
+                      {entry.operator}
+                      {entry.comment && (
+                        <span className={style.comment}>
+                          <FcComments className={style.commentIcon} />
+                          <span className={style.commentTooltip}>
+                            {entry.comment}
+                          </span>
+                        </span>
+                      )}
+                    </span>
+                  </td>
+
+                  <td
+                    className={`${style.taskCell} ${
+                      taskType ? style[`task--${taskType}`] : ""
+                    }`}
                   >
-                    {entry.operator}
-                    {entry.comment && (
-                      <span className={style.comment}>
-                        <FcComments className={style.commentIcon} />
-                        <span className={style.commentTooltip}>
-                          {entry.comment}
+                    <span className={style.taskBadge}>
+                      {entry.task ? String(entry.task).toUpperCase() : null}
+                    </span>
+                  </td>
+
+                  <td>{entry.product}</td>
+                  <td>{entry.color}</td>
+
+                  <td>{entry.quantity > 0 ? entry.quantity : ""}</td>
+                  <td>{formatTime(entry.workingTime)}</td>
+
+                  <td
+                    className={`${style.downtimeCell} ${
+                      rowHasDowntime ? style["downtime--has"] : ""
+                    }`}
+                  >
+                    {formatTime(entry.downtime)}
+                  </td>
+
+                  <td className={style.reasonDescription}>
+                    {reason?.id || ""}
+                    {entry.reason && (
+                      <span className={style.reasonIcon}>
+                        <AiOutlineInfoCircle />
+                        <span className={style.tooltip}>
+                          {reason?.description || ""}
                         </span>
                       </span>
                     )}
-                  </span>
-                </td>
-                <td>
-                  {["POD", "POF", "Test"].includes(entry.task)
-                    ? // {["POD", "POF", "Sample", "Test"].includes(entry.task)
-                      entry.task
-                    : entry.task?.toUpperCase()}
-                </td>
-                <td>{entry.product}</td>
-                <td>{entry.color}</td>
-                <td className={style.reasonDescription}>
-                  {reasons.find((r) => r.description === entry.reason)?.id ||
-                    ""}
-                  {entry.reason && (
-                    <span className={style.tooltip}>
-                      {
-                        reasons.find((r) => r.description === entry.reason)
-                          ?.description
+                  </td>
+
+                  <td>
+                    <button
+                      className={style.edit}
+                      onClick={() =>
+                        onEdit(
+                          entry.originalIndex ?? filteredIndex,
+                          entry.originalIndex
+                        )
                       }
-                    </span>
-                  )}
-                </td>
-                <td>{entry.quantity > 0 ? entry.quantity : ""}</td>
-                <td>{formatTime(entry.workingTime)}</td>
-                <td>{formatTime(entry.downtime)}</td>
-                <td>
-                  <button
-                    className={style.edit}
-                    onClick={() => onEdit(filteredIndex, entry.originalIndex)}
-                  >
-                    <FaRegEdit className={style.icon} />
-                  </button>
-                  <button
-                    className={style.delete}
-                    onClick={() =>
-                      handleDelete(
-                        filteredIndex,
-                        localStorage.getItem("username"),
-                        entry.task,
-                        entry.quantity,
-                        entry.machine
-                      )
-                    }
-                  >
-                    <RiDeleteBin5Line className={style.icon} />
-                  </button>
-                </td>
-              </tr>
-            ))}
+                      aria-label="Edit entry"
+                    >
+                      <FaRegEdit className={style.icon} />
+                    </button>
+
+                    <button
+                      className={style.delete}
+                      onClick={() =>
+                        handleDelete(
+                          entry.originalIndex ?? filteredIndex, // ✅ використовуємо originalIndex якщо є
+                          localStorage.getItem("username"),
+                          entry.task,
+                          entry.quantity,
+                          entry.machine
+                        )
+                      }
+                      aria-label="Delete entry"
+                    >
+                      <RiDeleteBin5Line className={style.icon} />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
         </tbody>
       </table>
 

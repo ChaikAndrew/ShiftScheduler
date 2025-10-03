@@ -84,3 +84,10 @@ export const shiftStartTimes = {
   second: "14:00",
   third: "22:00",
 };
+
+// Кінці змін
+export const shiftEndTimes = {
+  first: "14:00",
+  second: "22:00",
+  third: "06:00",
+};

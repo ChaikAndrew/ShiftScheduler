@@ -1,25 +1,12 @@
 import React from "react";
 import style from "./EntryForm.module.scss";
-
 import { showToast } from "../ToastNotification/ToastNotification";
-/**
- * Компонент EntryForm рендерить форму для додавання або редагування запису.
- *
- * Пропси:
- * - form: об'єкт з поточними значеннями форми
- * - setForm: функція для оновлення значень форми
- * - tasks, products, colors, reasons: масиви з варіантами вибору для полів select
- * - onSaveEntry: функція для збереження або оновлення запису
- * - editingIndex: індекс запису, що редагується (null, якщо додаємо новий запис)
- * - selectedLeader, selectedMachine, selectedOperator: вибрані значення для лідера, машини та оператора
- * - disabled: прапорець для блокування форми, якщо значення true
- */
-
 import {
   isValidFirstShiftTime,
   isValidSecondShiftTime,
   isValidThirdShiftTime,
 } from "../../utils/validateShiftTime";
+
 const EntryForm = ({
   form,
   setForm,
@@ -28,61 +15,46 @@ const EntryForm = ({
   colors,
   reasons,
   onSaveEntry,
+  onEndShift,
   editingIndex,
   selectedLeader,
   selectedMachine,
   selectedOperator,
   disabled,
   currentShift,
+  // 🆕 додали сеттери з батька
+  setEditingIndex,
+  setEditingEntryId,
 }) => {
   const handleSave = () => {
-    // Перевірка на заповненість всіх обов'язкових полів
     if (
-      !form.startTime.trim() || // Перевірка на порожній рядок
+      !form.startTime.trim() ||
       !form.endTime.trim() ||
       !selectedLeader ||
       !selectedMachine ||
       !selectedOperator
     ) {
       showToast("Please fill in all required fields of the form.", "warning");
-      console.log("Required fields missing:", {
-        startTime: form.startTime,
-        endTime: form.endTime,
-        selectedLeader,
-        selectedMachine,
-        selectedOperator,
-      });
       return;
     }
 
-    // Перевірка валідності часу в зміні
     if (
       currentShift === "first" &&
       !isValidFirstShiftTime(form.startTime, form.endTime)
-    ) {
-      console.log("Time validation failed for first shift");
+    )
       return;
-    }
     if (
       currentShift === "second" &&
       !isValidSecondShiftTime(form.startTime, form.endTime)
-    ) {
-      console.log("Time validation failed for second shift");
+    )
       return;
-    }
     if (
       currentShift === "third" &&
       !isValidThirdShiftTime(form.startTime, form.endTime)
-    ) {
-      console.log("Time validation failed for third shift");
+    )
       return;
-    }
 
-    // Зберігаємо запис
     onSaveEntry();
-    console.log("Entry saved:", form);
-
-    // Використання showToast для повідомлення про успіх
     showToast(
       editingIndex !== null
         ? "Record updated successfully!"
@@ -91,18 +63,33 @@ const EntryForm = ({
     );
   };
 
+  const handleCancel = () => {
+    setForm({
+      startTime: "",
+      endTime: "",
+      task: "",
+      customTaskName: "",
+      product: "",
+      color: "",
+      reason: "",
+      quantity: 0,
+      comment: "",
+    });
+    setEditingIndex(null);
+    setEditingEntryId(null);
+    showToast("Editing cancelled", "info"); // можна прибрати, якщо не потрібно
+  };
+
   return (
     <div className={style.formRow}>
-      {/* Поле введення для часу початку роботи */}
       <input
         type="time"
         value={form.startTime}
         onChange={(e) => setForm({ ...form, startTime: e.target.value })}
         placeholder="Start Time"
-        disabled={disabled} // Блокування поля, якщо disabled = true
+        disabled={disabled}
       />
 
-      {/* Вибір задачі з можливістю вибору "Zlecenie" для введення кастомного значення */}
       <select
         value={form.task}
         onChange={(e) => setForm({ ...form, task: e.target.value })}
@@ -116,7 +103,6 @@ const EntryForm = ({
         ))}
       </select>
 
-      {/* Поле для введення номера "Zlecenie" з'являється, якщо вибрано "Zlecenie" */}
       {form.task === "Zlecenie" && (
         <input
           className="zlecenie-input"
@@ -128,7 +114,6 @@ const EntryForm = ({
         />
       )}
 
-      {/* Вибір продукту */}
       <select
         value={form.product}
         onChange={(e) => setForm({ ...form, product: e.target.value })}
@@ -142,7 +127,6 @@ const EntryForm = ({
         ))}
       </select>
 
-      {/* Вибір кольору */}
       <select
         value={form.color}
         onChange={(e) => setForm({ ...form, color: e.target.value })}
@@ -156,7 +140,6 @@ const EntryForm = ({
         ))}
       </select>
 
-      {/* Вибір причини простою (необов'язкове поле) */}
       <select
         value={form.reason}
         onChange={(e) => setForm({ ...form, reason: e.target.value })}
@@ -170,7 +153,6 @@ const EntryForm = ({
         ))}
       </select>
 
-      {/* Поле для введення кількості */}
       <input
         className="input-quantity"
         type="number"
@@ -184,7 +166,6 @@ const EntryForm = ({
         disabled={disabled}
       />
 
-      {/* Поле введення для часу закінчення роботи */}
       <input
         type="time"
         value={form.endTime}
@@ -193,10 +174,31 @@ const EntryForm = ({
         disabled={disabled}
       />
 
-      {/* Кнопка для збереження запису */}
-      <button onClick={handleSave} className={style.addEntry}>
-        {editingIndex !== null ? "Update Entry" : "Add Entry"}
-      </button>
+      {/* КНОПКИ */}
+      <div className={style.buttonsRow}>
+        <button onClick={handleSave} className={`${style.btn} ${style.ghost}`}>
+          {editingIndex !== null ? "Update Entry" : "Add Entry"}
+        </button>
+
+        {editingIndex !== null && (
+          <button
+            type="button"
+            onClick={handleCancel}
+            className={`${style.btn} ${style.ghost}`}
+          >
+            Cancel
+          </button>
+        )}
+
+        {/* <button
+          type="button"
+          onClick={onEndShift}
+          className={`${style.btn} ${style.ghost}`}
+          disabled={disabled || !!form.startTime} // ⬅️ додаємо перевірку
+        >
+          End Shift
+        </button> */}
+      </div>
     </div>
   );
 };

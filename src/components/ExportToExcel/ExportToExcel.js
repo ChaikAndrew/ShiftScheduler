@@ -12,6 +12,8 @@ import style from "./ExportToExcel.module.scss";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
+const SHOW_BACKLOG = false;
+
 const ExportToExcel = () => {
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
@@ -876,77 +878,81 @@ const ExportToExcel = () => {
     worksheet["!cols"][7] = { wch: 10 }; // колонка H — T-shirt
     worksheet["!cols"][8] = { wch: 12 }; // колонка I — Total €
 
-    // Оновлення позиції для вставки таблиці Backlog після легенди
-    const rangeBackLog = XLSX.utils.decode_range(worksheet["!ref"]);
-    const insertStartRow = rangeBackLog.e.r + 2;
-    const lastColLetter = XLSX.utils.encode_col(columnWidths.length - 1); // наприклад, "AA"
     // Таблиця Backlog після легенди
-    const extraTableBackLog = [
-      [],
-      [
-        { v: "Backlog Total:", s: styleBlueHeader },
-        { t: "n", v: 0 },
-        { v: "Missing" },
-      ],
-      [
-        { v: "POF TBI:", s: styleBlueHeader },
-        { t: "n", v: 0 },
-      ],
-      [
-        { v: "POD TBI:", s: styleBlueHeader },
-        { t: "n", v: 0 },
-        { t: "n", v: 0 },
-      ],
-      [
-        { v: "POD Other:", s: styleBlueHeader },
-        {
-          f:
-            `SUM(B${insertStartRow + 6}:${lastColLetter}${
+    if (mode === "single" && SHOW_BACKLOG) {
+      const range = XLSX.utils.decode_range(worksheet["!ref"]);
+      const insertStartRow = range.e.r + 2;
+      const lastColLetter = XLSX.utils.encode_col(columnWidths.length - 1);
+
+      const extraTableBackLog = [
+        [],
+        [
+          { v: "Backlog Total:", s: styleBlueHeader },
+          { t: "n", v: 0 },
+          { v: "Missing" },
+        ],
+        [
+          { v: "POF TBI:", s: styleBlueHeader },
+          { t: "n", v: 0 },
+        ],
+        [
+          { v: "POD TBI:", s: styleBlueHeader },
+          { t: "n", v: 0 },
+          { t: "n", v: 0 },
+        ],
+        [
+          { v: "POD Other:", s: styleBlueHeader },
+          {
+            f: `SUM(B${insertStartRow + 6}:${lastColLetter}${
               insertStartRow + 6
-            },` +
-            `B${insertStartRow + 9}:${lastColLetter}${insertStartRow + 9})`,
-        },
-      ],
-      [
-        { v: "", s: styleBlueHeader },
-        { v: "Neomachi", s: styleBlueHeader },
-        { v: "Go Jungo", s: styleRedHeader },
-        { v: "Co hubo", s: styleBlueHeader },
-        { v: "IC", s: styleBlueHeader },
-        { v: "LAVY", s: styleBlueHeader },
-        { v: "UT", s: styleBlueHeader },
-        { v: "Printify", s: styleBlueHeader },
-        { v: "YAGO", s: styleBlueHeader },
-        { v: "TDE", s: styleBlueHeader },
-      ],
-      [
-        { v: "POD other details:", s: styleBlueHeader },
-        ...Array(9).fill({ t: "n", v: 0 }),
-      ],
-      [{ v: "Total:", s: styleBlueHeader }, ...Array(9).fill({ t: "n", v: 0 })],
+            },B${insertStartRow + 9}:${lastColLetter}${insertStartRow + 9})`,
+          },
+        ],
+        [
+          { v: "", s: styleBlueHeader },
+          { v: "Neomachi", s: styleBlueHeader },
+          { v: "Go Jungo", s: styleRedHeader },
+          { v: "Co hubo", s: styleBlueHeader },
+          { v: "IC", s: styleBlueHeader },
+          { v: "LAVY", s: styleBlueHeader },
+          { v: "UT", s: styleBlueHeader },
+          { v: "Printify", s: styleBlueHeader },
+          { v: "YAGO", s: styleBlueHeader },
+          { v: "TDE", s: styleBlueHeader },
+        ],
+        [
+          { v: "POD other details:", s: styleBlueHeader },
+          ...Array(9).fill({ t: "n", v: 0 }),
+        ],
+        [
+          { v: "Total:", s: styleBlueHeader },
+          ...Array(9).fill({ t: "n", v: 0 }),
+        ],
+        [
+          { v: "Trevco", s: styleBlueHeader },
+          { v: "EMP", s: styleBlueHeader },
+          { v: "Amazon ES", s: styleBlueHeader },
+          { v: "Amazon IT", s: styleBlueHeader },
+          { v: "Amazon DE", s: styleBlueHeader },
+          { v: "Zalando Cr.", s: styleBlueHeader },
+          { v: "Privalia", s: styleBlueHeader },
+          { v: "Amazon FR", s: styleBlueHeader },
+          { v: "Zalando PL", s: styleBlueHeader },
+        ],
+        [{ v: "", s: styleBlueHeader }, ...Array(8).fill({ t: "n", v: 0 })],
+        [
+          { v: "Total:", s: styleBlueHeader },
+          ...Array(8).fill({ t: "n", v: 0 }),
+        ],
+      ];
 
-      // Trevco — заголовок в одному рядку з брендами (без порожнього рядка)
-      [
-        { v: "Trevco", s: styleBlueHeader },
-        { v: "EMP", s: styleBlueHeader },
-        { v: "Amazon ES", s: styleBlueHeader },
-        { v: "Amazon IT", s: styleBlueHeader },
-        { v: "Amazon DE", s: styleBlueHeader },
-        { v: "Zalando Cr.", s: styleBlueHeader },
-        { v: "Privalia", s: styleBlueHeader },
-        { v: "Amazon FR", s: styleBlueHeader },
-        { v: "Zalando PL", s: styleBlueHeader },
-      ],
-      [{ v: "", s: styleBlueHeader }, ...Array(8).fill({ t: "n", v: 0 })],
-      [{ v: "Total:", s: styleBlueHeader }, ...Array(8).fill({ t: "n", v: 0 })],
-    ]; // <— оце закриття масиву і крапка з комою були відсутні
-
-    if (mode === "single") {
       XLSX.utils.sheet_add_aoa(worksheet, extraTableBackLog, {
         origin: `A${insertStartRow}`,
       });
+    }
 
-      // Додаємо stratyTable одразу після Backlog
+    // --- Straty: додаємо завжди у single ---
+    if (mode === "single") {
       XLSX.utils.sheet_add_aoa(worksheet, stratyTable, { origin: -1 });
     }
 
