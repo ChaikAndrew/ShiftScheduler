@@ -23,9 +23,10 @@ const taskAccentClass = (taskRaw) => {
 };
 
 // Правильна обробка нічної зміни для сортування
+// Для третьої зміни час <= 6:00 вважається наступним днем
 const parseDateTimeForThirdShift = (isoStr) => {
   const dt = DateTime.fromISO(isoStr, { zone: "utc" });
-  return dt.hour < 6 ? dt.plus({ days: 1 }) : dt;
+  return dt.hour < 6 || (dt.hour === 6 && dt.minute === 0) ? dt.plus({ days: 1 }) : dt;
 };
 
 // Чи є простій (> 0 хв). Підтримка чисел та рядка "HH:MM".

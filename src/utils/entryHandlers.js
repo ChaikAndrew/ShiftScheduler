@@ -58,7 +58,8 @@ export async function handleSaveEntryToDB({
   }
 
   //Обрахунок робочого часу та простою
-  const { workingTime, initialDowntime, shift } = calculateWorkTime(start, end);
+  // Передаємо currentShift для правильного визначення зміни на граничних часах (14:00, 22:00, 6:00)
+  const { workingTime, initialDowntime, shift } = calculateWorkTime(start.toISO(), end.toISO(), currentShift);
 
   //Формуємо дані запису
   const entryData = {

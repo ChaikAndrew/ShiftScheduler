@@ -14,9 +14,12 @@ export function isValidFirstShiftTime(startTime, endTime) {
   console.log("isValidFirstShiftTime:", { startTime, endTime, start, end });
   console.log("Start is valid:", start.isValid);
   console.log("End is valid:", end.isValid);
+  // Дозволяємо час від 06:00 до 14:00 включно (включаючи 14:00)
   if (
     start.hour < 6 ||
-    start.hour >= 14 ||
+    start.hour > 14 ||
+    (start.hour === 14 && start.minute > 0) ||
+    end.hour < 6 ||
     end.hour > 14 ||
     (end.hour === 14 && end.minute > 0)
   ) {
@@ -35,9 +38,12 @@ export function isValidSecondShiftTime(startTime, endTime) {
   const end = DateTime.fromISO(endTime, { zone: "utc" });
   console.log("isValidSecondShiftTime:", { startTime, endTime, start, end });
 
+  // Дозволяємо час від 14:00 до 22:00 включно (включаючи 14:00 і 22:00)
   if (
     start.hour < 14 ||
-    start.hour >= 22 ||
+    start.hour > 22 ||
+    (start.hour === 22 && start.minute > 0) ||
+    end.hour < 14 ||
     end.hour > 22 ||
     (end.hour === 22 && end.minute > 0)
   ) {
@@ -56,8 +62,8 @@ export function isValidThirdShiftTime(startTime, endTime) {
   const end = DateTime.fromISO(endTime, { zone: "utc" });
   console.log("isValidThirdShiftTime:", { startTime, endTime, start, end });
 
-  // Перевірка початку зміни (повинна бути між 22:00 і 06:00)
-  if (!(start.hour >= 22 || start.hour < 6)) {
+  // Перевірка початку зміни (повинна бути між 22:00 і 06:00 включно)
+  if (!(start.hour >= 22 || start.hour < 6 || (start.hour === 6 && start.minute === 0))) {
     showToast(
       "Error: In the third shift, the start time must be between 22:00 and 06:00.",
       "error"
@@ -65,10 +71,16 @@ export function isValidThirdShiftTime(startTime, endTime) {
     return false;
   }
 
-  // Перевірка кінця зміни (дозволено рівно до 06:00)
-  if (end < start && (end.hour > 6 || (end.hour === 6 && end.minute > 0))) {
+  // Перевірка кінця зміни (дозволено від 22:00 до 06:00 включно)
+  // Кінець повинен бути в межах третьої зміни: від 22:00 до 06:00 включно
+  const isEndInThirdShiftRange = 
+    end.hour >= 22 || 
+    end.hour < 6 || 
+    (end.hour === 6 && end.minute === 0);
+  
+  if (!isEndInThirdShiftRange) {
     showToast(
-      "Error: The end time for the third shift cannot be later than 06:00.",
+      "Error: In the third shift, the end time must be between 22:00 and 06:00.",
       "error"
     );
     return false;

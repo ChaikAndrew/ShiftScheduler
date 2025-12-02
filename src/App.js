@@ -248,9 +248,8 @@ function App() {
             grouped[shift][machine].push(entry);
           });
 
-          grouped[currentShift][selectedMachine].sort(
-            (a, b) => new Date(a.startTime) - new Date(b.startTime)
-          );
+          // Сортування не потрібно тут, оскільки recalculateDowntime робить правильне сортування
+          // з урахуванням особливостей третьої зміни
 
           let fullyRecalculated = { ...grouped };
           for (const machine in grouped[currentShift]) {
@@ -262,6 +261,7 @@ function App() {
           }
 
           setEntries(fullyRecalculated);
+          setRefreshKey((k) => k + 1); // Оновлюємо ключ для перемалювання таблиці
           setEditingIndex(null);
           setEditingEntryId(null);
           setForm({
@@ -670,10 +670,23 @@ function App() {
                     <EntryTable
                       key={refreshKey} // 🆕 Перемалює компонент при кожному збереженні
                       entries={filteredEntries
-                        .sort(
-                          (a, b) =>
-                            new Date(a.startTime) - new Date(b.startTime)
-                        )
+                        .sort((a, b) => {
+                          // Для третьої зміни потрібна особлива обробка сортування
+                          if (currentShift === "third") {
+                            const parseDateTimeForThirdShift = (isoStr) => {
+                              const dt = DateTime.fromISO(isoStr, { zone: "utc" });
+                              // Час <= 6:00 вважається наступним днем
+                              return dt.hour < 6 || (dt.hour === 6 && dt.minute === 0) 
+                                ? dt.plus({ days: 1 }) 
+                                : dt;
+                            };
+                            const timeA = parseDateTimeForThirdShift(a.startTime);
+                            const timeB = parseDateTimeForThirdShift(b.startTime);
+                            return timeA - timeB;
+                          } else {
+                            return new Date(a.startTime) - new Date(b.startTime);
+                          }
+                        })
                         .map((entry) => ({
                           ...entry,
                           originalIndex: entries[currentShift]?.[

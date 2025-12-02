@@ -8,7 +8,7 @@ export const machines = [
   "dtg6",
   "dtg7",
   "dtg8",
-  "dtg9",
+  "APOLLO",
 ];
 
 //Типи задач, які оператор може виконувати

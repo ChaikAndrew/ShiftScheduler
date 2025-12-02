@@ -3,11 +3,13 @@ import { shiftStartTimes } from "./constants";
 
 /**
  * Парсить ISO-час для третьої зміни.
- * Якщо час < 6:00 — вважаємо його наступним днем, щоб уникнути плутанини в сортуванні.
+ * Якщо час <= 6:00 — вважаємо його наступним днем, щоб уникнути плутанини в сортуванні.
+ * Це потрібно для правильної сортування, оскільки третя зміна йде від 22:00 до 6:00 наступного дня.
  */
 const parseDateTimeForThirdShift = (dateTimeStr) => {
   const dt = DateTime.fromISO(dateTimeStr, { zone: "utc" });
-  return dt.hour < 6 ? dt.plus({ days: 1 }) : dt;
+  // Додаємо день для часів <= 6:00 (включно з 6:00), щоб вони були після 22:00-23:59
+  return dt.hour < 6 || (dt.hour === 6 && dt.minute === 0) ? dt.plus({ days: 1 }) : dt;
 };
 
 /**
@@ -72,22 +74,64 @@ export function recalculateDowntime(
 
         if (index === 0) {
           // Перший запис: downtime від початку зміни
-          const downtime = Math.round(
-            startTime.diff(shiftStart, "minutes").minutes
-          );
+          let downtime;
+          
+          // Особлива обробка для третьої зміни з start = 6:00
+          if (currentShift === "third") {
+            const originalStart = DateTime.fromISO(entry.startTime, { zone: "utc" });
+            // Якщо start = 6:00, це означає кінець зміни, downtime = 8 годин
+            if (originalStart.hour === 6 && originalStart.minute === 0) {
+              downtime = 8 * 60; // 8 годин = 480 хвилин
+            } else {
+              // Для інших часів обчислюємо нормально
+              downtime = Math.round(
+                startTime.diff(shiftStart, "minutes").minutes
+              );
+            }
+          } else {
+            downtime = Math.round(
+              startTime.diff(shiftStart, "minutes").minutes
+            );
+          }
+          
           entry.downtime = Math.max(downtime, 0);
         } else {
           // Наступні записи — від кінця попереднього
-          const prevEnd =
-            currentShift === "third"
-              ? parseDateTimeForThirdShift(entriesForDate[index - 1].endTime)
-              : DateTime.fromISO(entriesForDate[index - 1].endTime, {
-                  zone: "utc",
-                });
+          let prevEnd;
+          if (currentShift === "third") {
+            const prevEndOriginal = DateTime.fromISO(entriesForDate[index - 1].endTime, { zone: "utc" });
+            // Для третьої зміни: якщо endTime <= 6:00, це наступний день
+            if (prevEndOriginal.hour < 6 || (prevEndOriginal.hour === 6 && prevEndOriginal.minute === 0)) {
+              prevEnd = prevEndOriginal.plus({ days: 1 });
+            } else {
+              prevEnd = prevEndOriginal;
+            }
+          } else {
+            prevEnd = DateTime.fromISO(entriesForDate[index - 1].endTime, {
+              zone: "utc",
+            });
+          }
 
-          const downtime = Interval.fromDateTimes(prevEnd, startTime).length(
-            "minutes"
-          );
+          let downtime;
+          
+          // Особлива обробка для третьої зміни з start = 6:00 (коли це не перший запис)
+          if (currentShift === "third") {
+            const originalStart = DateTime.fromISO(entry.startTime, { zone: "utc" });
+            // Якщо start = 6:00 і це не перший запис, то це кінець зміни
+            // Downtime = від кінця попереднього запису до 6:00 наступного дня
+            if (originalStart.hour === 6 && originalStart.minute === 0) {
+              // prevEnd вже оброблений вище
+              // startTime також оброблений і має +1 день
+              // Обчислюємо інтервал між ними
+              downtime = Interval.fromDateTimes(prevEnd, startTime).length("minutes");
+            } else {
+              // Для інших часів обчислюємо нормально
+              downtime = Interval.fromDateTimes(prevEnd, startTime).length("minutes");
+            }
+          } else {
+            downtime = Interval.fromDateTimes(prevEnd, startTime).length("minutes");
+          }
+          
           entry.downtime = Math.max(Math.round(downtime), 0);
         }
       } catch (err) {
