@@ -2,6 +2,8 @@ import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import styles from "./OperatorManager.module.scss";
 
+// ...імпорти як були
+
 const OperatorManager = () => {
   const [operators, setOperators] = useState([]);
   const [newName, setNewName] = useState("");
@@ -12,6 +14,9 @@ const OperatorManager = () => {
     "https://shift-scheduler-server.vercel.app"
   );
 
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [operatorToDelete, setOperatorToDelete] = useState(null);
+
   const token = localStorage.getItem("token");
 
   const fetchOperators = useCallback(async () => {
@@ -21,7 +26,7 @@ const OperatorManager = () => {
       });
       setOperators(res.data);
     } catch (err) {
-      console.error("❌ Помилка при отриманні операторів:", err.message);
+      console.error("❌ Помилка при отриманні операторів:", err?.message);
     }
   }, [baseUrl, token]);
 
@@ -34,16 +39,9 @@ const OperatorManager = () => {
           signal: controller.signal,
         });
         clearTimeout(timeout);
-
-        if (res.ok) {
-          setBaseUrl("http://localhost:4040");
-          console.log("✅ Використовується localhost");
-        }
-      } catch {
-        console.log("🌍 Using production API");
-      }
+        if (res.ok) setBaseUrl("http://localhost:4040");
+      } catch {}
     };
-
     checkLocalhost();
   }, []);
 
@@ -63,39 +61,60 @@ const OperatorManager = () => {
       setIsAdding(false);
       fetchOperators();
     } catch (err) {
-      console.error("❌ Не вдалося додати оператора:", err.message);
+      console.error("❌ Не вдалося додати оператора:", err?.message);
     }
   };
 
+  // ✅ завжди каскад
   const updateOperator = async () => {
-    if (!editName.trim()) return;
+    if (!editName.trim() || !editId) return;
     try {
       await axios.put(
-        `${baseUrl}/api/operators/${editId}`,
-        { name: editName },
+        `${baseUrl}/api/operators/${editId}/rename?cascade=true`,
+        { newName: editName },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setEditId(null);
       setEditName("");
       fetchOperators();
     } catch (err) {
-      console.error("❌ Не вдалося оновити оператора:", err.message);
+      console.error("❌ Не вдалося оновити оператора:", err?.message);
     }
   };
 
-  const deleteOperator = async (id) => {
-    if (!window.confirm("Точно видалити оператора?")) return;
+  const askDeleteOperator = (op) => {
+    setOperatorToDelete(op);
+    setIsDeleting(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!operatorToDelete) return;
     try {
-      await axios.delete(`${baseUrl}/api/operators/${id}`, {
+      await axios.delete(`${baseUrl}/api/operators/${operatorToDelete._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      fetchOperators();
+      setOperators((list) =>
+        list.filter((o) => o._id !== operatorToDelete._id)
+      );
+      setIsDeleting(false);
+      setOperatorToDelete(null);
     } catch (err) {
-      console.error("❌ Не вдалося видалити оператора:", err.message);
+      console.error("❌ Не вдалося видалити оператора:", err?.message);
     }
   };
 
-  const renderModal = (title, content, onClose, onSave) => (
+  const cancelDelete = () => {
+    setIsDeleting(false);
+    setOperatorToDelete(null);
+  };
+
+  const renderModal = (
+    title,
+    content,
+    onClose,
+    onSave,
+    primaryLabel = "Save"
+  ) => (
     <div className={styles.modalOverlay}>
       <div className={styles.modalCard}>
         <div className={styles.modalHeader}>
@@ -107,7 +126,7 @@ const OperatorManager = () => {
             className={`${styles.btn} ${styles.btnPrimary}`}
             onClick={onSave}
           >
-            Save
+            {primaryLabel}
           </button>
           <button
             className={`${styles.btn} ${styles.btnGhost}`}
@@ -134,8 +153,8 @@ const OperatorManager = () => {
             </button>
           </div>
         </div>
+
         <div className={`${styles.cardHeader} ${styles.inner}`}>
-          {" "}
           <div className={styles.cardBody}>
             <div className={styles.tableWrap}>
               <table className={styles.table}>
@@ -159,11 +178,14 @@ const OperatorManager = () => {
                         <td className={styles.mono}>{op._id}</td>
                         <td>
                           {editId === op._id ? (
-                            <input
-                              className={styles.input}
-                              value={editName}
-                              onChange={(e) => setEditName(e.target.value)}
-                            />
+                            <div className={styles.editCell}>
+                              <input
+                                className={styles.input}
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                placeholder="Name Surname"
+                              />
+                            </div>
                           ) : (
                             op.name
                           )}
@@ -174,12 +196,16 @@ const OperatorManager = () => {
                               <button
                                 className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSmall}`}
                                 onClick={updateOperator}
+                                title="Rename and update history"
                               >
                                 Save
                               </button>
                               <button
                                 className={`${styles.btn} ${styles.btnGhost} ${styles.btnSmall}`}
-                                onClick={() => setEditId(null)}
+                                onClick={() => {
+                                  setEditId(null);
+                                  setEditName("");
+                                }}
                               >
                                 Cancel
                               </button>
@@ -197,7 +223,7 @@ const OperatorManager = () => {
                               </button>
                               <button
                                 className={`${styles.btn} ${styles.btnDanger} ${styles.btnSmall}`}
-                                onClick={() => deleteOperator(op._id)}
+                                onClick={() => askDeleteOperator(op)}
                               >
                                 Delete
                               </button>
@@ -226,8 +252,30 @@ const OperatorManager = () => {
             />
           </>,
           () => setIsAdding(false),
-          addOperator
+          addOperator,
+          "Save"
         )}
+
+      {isDeleting &&
+        renderModal(
+          "Delete Operator",
+          <>
+            <p>
+              Delete Operator <strong>{operatorToDelete?.name}</strong>?
+            </p>
+            <p className={styles.note}>This action cannot be undone.</p>
+          </>,
+          cancelDelete,
+          confirmDelete,
+          "Delete"
+        )}
+
+      {editId && (
+        <div className={styles.editBanner} role="status" aria-live="polite">
+          <span className={styles.editBannerDot} aria-hidden="true" />
+          <strong>Rename mode:</strong> history will be updated automatically.
+        </div>
+      )}
     </div>
   );
 };

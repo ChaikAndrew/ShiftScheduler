@@ -238,3 +238,43 @@
     gap: 6px;
   }
 }
+
+/* Комірка з інпутом */
+.editCell {
+  display: flex;
+  align-items: center;
+}
+
+/* Фіксований інфо-банер внизу екрана */
+.editBanner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin-bottom: 20px;
+  background: #eef6ff; /* ніжний блакитний */
+  border-top: 1px solid #dbeafe;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+  color: #1e3a8a; /* темно-синій текст */
+  box-shadow: 0 -6px 20px rgba(2, 6, 23, 0.05);
+}
+
+/* Маленький індикатор зліва */
+.editBannerDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #2563eb; /* синя крапка */
+  display: inline-block;
+}
+
+/* Якщо хочеш прибрати будь-які старі підказки у таблиці */
+.hint,
+.note {
+  display: none !important;
+}

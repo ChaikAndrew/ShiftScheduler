@@ -13,11 +13,17 @@ const AdminDashboard = () => {
     confirmPassword: "",
     role: "operator",
   });
+
   const [editingUser, setEditingUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [editPassword, setEditPassword] = useState("");
   const [editConfirmPassword, setEditConfirmPassword] = useState("");
+
+  // 🔥 нове для видалення
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+
   const [baseUrl, setBaseUrl] = useState(
     "https://shift-scheduler-server.vercel.app"
   );
@@ -124,21 +130,43 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteUser = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) return;
+  // ⛔️ було window.confirm — тепер відкриваємо модалку
+  const handleDeleteUser = (user) => {
+    setUserToDelete(user);
+    setIsDeleting(true);
+  };
+
+  // підтвердження видалення з модалки
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
     try {
-      await axios.delete(`${baseUrl}/auth/delete/${id}`, {
+      await axios.delete(`${baseUrl}/auth/delete/${userToDelete._id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         timeout: 5000,
       });
-      window.location.reload();
+      // оновимо локальний список без reload
+      setUsers((prev) => prev.filter((u) => u._id !== userToDelete._id));
+      setIsDeleting(false);
+      setUserToDelete(null);
     } catch (error) {
       console.error("Error deleting user:", error);
       alert("Failed to delete user.");
     }
   };
 
-  const renderModal = (title, content, onClose, onSave) => (
+  const cancelDelete = () => {
+    setIsDeleting(false);
+    setUserToDelete(null);
+  };
+
+  // трохи універсальніший рендер модалки (можна задати текст кнопки)
+  const renderModal = (
+    title,
+    content,
+    onClose,
+    onSave,
+    primaryLabel = "Save"
+  ) => (
     <div className={styles.modalOverlay}>
       <div className={styles.modalCard}>
         <div className={styles.modalHeader}>
@@ -150,7 +178,7 @@ const AdminDashboard = () => {
             className={`${styles.btn} ${styles.btnPrimary}`}
             onClick={onSave}
           >
-            Save
+            {primaryLabel}
           </button>
           <button
             className={`${styles.btn} ${styles.btnGhost}`}
@@ -236,7 +264,7 @@ const AdminDashboard = () => {
                           </button>
                           <button
                             className={`${styles.btn} ${styles.btnSmall} ${styles.btnDanger}`}
-                            onClick={() => handleDeleteUser(user._id)}
+                            onClick={() => handleDeleteUser(user)}
                           >
                             Delete
                           </button>
@@ -293,7 +321,8 @@ const AdminDashboard = () => {
             </select>
           </>,
           () => setIsAdding(false),
-          handleAddUser
+          handleAddUser,
+          "Save"
         )}
 
       {isEditing &&
@@ -335,7 +364,23 @@ const AdminDashboard = () => {
             </select>
           </>,
           () => setIsEditing(false),
-          handleSaveEdit
+          handleSaveEdit,
+          "Save"
+        )}
+
+      {isDeleting &&
+        renderModal(
+          "Delete User",
+          <>
+            <p>
+              Ви впевнені, що хочете видалити користувача{" "}
+              <strong>{userToDelete?.username}</strong>?
+            </p>
+            <p className={styles.note}>Цю дію не можна скасувати.</p>
+          </>,
+          cancelDelete,
+          confirmDelete,
+          "Delete"
         )}
     </div>
   );
