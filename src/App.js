@@ -450,7 +450,7 @@ function App() {
   );
 
   // Функція для обробки редагування запису
-  const handleEdit = (index) => {
+  const handleEdit = (entryId) => {
     let dateToUse = selectedDate;
 
     if (typeof dateToUse !== "string") {
@@ -463,7 +463,7 @@ function App() {
     console.log("Selected Machine:", selectedMachine);
 
     handleEditEntry(
-      index,
+      entryId,
       entries,
       currentShift,
       selectedMachine,
@@ -693,9 +693,7 @@ function App() {
                             selectedMachine
                           ]?.findIndex((e) => e === entry),
                         }))}
-                      onEdit={(filteredIndex, originalIndex) =>
-                        handleEdit(filteredIndex, originalIndex)
-                      }
+                      onEdit={(entryId) => handleEdit(entryId)}
                       onDelete={(filteredIndex) =>
                         handleDeleteEntry(
                           filteredIndex,

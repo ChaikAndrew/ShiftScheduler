@@ -249,12 +249,7 @@ function EntryTable({ entries, onEdit, onDelete, onUpdateEntry }) {
                   <td>
                     <button
                       className={style.edit}
-                      onClick={() =>
-                        onEdit(
-                          entry.originalIndex ?? filteredIndex,
-                          entry.originalIndex
-                        )
-                      }
+                      onClick={() => onEdit(entry._id)}
                       aria-label="Edit entry"
                     >
                       <FaRegEdit className={style.icon} />

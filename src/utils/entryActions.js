@@ -46,7 +46,7 @@ export function handleDateChange(
 
 //Ініціює редагування запису.
 export function handleEditEntry(
-  filteredIndex,
+  entryId,
   entries,
   currentShift,
   selectedMachine,
@@ -57,27 +57,32 @@ export function handleEditEntry(
   selectedDate
 ) {
   console.group("✏️ handleEditEntry Process");
-  console.log("Filtered Index:", filteredIndex);
+  console.log("Entry ID:", entryId);
   console.log("Current Shift:", currentShift);
   console.log("Selected Machine:", selectedMachine);
   console.log("Selected Date:", selectedDate);
 
   const shiftMachineEntries = entries[currentShift]?.[selectedMachine] || [];
-  const filteredEntries = shiftMachineEntries.filter((entry) =>
-    isDateMatching(entry.date, selectedDate)
-  );
-
-  console.log("Filtered Entries for Date:", filteredEntries);
-
-  const entry = filteredEntries[filteredIndex];
-  const originalIndex = shiftMachineEntries.findIndex((e) => e === entry);
+  
+  // Знаходимо запис за ID замість індексу
+  const entry = shiftMachineEntries.find((e) => e._id === entryId);
 
   if (!entry) {
-    console.error("❌ Entry not found for the selected date.");
+    console.error("❌ Entry not found for the selected ID.");
     setError("Entry not found for the selected date.");
     console.groupEnd();
     return;
   }
+
+  // Перевіряємо, чи запис відповідає вибраній даті
+  if (!isDateMatching(entry.date, selectedDate)) {
+    console.error("❌ Entry date does not match the selected date.");
+    setError("Entry not found for the selected date.");
+    console.groupEnd();
+    return;
+  }
+
+  const originalIndex = shiftMachineEntries.findIndex((e) => e._id === entryId);
 
   //Корекція дати для третьої зміни
   let displayDate = entry.date;

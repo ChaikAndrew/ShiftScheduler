@@ -253,9 +253,6 @@ const MonthlyOperatorStatistics = ({ operators }) => {
             tooltip="Monthly total quantity per operator and breakdown by task type (POD, POF, etc.)."
           >
             <div className={style.section}>
-              <h3 className={style.title}>
-                Monthly Task Summary – {reportTitle}
-              </h3>
               <div className={style.card}>
                 <div className={style.tableWrap}>
                   <table className={style.table}>
@@ -294,9 +291,6 @@ const MonthlyOperatorStatistics = ({ operators }) => {
             tooltip="Monthly product totals per operator, showing quantity for each product type."
           >
             <div className={style.section}>
-              <h3 className={style.title}>
-                Monthly Product Summary – {reportTitle}
-              </h3>
               <div className={style.card}>
                 <div className={style.tableWrap}>
                   <table className={style.table}>
@@ -335,9 +329,6 @@ const MonthlyOperatorStatistics = ({ operators }) => {
             tooltip="Table showing daily totals and average per day for each operator."
           >
             <div className={style.section}>
-              <h3 className={style.title}>
-                Daily Operator Statistics – {reportTitle}
-              </h3>
               <div className={style.card}>
                 <div className={style.tableWrap}>
                   <table className={style.table}>
@@ -386,9 +377,6 @@ const MonthlyOperatorStatistics = ({ operators }) => {
             tooltip="Total work time, number of products, and average production speed per operator."
           >
             <div className={style.section}>
-              <h3 className={style.title}>
-                Operator Work Efficiency – {reportTitle}
-              </h3>
               <div className={style.card}>
                 <div className={style.tableWrap}>
                   <table className={style.table}>
@@ -434,9 +422,6 @@ const MonthlyOperatorStatistics = ({ operators }) => {
             tooltip="Per-product stats: total quantity and average speed (units/hr) for each operator."
           >
             <div className={style.section}>
-              <h3 className={style.title}>
-                Detailed Product Breakdown – {reportTitle}
-              </h3>
               <div className={style.card}>
                 <div className={style.tableWrap}>
                   <table className={style.table}>
