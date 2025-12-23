@@ -117,8 +117,8 @@ export function getWhatsAppUrl(phoneNumber, message) {
   if (phoneNumber) {
     return `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
   }
-  // Якщо номер не вказано, відкриваємо WhatsApp Web з попередньо заповненим повідомленням
+  // Якщо номер не вказано, використовуємо wa.me - на мобільних відкриє додаток, на десктопі - веб-версію
   // Користувач сам вибере контакт для відправки
-  return `https://web.whatsapp.com/send?text=${encodedMessage}`;
+  return `https://wa.me/?text=${encodedMessage}`;
 }
 
