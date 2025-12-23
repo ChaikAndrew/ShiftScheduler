@@ -32,6 +32,11 @@ video {
   padding: 20px;
 }
 
+/* Прибираємо падінги з контейнера на сторінці логування */
+.content.login-page.container {
+  padding: 0;
+}
+
 /* Загальні стилі для контейнера */
 
 /* Стилі для таблиці */
@@ -268,6 +273,11 @@ select {
   transition: margin-left 0.3s ease-in-out;
 }
 
+/* Прибираємо transition для app-container на сторінці логування */
+body.login-page .app-container {
+  transition: none !important;
+}
+
 .content {
   flex-grow: 1;
 
@@ -277,6 +287,17 @@ select {
 
 .app-container.collapsed .content {
   margin-left: 70px; /* Коли NavBar згорнутий */
+}
+
+/* Прибираємо margin-left на сторінці входу */
+.content.login-page {
+  margin-left: 0 !important;
+  transition: none !important;
+}
+
+/* Стиль футера на сторінці логування */
+body.login-page footer.footer {
+  background-color: #33333361 !important;
 }
 
 /* Блокування прокрутки та взаємодії з основною сторінкою */
@@ -315,41 +336,7 @@ body.modal-open {
 
 .pageTitle {
   font-size: 28px;
-
   letter-spacing: -0.01em;
-
   text-align: center;
-
-  background: linear-gradient(
-    270deg,
-    #000000,
-    #054932,
-    #784d02,
-    #4a1010,
-    #432d76,
-    #000000,
-    #007083,
-    #486e0d,
-    #6366f1,
-    #0c655b
-  );
-  background-size: 600% 600%;
-  animation: gradientShift 50s ease infinite;
-
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
-}
-
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  color: #000000;
 }

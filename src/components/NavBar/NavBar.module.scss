@@ -159,6 +159,26 @@
   margin-top: 30px;
 }
 
+.whatsappLink {
+  margin-top: auto;
+  margin-bottom: 50px;
+  background-color: #25d366;
+  color: white !important;
+
+  &:hover {
+    background-color: #20ba5a !important;
+    color: white !important;
+  }
+
+  .icon {
+    color: white;
+  }
+
+  .linkText {
+    color: white;
+  }
+}
+
 /* Контейнер контенту для плавного зсуву */
 .mainContent {
   margin-left: 250px;

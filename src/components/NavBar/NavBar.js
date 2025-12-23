@@ -17,11 +17,12 @@ import { GrGroup } from "react-icons/gr";
 import { BsClock } from "react-icons/bs";
 import { FiSearch } from "react-icons/fi";
 import { TbFileExport } from "react-icons/tb";
+import { FaWhatsapp } from "react-icons/fa";
 
 import styles from "./NavBar.module.scss";
 import LogoWithAnimation from "../LogoWithAnimation/LogoWithAnimation";
 
-const NavBar = ({ isCollapsed, setIsCollapsed, setIsSearchModalOpen }) => {
+const NavBar = ({ isCollapsed, setIsCollapsed, setIsSearchModalOpen, setIsWhatsAppModalOpen }) => {
   const navigate = useNavigate();
   const [role, setRole] = useState(localStorage.getItem("role"));
   const [username, setUsername] = useState(localStorage.getItem("username"));
@@ -193,6 +194,16 @@ const NavBar = ({ isCollapsed, setIsCollapsed, setIsSearchModalOpen }) => {
           <VscPreview className={styles.icon} />
           <span className={styles.linkText}>{dashboardLink.label}</span>
         </NavLink>
+        {(role === "admin" || role === "leader") && (
+          <NavLink
+            to="#"
+            onClick={() => setIsWhatsAppModalOpen(true)}
+            className={`${styles.link} ${styles.whatsappLink}`}
+          >
+            <FaWhatsapp className={styles.icon} />
+            <span className={styles.linkText}>Send to WhatsApp</span>
+          </NavLink>
+        )}
       </div>
       <div className={styles.userSection}>
         <LogoWithAnimation />

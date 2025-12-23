@@ -61,6 +61,7 @@ import MachineStatistics from "./components/MachineTimeStats/MachineTimeStats";
 import MonthlyMachineStatistics from "./components/MachinesQuantityStats/MachinesQuantityStats";
 
 import ExportToExcel from "./components/ExportToExcel/ExportToExcel";
+import WhatsAppModal from "./components/WhatsAppModal/WhatsAppModal";
 
 import NavBar from "./components/NavBar/NavBar";
 import Footer from "./components/Footer/Footer";
@@ -181,6 +182,7 @@ function App() {
   const [editingEntryId, setEditingEntryId] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const [form, setForm] = useState({
     startTime: "",
     endTime: "",
@@ -567,6 +569,7 @@ function App() {
           isCollapsed={isCollapsed}
           setIsCollapsed={setIsCollapsed}
           setIsSearchModalOpen={setIsSearchModalOpen}
+          setIsWhatsAppModalOpen={setIsWhatsAppModalOpen}
         />
       )}
       <SearchByZlecenieName
@@ -574,8 +577,12 @@ function App() {
         isModalOpen={isSearchModalOpen}
         setIsModalOpen={setIsSearchModalOpen}
       />
+      <WhatsAppModal
+        isOpen={isWhatsAppModalOpen}
+        onClose={() => setIsWhatsAppModalOpen(false)}
+      />
 
-      <div className={`content container`}>
+      <div className={`content container ${location.pathname === "/login" ? "login-page" : ""}`}>
         <ToastContainer />
         <Routes>
           <Route

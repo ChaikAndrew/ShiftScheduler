@@ -3,10 +3,13 @@ import React, { useMemo, useEffect, useState } from "react";
 import s from "./ShiftDailySummary.module.scss";
 
 import { calculateDetailedByShift } from "../../utils/calculateDetailedByShift";
-import { products } from "../../utils/constants";
+import { products, machines } from "../../utils/constants";
 import { getStratyPerShiftByProductForDate } from "../../utils/calculateStratyPerShiftByProduct";
 import { getStratyPerShiftByTaskForDate } from "../../utils/calculateStratyPerShiftByTask";
+import { fetchStraties } from "../../utils/stratyApi";
 import CustomDatePicker from "../CustomDatePicker/CustomDatePicker";
+import WhatsAppButton from "../WhatsAppButton/WhatsAppButton";
+import { formatDailySummaryForWhatsApp } from "../../utils/whatsappFormatter";
 
 const SHIFTS = ["first", "second", "third"];
 
@@ -15,6 +18,9 @@ export default function ShiftDailySummary({
   selectedDate,
   onDateChange,
 }) {
+  // Перевіряємо, чи користувач є адміністратором
+  const userRole = typeof window !== "undefined" ? localStorage.getItem("role") : null;
+  const isAdmin = userRole === "admin";
   const detailed = useMemo(
     () => calculateDetailedByShift(entries, selectedDate, products),
     [entries, selectedDate]
@@ -29,6 +35,14 @@ export default function ShiftDailySummary({
     first: { POD: 0, POF: 0, ZLECENIE: 0 },
     second: { POD: 0, POF: 0, ZLECENIE: 0 },
     third: { POD: 0, POF: 0, ZLECENIE: 0 },
+  });
+  const [stratyByMachine, setStratyByMachine] = useState({});
+  const [stratyDetails, setStratyDetails] = useState({
+    BLUZA: 0,
+    TSHIRT: 0,
+    POD: 0,
+    POF: 0,
+    ZLECENIE: 0,
   });
 
   useEffect(() => {
@@ -50,6 +64,98 @@ export default function ShiftDailySummary({
       alive = false;
     };
   }, [selectedDate]);
+
+  // Отримуємо страти по машинах
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const SHIFT_LABEL = {
+          first: "1 ZMIANA",
+          second: "2 ZMIANA",
+          third: "3 ZMIANA",
+        };
+
+        // Отримуємо страти для всіх змін
+        const allStraty = await Promise.all(
+          Object.values(SHIFT_LABEL).map((shift) =>
+            fetchStraties({ date: selectedDate, shift, mode: "day" })
+          )
+        );
+
+        if (!alive) return;
+
+        // Підраховуємо страти по машинах
+        const machineStats = {};
+        const machineQuantity = {};
+
+        // Підраховуємо кількість надрукованого для кожної машини
+        ["first", "second", "third"].forEach((shift) => {
+          machines.forEach((machine) => {
+            const shiftEntries = entries[shift]?.[machine] || [];
+            shiftEntries.forEach((entry) => {
+              if (entry.displayDate === selectedDate) {
+                const qty = parseInt(entry.quantity, 10) || 0;
+                if (!machineQuantity[machine]) {
+                  machineQuantity[machine] = 0;
+                }
+                machineQuantity[machine] += qty;
+              }
+            });
+          });
+        });
+
+        // Підраховуємо страти по машинах та деталізацію
+        const details = {
+          BLUZA: 0,
+          TSHIRT: 0,
+          POD: 0,
+          POF: 0,
+          ZLECENIE: 0,
+        };
+
+        allStraty.flat().forEach((item) => {
+          const machine = (item.number_dtg || "").toLowerCase();
+          if (machine) {
+            if (!machineStats[machine]) {
+              machineStats[machine] = { quantity: 0, straty: 0 };
+            }
+            machineStats[machine].straty += 1;
+          }
+
+          // Деталізація по продуктах
+          const product = (item.bluza_t_shirt || "").toUpperCase();
+          if (product === "BLUZA") details.BLUZA++;
+          else if (product === "T-SHIRT") details.TSHIRT++;
+
+          // Деталізація по задачах
+          const task = (item.pof_pod_hurt || "").toUpperCase();
+          if (task === "POD") details.POD++;
+          else if (task === "POF") details.POF++;
+          else if (task === "ZLECENIE") details.ZLECENIE++;
+        });
+
+        setStratyDetails(details);
+
+        // Об'єднуємо кількість та страти
+        machines.forEach((machine) => {
+          const machineKey = machine.toLowerCase();
+          if (!machineStats[machineKey]) {
+            machineStats[machineKey] = { quantity: 0, straty: 0 };
+          }
+          machineStats[machineKey].quantity = machineQuantity[machine] || 0;
+        });
+
+        setStratyByMachine(machineStats);
+      } catch (e) {
+        console.error("straty by machine fetch error:", e);
+        setStratyByMachine({});
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [selectedDate, entries, machines]);
 
   const stratyByProductTotal = useMemo(() => {
     const sum = (p) =>
@@ -93,6 +199,22 @@ export default function ShiftDailySummary({
     }),
     [stratyByTask]
   );
+
+  // Форматуємо повідомлення для WhatsApp
+  const whatsappMessage = useMemo(() => {
+    return formatDailySummaryForWhatsApp({
+      selectedDate,
+      detailed,
+      lossesTotalDay,
+      stratyByProductTotal,
+      stratyByTaskTotal,
+      products,
+      entries,
+      machines,
+      stratyByMachine,
+      stratyDetails,
+    });
+  }, [selectedDate, detailed, lossesTotalDay, stratyByProductTotal, stratyByTaskTotal, products, entries, stratyByMachine, stratyDetails]);
 
   return (
     <div className={s.wrapper}>
@@ -218,6 +340,7 @@ export default function ShiftDailySummary({
             <span className={`${s.totalBadge} ${s.lossBadge}`}>
               Defects <strong>{lossesTotalDay}</strong>
             </span>
+            {isAdmin && <WhatsAppButton message={whatsappMessage} />}
           </div>
         </div>
 

@@ -21,9 +21,21 @@ const MonthlyStratyStats = () => {
     pod: 0,
     pof: 0,
     zlecenie: 0,
+    zlecenieNadrukow: 0,
     bluza: 0,
     tshirt: 0,
   });
+
+  // Aggregate values for all shifts on selected date (for mode === "day")
+  const [allShiftsAggregateValues, setAllShiftsAggregateValues] = useState({
+    pod: 0,
+    pof: 0,
+    zlecenie: 0,
+    zlecenieNadrukow: 0,
+    bluza: 0,
+    tshirt: 0,
+  });
+  const [totalLossesAllShifts, setTotalLossesAllShifts] = useState(0);
 
   const months = [
     "January",
@@ -40,23 +52,98 @@ const MonthlyStratyStats = () => {
     "December",
   ];
 
+  // Format date to DD.MM.YYYY format
+  const formatDate = (dateString) => {
+    const d = new Date(dateString);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}.${month}.${year}`;
+  };
+
   useEffect(() => {
     const fetchStraties = async () => {
       if (mode === "day" && !date) return;
       setLoading(true);
       try {
-        const encodedShift = encodeURIComponent(selectedShift);
         const baseURL = "https://braki-api.vercel.app/api";
-        const endpoint =
-          mode === "month"
-            ? `${baseURL}/straties-filtered?year=${year}&month=${month}`
-            : `${baseURL}/straties-filtered?date=${date}&shift=${encodedShift}`;
+        let data = [];
 
-        const res = await fetch(endpoint);
-        const data = await res.json();
+        if (mode === "month") {
+          // Month mode - fetch all data for the month
+          const endpoint = `${baseURL}/straties-filtered?year=${year}&month=${month}`;
+          const res = await fetch(endpoint);
+          data = await res.json();
+        } else {
+          // Day mode
+          if (selectedShift === "ALL") {
+            // Fetch all shifts and combine results
+            const shifts = ["1 ZMIANA", "2 ZMIANA", "3 ZMIANA"];
+            const promises = shifts.map((shift) => {
+              const encodedShift = encodeURIComponent(shift);
+              const endpoint = `${baseURL}/straties-filtered?date=${date}&shift=${encodedShift}`;
+              return fetch(endpoint).then((res) => res.json());
+            });
+            const results = await Promise.all(promises);
+            data = results.flat();
+          } else {
+            // Fetch single shift
+            const encodedShift = encodeURIComponent(selectedShift);
+            const endpoint = `${baseURL}/straties-filtered?date=${date}&shift=${encodedShift}`;
+            const res = await fetch(endpoint);
+            data = await res.json();
+          }
+        }
 
-        setStraty(data);
-        calculate(data);
+        // Ensure ilosc_strat is properly set (default to 1 if missing or invalid)
+        const adjustedData = data.map((strata) => {
+          let iloscStrat = 1;
+          if (strata.ilosc_strat !== undefined && strata.ilosc_strat !== null && strata.ilosc_strat !== '') {
+            iloscStrat = parseInt(strata.ilosc_strat, 10);
+            if (isNaN(iloscStrat) || iloscStrat <= 0) {
+              iloscStrat = 1;
+            }
+          }
+          return {
+            ...strata,
+            ilosc_strat: iloscStrat,
+          };
+        });
+
+        setStraty(adjustedData);
+        calculate(adjustedData);
+
+        // If mode is "day", also fetch all shifts data for total statistics
+        if (mode === "day" && date) {
+          const shifts = ["1 ZMIANA", "2 ZMIANA", "3 ZMIANA"];
+          const promises = shifts.map((shift) => {
+            const encodedShift = encodeURIComponent(shift);
+            const endpoint = `${baseURL}/straties-filtered?date=${date}&shift=${encodedShift}`;
+            return fetch(endpoint).then((res) => res.json());
+          });
+          
+          Promise.all(promises)
+            .then((results) => {
+              const allData = results.flat();
+              const adjustedAllData = allData.map((strata) => {
+                let iloscStrat = 1;
+                if (strata.ilosc_strat !== undefined && strata.ilosc_strat !== null && strata.ilosc_strat !== '') {
+                  iloscStrat = parseInt(strata.ilosc_strat, 10);
+                  if (isNaN(iloscStrat) || iloscStrat <= 0) {
+                    iloscStrat = 1;
+                  }
+                }
+                return {
+                  ...strata,
+                  ilosc_strat: iloscStrat,
+                };
+              });
+              calculateAllShifts(adjustedAllData);
+            })
+            .catch((err) => {
+              console.error("❌ Error loading all shifts data:", err);
+            });
+        }
       } catch (err) {
         console.error("❌ Error loading data:", err);
       } finally {
@@ -68,43 +155,174 @@ const MonthlyStratyStats = () => {
   }, [mode, month, year, date, selectedShift]);
 
   const calculate = (data) => {
-    setTotalLosses(data.length);
+    // Calculate total losses using ilosc_strat
+    const total = data.reduce((acc, curr) => {
+      const quantity = curr.ilosc_strat && curr.ilosc_strat > 0 ? parseInt(curr.ilosc_strat, 10) : 1;
+      return acc + quantity;
+    }, 0);
+    setTotalLosses(total);
 
-    const pod = data.filter((x) => x.pof_pod_hurt === "POD").length;
-    const pof = data.filter((x) => x.pof_pod_hurt === "POF").length;
-    const zlecenie = data.filter((x) => x.pof_pod_hurt === "ZLECENIE").length;
-    const bluza = data.filter((x) => x.bluza_t_shirt === "BLUZA").length;
-    const tshirt = data.filter((x) => x.bluza_t_shirt === "T-SHIRT").length;
-    setTotalAggregateValues({ pod, pof, zlecenie, bluza, tshirt });
+    // Calculate aggregate values using ilosc_strat
+    const pod = data.reduce(
+      (acc, curr) => {
+        const quantity = curr.ilosc_strat && curr.ilosc_strat > 0 ? parseInt(curr.ilosc_strat, 10) : 1;
+        return acc + (curr.pof_pod_hurt === "POD" ? quantity : 0);
+      },
+      0
+    );
+    const pof = data.reduce(
+      (acc, curr) => {
+        const quantity = curr.ilosc_strat && curr.ilosc_strat > 0 ? parseInt(curr.ilosc_strat, 10) : 1;
+        return acc + (curr.pof_pod_hurt === "POF" ? quantity : 0);
+      },
+      0
+    );
+    const zlecenie = data.reduce(
+      (acc, curr) => {
+        const quantity = curr.ilosc_strat && curr.ilosc_strat > 0 ? parseInt(curr.ilosc_strat, 10) : 1;
+        return acc + (curr.pof_pod_hurt === "ZLECENIE" ? quantity : 0);
+      },
+      0
+    );
+    const zlecenieNadrukow = data.reduce(
+      (acc, curr) => {
+        if (curr.pof_pod_hurt === "ZLECENIE" && curr.ilosc_nadrukow) {
+          const nadruki = parseInt(curr.ilosc_nadrukow, 10);
+          return acc + (isNaN(nadruki) ? 0 : nadruki);
+        }
+        return acc;
+      },
+      0
+    );
+    const bluza = data.reduce(
+      (acc, curr) => {
+        const quantity = curr.ilosc_strat && curr.ilosc_strat > 0 ? parseInt(curr.ilosc_strat, 10) : 1;
+        return acc + (curr.bluza_t_shirt === "BLUZA" ? quantity : 0);
+      },
+      0
+    );
+    const tshirt = data.reduce(
+      (acc, curr) => {
+        const quantity = curr.ilosc_strat && curr.ilosc_strat > 0 ? parseInt(curr.ilosc_strat, 10) : 1;
+        return acc + (curr.bluza_t_shirt === "T-SHIRT" ? quantity : 0);
+      },
+      0
+    );
+    setTotalAggregateValues({ pod, pof, zlecenie, zlecenieNadrukow, bluza, tshirt });
 
+    // Calculate machine stats using ilosc_strat
     const byMachine = {};
     data.forEach((item) => {
       const machine = item.number_dtg;
+      const quantity = item.ilosc_strat && item.ilosc_strat > 0 ? parseInt(item.ilosc_strat, 10) : 1;
+      
       if (!byMachine[machine]) {
         byMachine[machine] = {
           POD: 0,
           POF: 0,
           ZLECENIE: 0,
+          ZLECENIE_NADRUKOW: 0,
           BLUZA: 0,
           TSHIRT: 0,
           TOTAL: 0,
         };
       }
-      if (item.pof_pod_hurt === "POD") byMachine[machine].POD++;
-      if (item.pof_pod_hurt === "POF") byMachine[machine].POF++;
-      if (item.pof_pod_hurt === "ZLECENIE") byMachine[machine].ZLECENIE++;
-      if (item.bluza_t_shirt === "BLUZA") byMachine[machine].BLUZA++;
-      if (item.bluza_t_shirt === "T-SHIRT") byMachine[machine].TSHIRT++;
-      byMachine[machine].TOTAL++;
+      
+      if (item.pof_pod_hurt === "POD") byMachine[machine].POD += quantity;
+      if (item.pof_pod_hurt === "POF") byMachine[machine].POF += quantity;
+      if (item.pof_pod_hurt === "ZLECENIE") {
+        byMachine[machine].ZLECENIE += quantity;
+        if (item.ilosc_nadrukow) {
+          const nadruki = parseInt(item.ilosc_nadrukow, 10);
+          if (!isNaN(nadruki)) {
+            byMachine[machine].ZLECENIE_NADRUKOW += nadruki;
+          }
+        }
+      }
+      if (item.bluza_t_shirt === "BLUZA") byMachine[machine].BLUZA += quantity;
+      if (item.bluza_t_shirt === "T-SHIRT") byMachine[machine].TSHIRT += quantity;
+      byMachine[machine].TOTAL = byMachine[machine].POF + byMachine[machine].POD + byMachine[machine].ZLECENIE;
     });
     setMachineStats(byMachine);
 
+    // Calculate povod stats using ilosc_strat and ilosc_nadrukow
     const povod = {};
     data.forEach((item) => {
-      if (!povod[item.povod]) povod[item.povod] = 0;
-      povod[item.povod]++;
+      const quantity = item.ilosc_strat && item.ilosc_strat > 0 ? parseInt(item.ilosc_strat, 10) : 1;
+      if (!povod[item.povod]) {
+        povod[item.povod] = {
+          count: 0,
+          nadrukow: 0,
+        };
+      }
+      povod[item.povod].count += quantity;
+      
+      // Add nadrukow count if it's ZLECENIE type
+      if (item.pof_pod_hurt === "ZLECENIE" && item.ilosc_nadrukow) {
+        const nadruki = parseInt(item.ilosc_nadrukow, 10);
+        if (!isNaN(nadruki)) {
+          povod[item.povod].nadrukow += nadruki;
+        }
+      }
     });
     setPovodStats(povod);
+  };
+
+  const calculateAllShifts = (data) => {
+    // Calculate total losses for all shifts
+    const total = data.reduce((acc, curr) => {
+      const quantity = curr.ilosc_strat && curr.ilosc_strat > 0 ? parseInt(curr.ilosc_strat, 10) : 1;
+      return acc + quantity;
+    }, 0);
+    setTotalLossesAllShifts(total);
+
+    // Calculate aggregate values for all shifts
+    const pod = data.reduce(
+      (acc, curr) => {
+        const quantity = curr.ilosc_strat && curr.ilosc_strat > 0 ? parseInt(curr.ilosc_strat, 10) : 1;
+        return acc + (curr.pof_pod_hurt === "POD" ? quantity : 0);
+      },
+      0
+    );
+    const pof = data.reduce(
+      (acc, curr) => {
+        const quantity = curr.ilosc_strat && curr.ilosc_strat > 0 ? parseInt(curr.ilosc_strat, 10) : 1;
+        return acc + (curr.pof_pod_hurt === "POF" ? quantity : 0);
+      },
+      0
+    );
+    const zlecenie = data.reduce(
+      (acc, curr) => {
+        const quantity = curr.ilosc_strat && curr.ilosc_strat > 0 ? parseInt(curr.ilosc_strat, 10) : 1;
+        return acc + (curr.pof_pod_hurt === "ZLECENIE" ? quantity : 0);
+      },
+      0
+    );
+    const zlecenieNadrukow = data.reduce(
+      (acc, curr) => {
+        if (curr.pof_pod_hurt === "ZLECENIE" && curr.ilosc_nadrukow) {
+          const nadruki = parseInt(curr.ilosc_nadrukow, 10);
+          return acc + (isNaN(nadruki) ? 0 : nadruki);
+        }
+        return acc;
+      },
+      0
+    );
+    const bluza = data.reduce(
+      (acc, curr) => {
+        const quantity = curr.ilosc_strat && curr.ilosc_strat > 0 ? parseInt(curr.ilosc_strat, 10) : 1;
+        return acc + (curr.bluza_t_shirt === "BLUZA" ? quantity : 0);
+      },
+      0
+    );
+    const tshirt = data.reduce(
+      (acc, curr) => {
+        const quantity = curr.ilosc_strat && curr.ilosc_strat > 0 ? parseInt(curr.ilosc_strat, 10) : 1;
+        return acc + (curr.bluza_t_shirt === "T-SHIRT" ? quantity : 0);
+      },
+      0
+    );
+    setAllShiftsAggregateValues({ pod, pof, zlecenie, zlecenieNadrukow, bluza, tshirt });
   };
 
   return (
@@ -123,7 +341,7 @@ const MonthlyStratyStats = () => {
           </span>
           {mode === "day" && (
             <span className={s.pill}>
-              Shift <strong>{selectedShift}</strong>
+              Shift <strong>{selectedShift === "ALL" ? "ALL SHIFTS" : selectedShift}</strong>
             </span>
           )}
         </div>
@@ -194,6 +412,7 @@ const MonthlyStratyStats = () => {
                 value={selectedShift}
                 onChange={(e) => setSelectedShift(e.target.value)}
               >
+                <option value="ALL">All Shifts</option>
                 <option value="1 ZMIANA">Shift 1</option>
                 <option value="2 ZMIANA">Shift 2</option>
                 <option value="3 ZMIANA">Shift 3</option>
@@ -213,6 +432,7 @@ const MonthlyStratyStats = () => {
                 <th>POD</th>
                 <th>POF</th>
                 <th>ZLECENIE</th>
+                <th>NADRUKI</th>
                 <th>BLUZA</th>
                 <th>T-SHIRT</th>
               </tr>
@@ -226,6 +446,7 @@ const MonthlyStratyStats = () => {
                 <td>{totalAggregateValues.pod}</td>
                 <td>{totalAggregateValues.pof}</td>
                 <td>{totalAggregateValues.zlecenie}</td>
+                <td>{totalAggregateValues.zlecenieNadrukow}</td>
                 <td>{totalAggregateValues.bluza}</td>
                 <td>{totalAggregateValues.tshirt}</td>
               </tr>
@@ -233,13 +454,13 @@ const MonthlyStratyStats = () => {
 
             <thead>
               <tr>
-                <th colSpan="6">Machines (DTG)</th>
+                <th colSpan="7">Machines (DTG)</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan="6" className={s.loadingRow}>
+                  <td colSpan="7" className={s.loadingRow}>
                     Loading…
                   </td>
                 </tr>
@@ -257,6 +478,7 @@ const MonthlyStratyStats = () => {
                       <td>{machineStats[machine].POD}</td>
                       <td>{machineStats[machine].POF}</td>
                       <td>{machineStats[machine].ZLECENIE}</td>
+                      <td>{machineStats[machine].ZLECENIE_NADRUKOW || 0}</td>
                       <td>{machineStats[machine].BLUZA}</td>
                       <td>{machineStats[machine].TSHIRT}</td>
                     </tr>
@@ -266,26 +488,35 @@ const MonthlyStratyStats = () => {
 
             <thead>
               <tr>
-                <th colSpan="6">Loss reasons (POVOD)</th>
+                <th colSpan="7">Loss reasons (POVOD)</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td colSpan="6">
+                <td colSpan="7">
                   {Object.entries(povodStats)
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([reason, count], index, array) => (
-                      <span key={reason} className={ets.reasonDescription}>
-                        {reason.toUpperCase()}:{" "}
-                        <span className={index < 3 ? s.redCount : " "}>
-                          {count}
+                    .sort(([, a], [, b]) => {
+                      const countA = typeof a === 'object' ? a.count : a;
+                      const countB = typeof b === 'object' ? b.count : b;
+                      return countB - countA;
+                    })
+                    .map(([reason, data], index, array) => {
+                      const count = typeof data === 'object' ? data.count : data;
+                      const nadrukow = typeof data === 'object' ? data.nadrukow : 0;
+                      return (
+                        <span key={reason} className={ets.reasonDescription}>
+                          {reason.toUpperCase()}:{" "}
+                          <span className={index < 3 ? s.redCount : " "}>
+                            {count}
+                            {nadrukow > 0 && ` (${nadrukow})`}
+                          </span>
+                          {index !== array.length - 1 && ", "}
+                          <div className={ets.tooltip}>
+                            {povodDescription[reason] || "Опис відсутній"}
+                          </div>
                         </span>
-                        {index !== array.length - 1 && ", "}
-                        <div className={ets.tooltip}>
-                          {povodDescription[reason] || "Опис відсутній"}
-                        </div>
-                      </span>
-                    ))}
+                      );
+                    })}
                 </td>
               </tr>
             </tbody>
@@ -308,6 +539,8 @@ const MonthlyStratyStats = () => {
                     <th>BLUZA / T-SHIRT</th>
                     <th>MODEL</th>
                     <th>POVOD</th>
+                    <th>ILOŚĆ STRAT</th>
+                    <th>ILOŚĆ NADRUKÓW</th>
                     <th>GODZINA</th>
                     <th>DATA</th>
                   </tr>
@@ -341,12 +574,36 @@ const MonthlyStratyStats = () => {
                               {povodDescription[item.povod] || "Опис відсутній"}
                             </div>
                           </td>
+                          <td>
+                            {item.ilosc_strat && !isNaN(item.ilosc_strat) && item.ilosc_strat > 0
+                              ? item.ilosc_strat
+                              : "1"}
+                          </td>
+                          <td>
+                            {item.pof_pod_hurt === "ZLECENIE" && item.ilosc_nadrukow
+                              ? item.ilosc_nadrukow
+                              : item.pof_pod_hurt === "ZLECENIE"
+                              ? "-"
+                              : "-"}
+                          </td>
                           <td>{time}</td>
                           <td>{day}</td>
                         </tr>
                       );
                     })}
                 </tbody>
+                <tfoot>
+                  {/* Summary row for selected shift */}
+                  <tr>
+                    <th colSpan="4">
+                      {selectedShift === "ALL" ? "ALL SHIFTS" : selectedShift} ({formatDate(date)}):{" "}
+                      <span className={s.redCount}>{totalLosses}</span>
+                    </th>
+                    <th colSpan="7">
+                      POD: {totalAggregateValues.pod}, POF: {totalAggregateValues.pof}, ZLECENIE: {totalAggregateValues.zlecenie} (NADRUKI: {totalAggregateValues.zlecenieNadrukow}) (BLUZA: {totalAggregateValues.bluza}, T-SHIRT: {totalAggregateValues.tshirt})
+                    </th>
+                  </tr>
+                </tfoot>
               </table>
             </div>
           </div>

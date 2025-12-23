@@ -2,24 +2,32 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import style from "./LoginPage.module.scss";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import loginImage from "../../images/login.png";
-import infoImage from "../../images/info.png";
+import LightPillar from "../../components/LightPillar/LightPillar";
+import hftLogo from "../../images/hft.svg";
+import { showToast } from "../../components/ToastNotification/ToastNotification";
+import { ToastContainer } from "react-toastify";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [baseUrl, setBaseUrl] = useState(
     "https://shift-scheduler-server.vercel.app"
   );
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Disable scroll
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    // Add class for login page styling
+    document.body.classList.add('login-page');
+
     const checkLocalhost = async () => {
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 1000); // Тайм-аут 1 секунда
+        const timeout = setTimeout(() => controller.abort(), 1000);
 
         const response = await fetch("http://localhost:4040", {
           signal: controller.signal,
@@ -36,6 +44,13 @@ const LoginPage = () => {
     };
 
     checkLocalhost();
+
+    // Cleanup: restore scroll on unmount
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      document.body.classList.remove('login-page');
+    };
   }, []);
 
   const toggleShowPassword = () => {
@@ -45,6 +60,7 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     console.log("Login started");
+    setIsLoading(true);
 
     const trimmedUsername = username.trim();
     const trimmedPassword = password.trim();
@@ -93,7 +109,7 @@ const LoginPage = () => {
           navigate("/leader-dashboard");
           break;
         default:
-          setError("Unknown role");
+          showToast("Unknown role", "error");
           return;
       }
 
@@ -102,7 +118,9 @@ const LoginPage = () => {
       }, 300);
     } catch (error) {
       console.error("Login error:", error);
-      setError("Login failed. Please try again.");
+      showToast("Login failed. Please try again.", "error");
+    } finally {
+      setIsLoading(false);
     }
 
     console.log("Login finished");
@@ -110,34 +128,46 @@ const LoginPage = () => {
 
   return (
     <div className={style.loginWrapper}>
-      <div className={style.loginContainer}>
-        <div></div>
-        <img
-          src={loginImage}
-          alt="Login illustration"
-          className={style.loginImage}
+      <div className={style.backgroundSection}>
+        <LightPillar
+          topColor="#5227FF"
+          bottomColor="#FF9FFC"
+          intensity={0.9}
+          rotationSpeed={1}
+          glowAmount={0.003}
+          pillarWidth={3.0}
+          pillarHeight={0.4}
+          noiseIntensity={0}
+          pillarRotation={115}
+          interactive={false}
+          mixBlendMode="screen"
         />
-        <h2 className={style.header}>Login</h2>
-        <form onSubmit={handleLogin}>
+      </div>
+      <div className={style.loginContainer}>
+        <h2 className={style.header}>
+          Welcome to Shift Print{" "}
+          <span className={style.hft}>HFT</span>
+          <span className={style.seven}>7</span>
+          <span className={style.one}>1</span>
+        </h2>
+        <form onSubmit={handleLogin} className={style.form}>
           <div className={style.formGroup}>
-            <label className={style.label}>Username</label>
             <input
               type="text"
               className={style.input}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter username"
+              placeholder="Username"
             />
           </div>
           <div className={style.formGroup}>
-            <label className={style.label}>Password</label>
             <div className={style.passwordContainer}>
               <input
                 type={showPassword ? "text" : "password"}
                 className={style.input}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
+                placeholder="Password"
               />
               <button
                 type="button"
@@ -148,55 +178,21 @@ const LoginPage = () => {
               </button>
             </div>
           </div>
-          {error && <p className={style.errorMessage}>{error}</p>}
-          <button type="submit" className={style.button}>
-            Login
+          {isLoading && (
+            <div className={style.loadingSpinner}>
+              <img src={hftLogo} alt="Loading" className={style.spinner} />
+            </div>
+          )}
+          <button 
+            type="submit" 
+            className={style.button}
+            disabled={isLoading}
+          >
+            {isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
       </div>
-      <div className={style.descriptionBox}>
-        <h2>What is ShiftPrint Manager?</h2>
-        <p>
-          ShiftPrint Manager is a system for registering shifts, tasks, and
-          operator productivity. It allows you to manage work data, view
-          detailed statistics, and streamline control over your production.
-        </p>
-        <ul>
-          <li>
-            <span className={style.highlighted}>- Real-time analytics</span> :
-            instantly view productivity, downtime, output volume, and more
-          </li>
-          <li>
-            <span className={style.highlighted}>- Simple and secure login</span>{" "}
-            : access only for registered users with roles
-          </li>
-          <li>
-            <span className={style.highlighted}>
-              - Flexible shift management
-            </span>{" "}
-            : shifts, machines, and operators all under control
-          </li>
-          <li>
-            <span className={style.highlighted}>- Task comments</span> : leave
-            notes or feedback on any entry
-          </li>
-          <li>
-            <span className={style.highlighted}>
-              - Time-saving for team leaders
-            </span>{" "}
-            : no more Excel chaos, everything is automated
-          </li>
-          <li>
-            <span className={style.highlighted}>- Cloud-based storage</span> :
-            all data is centralized, safe, and accessible
-          </li>
-        </ul>
-        <img
-          src={infoImage}
-          alt="Login illustration"
-          className={style.infoImage}
-        />
-      </div>
+      <ToastContainer />
     </div>
   );
 };
