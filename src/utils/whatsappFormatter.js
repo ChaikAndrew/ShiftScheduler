@@ -58,31 +58,132 @@ export function formatDailySummaryForWhatsApp({
         message += `┃ ${product}: ${productTotal}\n`;
       }
     });
+    
+    // Деталізація по машинах для цієї зміни
+    if (entries && machines && entries[shift.key]) {
+      const shiftEntries = entries[shift.key];
+      const machinesInShift = machines
+        .filter((machine) => {
+          const machineEntries = shiftEntries[machine]?.filter(
+            (e) => e.displayDate === selectedDate
+          ) || [];
+          return machineEntries.length > 0;
+        })
+        .sort();
+      
+      if (machinesInShift.length > 0) {
+        message += `\n┃ *MASZYNY:*\n`;
+        
+        machinesInShift.forEach((machine) => {
+          const machineEntries = shiftEntries[machine]?.filter(
+            (e) => e.displayDate === selectedDate
+          ) || [];
+          
+          if (machineEntries.length === 0) return;
+          
+          // Підрахунок статистики по машині
+          let machineTotal = 0;
+          const machineTasks = { POD: 0, POF: 0, Zlecenie: 0, Test: 0 };
+          const machineProducts = {};
+          
+          machineEntries.forEach((entry) => {
+            const qty = parseInt(entry.quantity, 10) || 0;
+            machineTotal += qty;
+            
+            const task = entry.task;
+            if (task === "POD" || task === "POF" || task === "Test") {
+              machineTasks[task] = (machineTasks[task] || 0) + qty;
+            } else {
+              machineTasks.Zlecenie = (machineTasks.Zlecenie || 0) + qty;
+            }
+            
+            if (entry.product) {
+              machineProducts[entry.product] = 
+                (machineProducts[entry.product] || 0) + qty;
+            }
+          });
+          
+          if (machineTotal > 0) {
+            const machineName = machine.toUpperCase();
+            message += `┃  *${machineName}*: ${machineTotal}\n`;
+            
+            // Задачі
+            if (machineTasks.POD > 0) {
+              message += `┃    POD: ${machineTasks.POD}\n`;
+            }
+            if (machineTasks.POF > 0) {
+              message += `┃    POF: ${machineTasks.POF}\n`;
+            }
+            if (machineTasks.Zlecenie > 0) {
+              message += `┃    Zlecenie: ${machineTasks.Zlecenie}\n`;
+            }
+            
+            // Продукти (якщо є)
+            const productEntries = Object.entries(machineProducts)
+              .filter(([, qty]) => qty > 0)
+              .sort(([a], [b]) => a.localeCompare(b));
+            
+            if (productEntries.length > 0) {
+              productEntries.forEach(([product, qty]) => {
+                message += `┃    ${product}: ${qty}\n`;
+              });
+            }
+          }
+        });
+      }
+    }
+    
     // Додаємо розділювач між змінами (крім останньої)
     if (index < shifts.length - 1) {
       message += `━━━━━━━━━━\n`;
     }
   });
 
-  // Статистика по машинах
-  if (machines && machines.length > 0 && entries && stratyByMachine) {
+  // Статистика по машинах (загальна за день)
+  if (machines && machines.length > 0 && entries) {
     message += `━━━━━━━━━━\n`;
     message += `*MASZYNY:*\n`;
     
     let totalStraty = 0;
+    const machineStatsMap = {};
     
-    // Виводимо статистику по машинах
-    Object.entries(stratyByMachine)
+    // Рахуємо quantity для всіх машин з entries
+    machines.forEach((machine) => {
+      let machineQuantity = 0;
+      
+      // Сумуємо quantity по всіх змінах для цієї машини
+      ["first", "second", "third"].forEach((shift) => {
+        const shiftEntries = entries[shift]?.[machine] || [];
+        shiftEntries.forEach((entry) => {
+          if (entry.displayDate === selectedDate) {
+            machineQuantity += parseInt(entry.quantity, 10) || 0;
+          }
+        });
+      });
+      
+      // Отримуємо straty з stratyByMachine (якщо є)
+      const machineKey = machine.toLowerCase();
+      const stratyData = stratyByMachine?.[machineKey] || {};
+      const machineStraty = stratyData.straty || 0;
+      
+      if (machineQuantity > 0 || machineStraty > 0) {
+        machineStatsMap[machine] = {
+          quantity: machineQuantity,
+          straty: machineStraty,
+        };
+        totalStraty += machineStraty;
+      }
+    });
+    
+    // Виводимо статистику по машинах (відсортовані)
+    Object.entries(machineStatsMap)
       .sort(([a], [b]) => a.localeCompare(b))
       .forEach(([machine, stats]) => {
         const machineName = machine.toUpperCase();
         const machineQuantity = stats.quantity || 0;
         const machineStraty = stats.straty || 0;
-        totalStraty += machineStraty;
         
-        if (machineQuantity > 0 || machineStraty > 0) {
-          message += `┃ ${machineName}: ${machineQuantity} (${machineStraty} strat)\n`;
-        }
+        message += `┃ *${machineName}*: ${machineQuantity}${machineStraty > 0 ? ` (${machineStraty} strat)` : ''}\n`;
       });
     
     // Підсумок страт з деталізацією

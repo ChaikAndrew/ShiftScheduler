@@ -17,7 +17,9 @@ const WhatsAppModal = ({ isOpen, onClose }) => {
     DateTime.now().toISODate()
   );
   const [entries, setEntries] = useState({ first: {}, second: {}, third: {} });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingEntries, setIsLoadingEntries] = useState(false);
+  const [isLoadingStraty, setIsLoadingStraty] = useState(false);
+  const [isLoadingStratyByMachine, setIsLoadingStratyByMachine] = useState(false);
   const [stratyByProduct, setStratyByProduct] = useState({
     first: {},
     second: {},
@@ -42,7 +44,7 @@ const WhatsAppModal = ({ isOpen, onClose }) => {
     if (!isOpen || !selectedDate) return;
 
     const loadEntries = async () => {
-      setIsLoading(true);
+      setIsLoadingEntries(true);
       try {
         const token = localStorage.getItem("token");
         const dt = DateTime.fromISO(selectedDate);
@@ -73,7 +75,7 @@ const WhatsAppModal = ({ isOpen, onClose }) => {
       } catch (err) {
         console.error("❌ Error loading entries:", err.message);
       } finally {
-        setIsLoading(false);
+        setIsLoadingEntries(false);
       }
     };
 
@@ -85,6 +87,7 @@ const WhatsAppModal = ({ isOpen, onClose }) => {
     if (!isOpen || !selectedDate) return;
 
     let alive = true;
+    setIsLoadingStraty(true);
     (async () => {
       try {
         const [byProd, byTask] = await Promise.all([
@@ -96,6 +99,8 @@ const WhatsAppModal = ({ isOpen, onClose }) => {
         setStratyByTask(byTask);
       } catch (e) {
         console.error("straty fetch error:", e);
+      } finally {
+        if (alive) setIsLoadingStraty(false);
       }
     })();
 
@@ -109,6 +114,7 @@ const WhatsAppModal = ({ isOpen, onClose }) => {
     if (!isOpen || !selectedDate) return;
 
     let alive = true;
+    setIsLoadingStratyByMachine(true);
     (async () => {
       try {
         const SHIFT_LABEL = {
@@ -184,6 +190,8 @@ const WhatsAppModal = ({ isOpen, onClose }) => {
       } catch (e) {
         console.error("straty by machine fetch error:", e);
         setStratyByMachine({});
+      } finally {
+        if (alive) setIsLoadingStratyByMachine(false);
       }
     })();
 
@@ -254,12 +262,17 @@ const WhatsAppModal = ({ isOpen, onClose }) => {
     stratyDetails,
   ]);
 
+  // Перевірка, чи всі дані завантажені
+  const isDataReady = useMemo(() => {
+    return !isLoadingEntries && !isLoadingStraty && !isLoadingStratyByMachine;
+  }, [isLoadingEntries, isLoadingStraty, isLoadingStratyByMachine]);
+
   const handleSend = useCallback(() => {
-    if (!whatsappMessage) return;
+    if (!whatsappMessage || !isDataReady) return;
     const url = getWhatsAppUrl(null, whatsappMessage);
     window.open(url, "_blank");
     onClose();
-  }, [whatsappMessage, onClose]);
+  }, [whatsappMessage, isDataReady, onClose]);
 
   const handleClose = useCallback(() => {
     onClose();
@@ -304,11 +317,11 @@ const WhatsAppModal = ({ isOpen, onClose }) => {
             />
           </div>
 
-          {isLoading && (
+          {(isLoadingEntries || isLoadingStraty || isLoadingStratyByMachine) && (
             <div className={s.loading}>Завантаження даних...</div>
           )}
 
-          {!isLoading && (
+          {isDataReady && (
             <div className={s.preview}>
               <p>Дата: <strong>{selectedDate}</strong></p>
               <p className={s.messagePreview}>
@@ -321,14 +334,14 @@ const WhatsAppModal = ({ isOpen, onClose }) => {
             <button
               className={s.cancelButton}
               onClick={handleClose}
-              disabled={isLoading}
+              disabled={!isDataReady}
             >
               Скасувати
             </button>
             <button
               className={s.sendButton}
               onClick={handleSend}
-              disabled={isLoading || !whatsappMessage}
+              disabled={!isDataReady || !whatsappMessage}
             >
               Відправити в WhatsApp
             </button>
